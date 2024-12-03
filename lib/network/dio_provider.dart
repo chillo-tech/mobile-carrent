@@ -7,7 +7,7 @@ import 'ExceptionInterceptor.dart';
 class DioSingleton {
   static final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: Duration(seconds: 70),
+      connectTimeout: const Duration(seconds: 70),
     ),
   );
 

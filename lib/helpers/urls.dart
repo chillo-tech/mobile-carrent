@@ -6,15 +6,16 @@ class URLS {
   static String _getBaseUrl() {
     switch (F.appFlavor) {
       case Flavor.internaltest:
-        return 'http://test.com';
+        return 'https://api.carrent.chillo.fr/api/v1';
       case Flavor.production:
-        return 'https://prod.com';
+        return 'https://api.carrent.chillo.fr/api/v1';
       default:
-        return 'http://172.26.5.28';
+        return 'https://api.carrent.chillo.fr/api/v1';
     }
   }
 
   // ------------------------------------------- Micro Services
 
-  static String KEY_CLOAK_STAGING_URL = "$BASE_URL/user-management/"; // Externe
+  static String USER_MANAGEMENT = "$BASE_URL/"; // Externe
+  // static String USER_MANAGEMENT = "$BASE_URL/users/"; // Externe
 }

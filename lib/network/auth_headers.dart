@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
 import '../common/storage_constants.dart';
-import '../models/login_response.dart';
+import '../src/features/auth/login/login_response.dart';
 
 class AuthHeaders {
   var log = Logger("AuthHeaders");
@@ -16,46 +16,46 @@ class AuthHeaders {
 
   Future<String> get accessToken async {
     // var tokenExpiry = GetStorage().read('tokenExpiry');
-    DateTime tokenExpiryDate;
-    DateFormat dateFormat;
-    dateFormat = DateFormat('dd/MM/yyyy HH:mm:ss');
-    tokenExpiryDate = dateFormat.parse(GetStorage().read('tokenExpiryTime'));
-    log.info(dateFormat.format(tokenExpiryDate));
-    var token = GetStorage().read('accessToken');
-    if (dateFormat
-            .parse(dateFormat.format(DateTime.now()))
-            .isBefore(tokenExpiryDate) &&
-        token != null) {
-      log.info("not required to update token");
-      return token;
-    } else {
-      log.info("Calling Refresh Token Api");
-      try {
-        LoginResponse loginResponse = await refreshSession();
-        await GetStorage().write('tokenType', loginResponse.tokenType);
-        await GetStorage().write('accessToken', loginResponse.accessToken);
-        await GetStorage().write('refreshToken', loginResponse.refreshToken);
-        await GetStorage().write('tokenExpiry', loginResponse.expiresIn);
-        await GetStorage().write(
-          'tokenExpiryTime',
-          dateFormat.format(
-            DateTime.now().add(
-              Duration(seconds: loginResponse.expiresIn ?? 0),
-            ),
-          ),
-        );
-        await GetStorage()
-            .write('refreshTokenExpiry', loginResponse.refreshExpiresIn);
-      } catch (e) {
-        //Logout User
-        var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
-        isLoggedIn = isLoggedIn != null ? isLoggedIn : false;
-        if (isLoggedIn) {
-          // HomeController homeController = Get.find();
-          // homeController.logoutUser('logout_session_expired'.tr);
-        }
-      }
-    }
+    // DateTime tokenExpiryDate;
+    // DateFormat dateFormat;
+    // dateFormat = DateFormat('dd/MM/yyyy HH:mm:ss');
+    // tokenExpiryDate = dateFormat.parse(GetStorage().read('tokenExpiryTime'));
+    // log.info(dateFormat.format(tokenExpiryDate));
+    // var token = GetStorage().read('accessToken');
+    // if (dateFormat
+    //         .parse(dateFormat.format(DateTime.now()))
+    //         .isBefore(tokenExpiryDate) &&
+    //     token != null) {
+    //   log.info("not required to update token");
+    //   return token;
+    // } else {
+    //   log.info("Calling Refresh Token Api");
+    //   try {
+    //     LoginResponse loginResponse = await refreshSession();
+    //     await GetStorage().write('tokenType', loginResponse.tokenType);
+    //     await GetStorage().write('accessToken', loginResponse.accessToken);
+    //     await GetStorage().write('refreshToken', loginResponse.refreshToken);
+    //     await GetStorage().write('tokenExpiry', loginResponse.expiresIn);
+    //     await GetStorage().write(
+    //       'tokenExpiryTime',
+    //       dateFormat.format(
+    //         DateTime.now().add(
+    //           Duration(seconds: loginResponse.expiresIn ?? 0),
+    //         ),
+    //       ),
+    //     );
+    //     await GetStorage()
+    //         .write('refreshTokenExpiry', loginResponse.refreshExpiresIn);
+    //   } catch (e) {
+    //     //Logout User
+    //     var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
+    //     isLoggedIn = isLoggedIn ?? false;
+    //     if (isLoggedIn) {
+    //       // HomeController homeController = Get.find();
+    //       // homeController.logoutUser('logout_session_expired'.tr);
+    //     }
+    //   }
+    // }
     return GetStorage().read('accessToken');
   }
 

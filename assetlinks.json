@@ -1,0 +1,14 @@
+// [
+//     {
+//         "relation": [
+//             "delegate_permission/common.handle_all_urls"
+//         ],
+//         "target": {
+//             "namespace": "android_app",
+//             "package_name": "com.techhubstudio.carrent",
+//             "sha256_cert_fingerprints": [
+//                 "BC:C7:C8:85:A3:57:49:AB:70:6A:BF:E0:68:47:AB:91:57:7E:F8:8D:6E:01:18:9F:F9:6F:84:60:D1:F2:0F:40"
+//             ]
+//         }
+//     }
+// ]
