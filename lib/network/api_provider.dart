@@ -7,8 +7,9 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dioPkg;
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
+import 'package:http/http.dart' as http_client;
+import 'package:logging/logging.dart' as logg;
+import 'package:pretty_http_logger/pretty_http_logger.dart';
 import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
 import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
 
@@ -16,7 +17,7 @@ import 'ExceptionInterceptor.dart';
 import 'app_exception.dart';
 
 class ApiProvider {
-  var log = Logger("ApiProvider");
+  var log = logg.Logger("ApiProvider");
   final contentTypeKey = "Content-Type";
 
   final useMock = false;
@@ -37,6 +38,10 @@ class ApiProvider {
     }
     _headers = headers;
   }
+
+  HttpWithMiddleware http = HttpWithMiddleware.build(middlewares: [
+    HttpLogger(logLevel: LogLevel.BODY),
+  ]);
 
   late dioPkg.Dio _dio;
   static final ApiProvider _singleton = ApiProvider._internal();
@@ -69,7 +74,6 @@ class ApiProvider {
     );
     _dio.interceptors.add(ExceptionInterceptor());
     // _dio.addSentry();
-
   }
 
   Future<dynamic> get(String baseUrl, String url) async {
@@ -77,7 +81,7 @@ class ApiProvider {
     log.info(baseUrl + url);
     var callURL = Uri.parse(baseUrl + url);
     final contentTypeHeader =
-        _headers?[contentTypeKey] ?? dioPkg.Headers.formUrlEncodedContentType;
+        _headers?[contentTypeKey] ?? dioPkg.Headers.jsonContentType;
     final response = await _dio.getUri(
       callURL,
       options: dioPkg.Options(headers: headers, contentType: contentTypeHeader),
@@ -86,13 +90,13 @@ class ApiProvider {
     return jsonEncode(responseJson);
   }
 
-  Future<dynamic> post(String baseUrl, String url, dynamic body,
-      {String? contentType}) async {
+  Future<dynamic> post(String baseUrl, String url,
+      {Map<String, dynamic>? body, String? contentType}) async {
     var responseJson;
     log.info(baseUrl + url);
     var callURL = Uri.parse(baseUrl + url);
     final contentTypeHeader =
-        _headers?[contentTypeKey] ?? dioPkg.Headers.formUrlEncodedContentType;
+        _headers?[contentTypeKey] ?? dioPkg.Headers.jsonContentType;
     final response = await _dio.postUri<dynamic>(
       callURL,
       data: body,
@@ -102,8 +106,7 @@ class ApiProvider {
     return jsonEncode(responseJson);
   }
 
-  Future<dynamic> postWithHTTP(
-      String baseUrl, String url, dynamic body) async {
+  Future<dynamic> postWithHTTP(String baseUrl, String url, dynamic body) async {
     var responseJson;
     try {
       log.info(baseUrl + url);
@@ -112,15 +115,15 @@ class ApiProvider {
           .post(callURL, body: body, headers: headers)
           .timeout(Duration(seconds: connectTimeout), onTimeout: () {
         throw FetchDataException(
-            {'statusCode': 3, 'message': 'connection_timedout_error'});
+            {'statusCode': 3, 'message': 'Connexion timeout'});
       });
       responseJson = _returnResponse(response);
     } on SocketException {
       throw FetchDataException(
-          {'statusCode': 1, 'message': 'server_not_available_error'});
+          {'statusCode': 1, 'message': 'Server not available'});
     } on HttpException {
       throw FetchDataException(
-          {'statusCode': 2, 'message': 'no_internet_error'});
+          {'statusCode': 2, 'message': 'No internet error'});
     }
     return responseJson;
   }
@@ -131,7 +134,7 @@ class ApiProvider {
     log.info(baseUrl + url);
     var callURL = Uri.parse(baseUrl + url);
     final contentTypeHeader =
-        _headers?[contentTypeKey] ?? dioPkg.Headers.formUrlEncodedContentType;
+        _headers?[contentTypeKey] ?? dioPkg.Headers.jsonContentType;
     final response = await _dio.putUri<dynamic>(
       callURL,
       data: body,
@@ -141,38 +144,40 @@ class ApiProvider {
     return jsonEncode(responseJson);
   }
 
-  Future<dynamic> delete(String baseUrl, String url, dynamic body) async {
+  Future<dynamic> delete(String baseUrl, String url) async {
     var responseJson;
     log.info(baseUrl + url);
     var callURL = Uri.parse(baseUrl + url);
     final contentTypeHeader =
-        _headers?[contentTypeKey] ?? dioPkg.Headers.formUrlEncodedContentType;
+        _headers?[contentTypeKey] ?? dioPkg.Headers.jsonContentType;
     final response = await _dio.deleteUri<dynamic>(
       callURL,
-      data: body,
+      // data: body,
       options: dioPkg.Options(headers: headers, contentType: contentTypeHeader),
     );
     responseJson = _returnResponseDio(response);
     return jsonEncode(responseJson);
   }
 
-  Future<dynamic> multiPart(http.MultipartRequest request) async {
+  Future<dynamic> multiPart(http_client.MultipartRequest request) async {
     var responseJson;
     try {
       final response = await request.send();
-      final res = await http.Response.fromStream(response)
+      print('Headerssssssssss---------------------------------');
+      log.info(request.headers);
+      final res = await http_client.Response.fromStream(response)
           .timeout(Duration(seconds: connectTimeout), onTimeout: () {
         throw FetchDataException(
-            {'statusCode': 3, 'message': 'connection_timedout_error'.tr});
+            {'statusCode': 3, 'message': 'Connexion timeout'.tr});
       });
       responseJson = _returnResponse(res);
       log.info(responseJson);
     } on SocketException {
       throw FetchDataException(
-          {'statusCode': 1, 'message': 'server_not_available_error'.tr});
+          {'statusCode': 1, 'message': 'Server not available'.tr});
     } on HttpException {
       throw FetchDataException(
-          {'statusCode': 2, 'message': 'no_internet_error'.tr});
+          {'statusCode': 2, 'message': 'No internet error'.tr});
     }
     return responseJson;
   }
@@ -218,11 +223,11 @@ dynamic _returnResponseDio(dioPkg.Response response) {
       throw FetchDataException(errorResponse);
     default:
       var errorResponse = makeErrorResponse(response);
-      FetchDataException(errorResponse);
+      throw FetchDataException(errorResponse);
   }
 }
 
-dynamic _returnResponse(http.Response response) {
+dynamic _returnResponse(http_client.Response response) {
   switch (response.statusCode) {
     case 200:
       var responseJson = response.body;
@@ -262,7 +267,7 @@ dynamic _returnResponse(http.Response response) {
       throw FetchDataException(errorResponse);
     default:
       var errorResponse = makeErrorResponse(response);
-      FetchDataException(errorResponse);
+      throw FetchDataException(errorResponse);
   }
 }
 

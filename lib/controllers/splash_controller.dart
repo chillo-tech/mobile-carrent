@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+
 // import 'package:get_storage/get_storage.dart';
 
 // import '../common/storage_constants.dart';
@@ -25,7 +26,7 @@ class SplashController extends GetxController {
 
   void routeUser() async {
     final loggedIn = GetStorage().read(StorageConstants.loggedIn);
-    Get.offAllNamed(loggedIn != null && loggedIn ? '/home' : '/login');
+    Get.offAllNamed(loggedIn != null && loggedIn ? '/bottom_nav' : '/welcome');
 
   }
 

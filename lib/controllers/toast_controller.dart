@@ -14,7 +14,7 @@ class ToastController extends GetxController {
       text: message ?? "",
       contentColor: Colors.grey.shade900,
       duration: duration,
-      textStyle: GoogleFonts.inter(
+      textStyle: GoogleFonts.lato(
         color: Colors.white,
         fontSize: 14,
       ),

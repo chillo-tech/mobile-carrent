@@ -27,13 +27,11 @@ class ErrorController {
         if (statusCode == 403) {
           logoutUser();
         } else {
-          var message = errorObj['message'] != null
-              ? errorObj['message']
-              : errorObj['detail'];
+          var message = errorObj['message'] ?? errorObj['detail'];
           if (message.contains('Connection refused')) {
-            showMessage('connection_refused'.tr);
+            showMessage('Connexion refusée'.tr);
           } else {
-            if (message.isEmpty) message = "error_occurred".tr;
+            if (message.isEmpty) message = "Une erreur s'est produite".tr;
             showMessage(message);
           }
         }
@@ -46,20 +44,20 @@ class ErrorController {
         } else {
           var message = errorObj['message'];
           if (message.contains('Connection refused')) {
-            showMessage('connection_refused'.tr);
+            showMessage('Connexion refusée'.tr);
           } else {
-            if (message.isEmpty) message = "error_occurred".tr;
+            if (message.isEmpty) message = "une_erreur_s'est_produite".tr;
             showMessage(message);
           }
         }
       } else {
         // Handle other types of errors if needed
-        showMessage('error_message_server'.tr);
+        showMessage('Erreur inattendue'.tr);
         print(
-            'Unexpected error type of: ${errorResponseString.runtimeType} ${errorResponseString}');
+            'Type d\'erreur inattendu de: ${errorResponseString.runtimeType} $errorResponseString');
       }
     } catch (error) {
-      showMessage('error_message_server'.tr);
+      showMessage('Erreur inattendue'.tr);
     }
   }
 
@@ -67,10 +65,10 @@ class ErrorController {
     BotToast.showText(
       text: message,
       contentColor: Colors.grey.shade900,
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
       textStyle: TextStyle(
         fontSize: 14,
-        fontFamily: GoogleFonts.inter().fontFamily,
+        fontFamily: GoogleFonts.lato().fontFamily,
         color: Colors.white,
       ),
     );
@@ -78,10 +76,10 @@ class ErrorController {
 
   void logoutUser() async {
     var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
-    isLoggedIn = isLoggedIn != null ? isLoggedIn : false;
+    isLoggedIn = isLoggedIn ?? false;
     if (isLoggedIn) {
       // HomeController homeController = Get.find();
-      // homeController.logoutUser('logout_session_expired'.tr);
+      // homeController.logoutUser('session_expirée'.tr);
     }
   }
 }

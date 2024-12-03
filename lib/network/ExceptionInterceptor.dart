@@ -51,7 +51,7 @@ class ExceptionInterceptor extends Interceptor {
     if (err.error is SocketException) {
       throw FetchDataException({
         'statusCode': 1,
-        'message': 'server_not_available_error',
+        'message': 'Server not available',
       });
     } else if (err.error is HttpException) {
       throw FetchDataException({
