@@ -9,22 +9,55 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../common/storage_constants.dart';
 import '../network/app_exception.dart';
+import '../src/features/settings/controllers/settings_controller.dart';
 import 'toast_controller.dart';
 
 class ErrorController {
+  final SettingsController _settingsController = Get.put(SettingsController());
   String utf8convert(String text) {
     List<int> bytes = text.toString().codeUnits;
     return utf8.decode(bytes);
   }
 
   late ToastController toastController;
-  handleError(errorResponseString) {
-    print(errorResponseString);
+  void handleError(dynamic errorResponse) {
     try {
-      if (errorResponseString is DioException) {
-        var errorObj = json.decode(errorResponseString.response.toString());
-        var statusCode = errorObj['status'];
+      print(errorResponse);
+
+      String extractMessage(dynamic errorObj) {
+        try {
+          return errorObj['message'] ?? errorObj['detail'] ?? "";
+        } catch (_) {
+          return "";
+        }
+      }
+
+      void handleCommonError(String message) {
+        if (message.contains('Connection refused')) {
+          showMessage('Connexion refusée'.tr);
+        } else {
+          showMessage(
+              message.isNotEmpty ? message : "Une erreur s'est produite".tr);
+        }
+      }
+
+      if (errorResponse is DioException) {
+        final statusCode = errorResponse.response?.statusCode;
+        if (statusCode == 403 || statusCode == 401) {
+          _settingsController.logoutUser("Session expirée");
+          return;
+        }
+
+        final responseBody = errorResponse.response?.data;
+        final message = responseBody is String
+            ? extractMessage(json.decode(responseBody))
+            : extractMessage(responseBody);
+
+        handleCommonError(message);
+      } else if (errorResponse is AppException) {
+        final statusCode = errorResponse.response?['statusCode'];
         if (statusCode == 403) {
+<<<<<<< Updated upstream
           logoutUser();
         } else {
           var message = errorObj['message'] != null
@@ -51,8 +84,16 @@ class ErrorController {
             if (message.isEmpty) message = "error_occurred".tr;
             showMessage(message);
           }
+=======
+          _settingsController.logoutUser("Session expirée");
+          return;
+>>>>>>> Stashed changes
         }
+
+        final message = extractMessage(errorResponse.response);
+        handleCommonError(message);
       } else {
+<<<<<<< Updated upstream
         // Handle other types of errors if needed
         showMessage('error_message_server'.tr);
         print(
@@ -60,8 +101,19 @@ class ErrorController {
       }
     } catch (error) {
       showMessage('error_message_server'.tr);
+=======
+        showMessage('Erreur inattendue'.tr);
+        print(
+            "Type d'erreur inattendu: ${errorResponse.runtimeType} $errorResponse");
+      }
+    } catch (error, stackTrace) {
+      print('Unhandled error: $error');
+      print('Stack trace: $stackTrace');
+      showMessage('Erreur inattendue'.tr);
+>>>>>>> Stashed changes
     }
   }
+
 
   void showMessage(message) {
     BotToast.showText(
@@ -76,6 +128,7 @@ class ErrorController {
     );
   }
 
+<<<<<<< Updated upstream
   void logoutUser() async {
     var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
     isLoggedIn = isLoggedIn != null ? isLoggedIn : false;
@@ -84,4 +137,14 @@ class ErrorController {
       // homeController.logoutUser('logout_session_expired'.tr);
     }
   }
+=======
+  // void logoutUser() async {
+  //   var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
+  //   isLoggedIn = isLoggedIn ?? false;
+  //   if (isLoggedIn) {
+  //     // HomeController homeController = Get.find();
+  //     // homeController.logoutUser('session_expirée'.tr);
+  //   }
+  // }
+>>>>>>> Stashed changes
 }

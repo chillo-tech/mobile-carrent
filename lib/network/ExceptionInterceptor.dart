@@ -15,32 +15,33 @@ class ExceptionInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    // If the response is successful, return it
+    // Si la réponse est réussie, la retourner
     if (response.statusCode == 200) {
       var log = Logger("ApiProvider");
-      log.info('RESPONSE $response');
+      log.info('RÉPONSE $response');
       return handler.next(response);
     }
 
-    // Handle specific status codes and throw FetchDataException accordingly
+    // Gérer les codes d'état spécifiques et lancer FetchDataException en conséquence
     if (response.statusCode == 408) {
       throw FetchDataException({
         'statusCode': 3,
-        'message': 'connection_timedout_error'.tr,
+        'message': 'erreur_connexion_timeout'.tr,
       });
     } else if (response.statusCode == 404) {
       throw FetchDataException({
         'statusCode': 2,
-        'message': 'no_internet_error'.tr,
+        'message': 'erreur_pas_internet'.tr,
       });
     } else {
-      // You can handle other status codes as needed
+      // Vous pouvez gérer d'autres codes d'état si nécessaire
       return handler.next(response);
     }
   }
 
   @override
   Future onError(DioException err, ErrorInterceptorHandler handler) async {
+<<<<<<< Updated upstream
     // Handle Dio errors (e.g., SocketException, HttpException)
     if (err.response?.statusCode == 401) {
       final dio = Dio();
@@ -60,7 +61,44 @@ class ExceptionInterceptor extends Interceptor {
       });
     } else {
       // You can handle other Dio errors as needed
+=======
+    try {
+      // Gérer les erreurs non autorisées ou interdites
+      if (err.response?.statusCode == 401 || err.response?.statusCode == 403) {
+        print("Non autorisé ou Interdit: ${err.response?.statusCode}");
+        return handler.next(err);
+      }
+
+      // Gérer les erreurs liées au réseau
+      // if (err.error is SocketException) {
+      //   throw FetchDataException({
+      //     'statusCode': 1,
+      //     'message': 'Serveur non disponible',
+      //   });
+      // } else if (err.error is HttpException) {
+      //   throw FetchDataException({
+      //     'statusCode': 2,
+      //     'message': 'Pas de connexion internet',
+      //   });
+      // } else if (err.type == DioExceptionType.connectionTimeout) {
+      //   throw FetchDataException({
+      //     'statusCode': 3,
+      //     'message': 'Délai de connexion dépassé',
+      //   });
+      // } else if (err.type == DioExceptionType.receiveTimeout) {
+      //   throw FetchDataException({
+      //     'statusCode': 4,
+      //     'message': 'Délai de réception dépassé',
+      //   });
+      // }
+
+      // Gérer toutes les autres erreurs Dio
+      print("Erreur Dio non gérée: ${err.message}");
+>>>>>>> Stashed changes
       return handler.next(err);
+    } catch (e) {
+      print("Erreur lors de la gestion de l'exception: $e");
+      rethrow; // Relancer l'erreur après la gestion
     }
   }
 }
