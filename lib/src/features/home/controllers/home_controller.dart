@@ -9,12 +9,19 @@ import 'package:intl/intl.dart';
 
 import '../../../../common/storage_constants.dart';
 import '../../../../services/car.dart';
+import '../../bookings/controllers/bookings_controller.dart';
+import '../../create_post/controllers/post_controller.dart';
 
 class HomeController extends GetxController {
   RxString refresh_token = ''.obs;
   RxInt selectedIndex = 0.obs;
   final ErrorController errorController = ErrorController();
   RxList<CarResponse> cars = RxList();
+
+  final PostController postController =
+      Get.put(PostController(launchInitState: false));
+  final BookingsController bookingsController =
+      Get.put(BookingsController(launchInitState: false));
 
   void onTabItemTapped(int index) {
     selectedIndex(index);
@@ -60,12 +67,12 @@ class HomeController extends GetxController {
     }
   }
 
-  void getCars() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+  Future<void> getCars() async {
+    // Get.dialog(Center(
+    //   child: CircularProgressIndicator(
+    //     color: Get.theme.colorScheme.secondary,
+    //   ),
+    // ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     CarService carService = CarService();
 
@@ -76,11 +83,26 @@ class HomeController extends GetxController {
         cars.value = response;
         print("---------------------");
         print(response);
-        Get.back();
+        // Get.back();
       });
     } catch (error) {
-      Get.back();
+      // Get.back();
       errorController.handleError(error);
     }
+  }
+
+  Future<void> loadData() async {
+    Get.dialog(Center(
+      child: CircularProgressIndicator(
+        color: Get.theme.colorScheme.secondary,
+      ),
+    ));
+    await getCars();
+    final loggedIn = GetStorage().read(StorageConstants.loggedIn);
+    if (loggedIn != null && loggedIn) {
+      await postController.getMyPosts(launchLoader: false);
+      await bookingsController.getMyBookings(launchLoader: false);
+    }
+    Get.back();
   }
 }

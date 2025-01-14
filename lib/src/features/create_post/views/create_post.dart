@@ -37,7 +37,7 @@ class CreatePost extends StatelessWidget {
   List<String> fuelType = [
     'Super',
     'Gazoil',
-    'Électrique',
+    'Electrique',
   ];
   @override
   Widget build(BuildContext context) {
@@ -245,13 +245,18 @@ class CreatePost extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
                               if (picked != null &&
@@ -293,13 +298,16 @@ class CreatePost extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
                               if (picked != null &&

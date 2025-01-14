@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:carrent/models/booking.dart';
+
 import '../../../../../helpers/assets.dart';
+import '../../../bookings/controllers/bookings_controller.dart';
 import '../../forgot_password/controllers/forgot_password_controller.dart';
 import '../../login/controllers/login_controller.dart';
 import '../../register/controllers/register_controller.dart';
@@ -15,6 +18,7 @@ class OtpController extends GetxController {
   RegisterController registerController = Get.put(RegisterController());
   ForgotPasswordController forgotPasswordController =
       Get.put(ForgotPasswordController());
+  BookingsController bookingsController = Get.put(BookingsController());
 
   @override
   void onInit() {
@@ -54,14 +58,8 @@ class OtpController extends GetxController {
         stopTimer();
         break;
       case "car_withraw":
-        Get.toNamed('/success_post', arguments: {
-          'image': Assets.success_withdraw,
-          'title': "La prise en charge s'est déroulée sans problème !",
-          'description':
-              "La voiture a été récupérée avec succès, appuyez sur continuer pour procéder",
-          'buttonTitle': 'Continuer',
-          'route': '/bottom_nav'
-        });
+        BookingResponse booking = Get.arguments['booking'];
+        bookingsController.withdrawACar(booking: booking);
         break;
     }
   }

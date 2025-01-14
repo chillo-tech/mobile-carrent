@@ -1,8 +1,11 @@
+import 'package:carrent/src/features/booking/controllers/booking_controller.dart';
+import 'package:carrent/src/features/create_post/controllers/post_controller.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/common_fonctions.dart';
 import '../../../../common/storage_constants.dart';
 import '../../../../controllers/error_controller.dart';
+import '../../bookings/controllers/bookings_controller.dart';
 import '../controllers/settings_controller.dart';
 import '../../../../theme/theme.dart';
 import '../../../../utils/utility.dart';
@@ -16,15 +19,34 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../common/app_sizes.dart';
 import '../../../../controllers/user_controller.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   Settings({super.key});
+
+  @override
+  State<Settings> createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
   final SettingsController _settingsController = Get.put(SettingsController());
+
   final UserController _userController = Get.put(UserController());
+
+  final PostController _postController =
+      Get.put(PostController(launchInitState: false));
+
+  final BookingsController _bookingsController = Get.put(BookingsController());
+
+  @override
+  void initState() {
+    Future.delayed(Duration.zero, () async {
+      await _userController.retreiveUserData();
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print(
-        "_userController.currentuser ${_userController.currentuser!.firstName}");
     List<Map<String, String>> settingsLinks = [
       {
         'title': 'Mon Compte',
@@ -99,8 +121,8 @@ class Settings extends StatelessWidget {
                           child: Text(
                             _userController.currentuser != null &&
                                     _userController
-                                        .currentuser!.firstName.isNotEmpty
-                                ? _userController.currentuser!.firstName[0]
+                                        .currentuser!.completeName.isNotEmpty
+                                ? _userController.currentuser!.completeName[0]
                                 : "G",
                             style: GoogleFonts.lato(
                               color: ColorStyle.textBlackColor,
@@ -132,8 +154,8 @@ class Settings extends StatelessWidget {
                         Text(
                           _userController.currentuser != null &&
                                   _userController
-                                      .currentuser!.firstName.isNotEmpty
-                              ? _userController.currentuser!.firstName
+                                      .currentuser!.completeName.isNotEmpty
+                              ? _userController.currentuser!.completeName
                               : "Guest",
                           style: GoogleFonts.poppins(
                             color: ColorStyle.white,
@@ -191,7 +213,7 @@ class Settings extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '3',
+                    _postController.myCars.length.toString(),
                     style: GoogleFonts.lato(
                       color: ColorStyle.textBlackColor,
                       fontSize: 18.0,
@@ -211,7 +233,7 @@ class Settings extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '10',
+                    _bookingsController.myBookings.length.toString(),
                     style: GoogleFonts.lato(
                       color: ColorStyle.textBlackColor,
                       fontSize: 18.0,
@@ -296,7 +318,10 @@ class Settings extends StatelessWidget {
           }
         } else if (route == '/conflit') {
           Get.bottomSheet(
-            conflictSheet(),
+            conflictSheet(
+                bookings: _bookingsController.myBookings.where((booking) {
+              return booking.withdrawStatus != "En Litige";
+            }).toList()),
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
           );

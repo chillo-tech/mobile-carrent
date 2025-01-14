@@ -23,10 +23,19 @@ class SearchResultScreen extends StatefulWidget {
 
 class _SearchResultScreenState extends State<SearchResultScreen> {
   final HomeController homeController = Get.find();
-  final SearchResultController searchResultController =
-      Get.put(SearchResultController());
-  final SearchBarController _searchBarController =
-      Get.put(SearchBarController());
+  final SearchResultController searchResultController = Get.find();
+  final SearchBarController _searchBarController = Get.find();
+
+  bool activateSearchPlace = Get.arguments['activateSearchPlace'] ?? false;
+
+  @override
+  void initState() {
+    Future.delayed(Duration.zero, () {
+      _searchBarController.isPlaceSearchActivated.value =
+          Get.arguments?['activateSearchPlace'] ?? false;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +154,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     setState(
                                         () {}); // Forcer la mise à jour de l'interface
                                   });
-                                }),
+                                },
+                                    isEnable: searchResultController
+                                            .getMinPrice(searchResultController
+                                                .filteredCars)! <
+                                        searchResultController.getMaxPrice(
+                                            searchResultController
+                                                .filteredCars)!),
                                 filterButton("Type de vehicule",
                                     isFilterApplied: searchResultController
                                         .appliedFilters.value
@@ -165,7 +180,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     setState(
                                         () {}); // Forcer la mise à jour de l'interface
                                   });
-                                }),
+                                },
+                                    isEnable: searchResultController
+                                            .filteredCars.length >
+                                        1),
                                 filterButton("Marque",
                                     isFilterApplied: searchResultController
                                         .appliedFilters.value
@@ -185,7 +203,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     setState(
                                         () {}); // Forcer la mise à jour de l'interface
                                   });
-                                }),
+                                },
+                                    isEnable: searchResultController
+                                            .filteredCars.length >
+                                        1),
                                 filterButton("Année",
                                     isFilterApplied: searchResultController
                                         .appliedFilters.value
@@ -199,110 +220,142 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     setState(
                                         () {}); // Forcer la mise à jour de l'interface
                                   });
-                                }),
+                                },
+                                    isEnable: searchResultController.getMinYear(
+                                            searchResultController
+                                                .filteredCars)! <
+                                        searchResultController.getMaxYear(
+                                            searchResultController
+                                                .filteredCars)!),
                               ],
                             );
                           }),
                           Obx(() {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                sectionTitle(
-                                    '${searchResultController.filteredCars.length} cars available'),
-                                ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: searchResultController
-                                        .filteredCars.length,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (BuildContext context, index) {
-                                      print(
-                                          searchResultController.filteredCars);
-                                      return Column(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Get.toNamed('/car_details',
-                                                  arguments:
-                                                      searchResultController
-                                                          .filteredCars[index]);
-                                            },
-                                            child: carComponent(
-                                              title: searchResultController
-                                                  .filteredCars[index].make,
-                                              image:
-                                                  "https://files.chillo.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
-                                              rating: 4.95,
-                                              commands: 120,
-                                              price: searchResultController
-                                                  .filteredCars[index].price,
-                                            ),
+                            return searchResultController
+                                    .filteredCars.isNotEmpty
+                                ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      sectionTitle(
+                                          '${searchResultController.filteredCars.length} cars available'),
+                                      ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: searchResultController
+                                              .filteredCars.length,
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
+                                          itemBuilder:
+                                              (BuildContext context, index) {
+                                            print(searchResultController
+                                                .filteredCars);
+                                            return Column(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Get.toNamed('/car_details',
+                                                        arguments:
+                                                            searchResultController
+                                                                    .filteredCars[
+                                                                index]);
+                                                  },
+                                                  child: carComponent(
+                                                    title:
+                                                        searchResultController
+                                                            .filteredCars[index]
+                                                            .make,
+                                                    image:
+                                                        "https://files.chillo.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
+                                                    rating: 4.95,
+                                                    commands: 120,
+                                                    price:
+                                                        searchResultController
+                                                            .filteredCars[index]
+                                                            .price,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16.0),
+                                              ],
+                                            );
+                                          }),
+                                    ],
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.only(top: 20.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          height: 350,
+                                          child: Stack(
+                                            children: [
+                                              ClipRRect(
+                                                  borderRadius:
+                                                      const BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(12.0),
+                                                    bottomRight:
+                                                        Radius.circular(12.0),
+                                                  ),
+                                                  child:
+                                                      Image.asset(Assets.car3)),
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: ClipRRect(
+                                                    borderRadius:
+                                                        const BorderRadius.only(
+                                                      topRight:
+                                                          Radius.circular(12.0),
+                                                      bottomRight:
+                                                          Radius.circular(12.0),
+                                                    ),
+                                                    child: Image.asset(
+                                                        Assets.car4)),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(height: 16.0),
-                                        ],
-                                      );
-                                    }),
-                              ],
-                            );
-                          }),
-                          const SizedBox(height: 20.0),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: 350,
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topRight: Radius.circular(12.0),
-                                          bottomRight: Radius.circular(12.0),
                                         ),
-                                        child: Image.asset(Assets.car3)),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: ClipRRect(
-                                          borderRadius: const BorderRadius.only(
-                                            topRight: Radius.circular(12.0),
-                                            bottomRight: Radius.circular(12.0),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              1.5,
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                "Louez, Roulez, Retournez – Aussi simple que ça!",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.lato(
+                                                  color:
+                                                      ColorStyle.fontColorLight,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 20.0,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.lato(
+                                                  color: ColorStyle.greyColor,
+                                                  fontSize: 16.0,
+                                                ),
+                                              )
+                                            ],
                                           ),
-                                          child: Image.asset(Assets.car4)),
+                                        ),
+                                        const SizedBox(height: 16.0),
+                                        PrimaryButton(
+                                          title: 'Parcourir les voitures',
+                                          onPressed: () {
+                                            Get.offAllNamed('/bottom_nav');
+                                          },
+                                        )
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width / 1.5,
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Louez, Roulez, Retournez – Aussi simple que ça!",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.lato(
-                                        color: ColorStyle.fontColorLight,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 20.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.lato(
-                                        color: ColorStyle.greyColor,
-                                        fontSize: 16.0,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 16.0),
-                              PrimaryButton(
-                                title: 'Parcourir les voitures',
-                                onPressed: () {
-                                  Get.toNamed('/bottom_nav');
-                                },
-                              )
-                            ],
-                          ),
+                                  );
+                          }),
                         ],
                       ),
                     ),
@@ -312,7 +365,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             ),
             Obx(() {
               return _searchBarController.isPlaceSearchActivated.value
-                  ? topSheet(context, navigate: false)
+                  ? topSheet(context, navigate: true)
                   : const SizedBox();
             }),
           ],
@@ -322,14 +375,16 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Widget filterButton(String text,
-      {void Function()? action, bool isFilterApplied = false}) {
+      {void Function()? action,
+      bool isFilterApplied = false,
+      bool isEnable = true}) {
     return GestureDetector(
-      onTap: () => Future.delayed(Duration.zero, action),
+      onTap: isEnable ? () => Future.delayed(Duration.zero, action) : null,
       child: Container(
         padding: const EdgeInsets.all(6.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
-          color: isFilterApplied
+          color: isFilterApplied || !isEnable
               ? ColorStyle.blackBackground
               : ColorStyle.containerBg,
         ),
@@ -338,7 +393,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           children: [
             Text(text,
                 style: GoogleFonts.lato(
-                  color: isFilterApplied
+                  color: isFilterApplied || !isEnable
                       ? ColorStyle.lightWhite
                       : ColorStyle.textBlackColor,
                   fontSize: 12.0,
@@ -349,7 +404,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             Icon(
               FontAwesomeIcons.chevronDown,
               size: 12.0,
-              color: isFilterApplied
+              color: isFilterApplied || !isEnable
                   ? ColorStyle.lightWhite
                   : ColorStyle.textBlackColor,
             ),
@@ -374,7 +429,11 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Widget priceFilter() {
-    RangeValues currentRangeValues = const RangeValues(1, 50000);
+    RangeValues currentRangeValues = RangeValues(
+        double.parse(searchResultController
+            .getMinPrice(searchResultController.filteredCars)
+            .toString()),
+        100000);
     // const RangeValues(100000 / 3, 100000 / 1.4);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
@@ -401,7 +460,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             ),
           ),
           Text(
-            "£1 - £100,000",
+            // searchResultController.getMinMaxPrice(searchResultController.filteredCars),
+            "${searchResultController.getMinPrice(searchResultController.filteredCars)} FCFA - ${searchResultController.getMaxPrice(searchResultController.filteredCars)} FCFA",
             style: GoogleFonts.lato(
               color: ColorStyle.textBlackColor,
               fontSize: 16.0,
@@ -411,7 +471,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           RangeSlider(
             activeColor: ColorStyle.lightPrimaryColor,
             values: currentRangeValues,
-            min: 1,
+            min: double.parse(searchResultController
+                .getMinPrice(searchResultController.filteredCars)
+                .toString()),
             max: 100000,
             // divisions: 10,
             labels: RangeLabels(
@@ -419,9 +481,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
               '£${currentRangeValues.end.round()}',
             ),
             onChanged: (RangeValues values) {
-              // setState(() {
-              //   _currentRangeValues = values;
-              // });
+              print(values);
+              setState(() {
+                currentRangeValues = values;
+              });
             },
           ),
           PrimaryButton(
@@ -448,7 +511,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Widget yearFilter() {
-    RangeValues currentRangeValues = const RangeValues(2000, 2024);
+    RangeValues currentRangeValues = RangeValues(
+        double.parse(searchResultController
+            .getMinYear(searchResultController.filteredCars)
+            .toString()),
+        double.parse(searchResultController
+            .getMaxYear(searchResultController.filteredCars)
+            .toString()));
     // const RangeValues(100000 / 3, 100000 / 1.4);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
@@ -475,7 +544,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             ),
           ),
           Text(
-            "2000 - ${DateTime.now().year}",
+            "${searchResultController.getMinYear(searchResultController.filteredCars)} - ${searchResultController.getMaxYear(searchResultController.filteredCars).toString()}",
             style: GoogleFonts.lato(
               color: ColorStyle.textBlackColor,
               fontSize: 16.0,
@@ -485,8 +554,12 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           RangeSlider(
             activeColor: ColorStyle.lightPrimaryColor,
             values: currentRangeValues,
-            min: 2000,
-            max: 2024,
+            min: double.parse(searchResultController
+                .getMinYear(searchResultController.filteredCars)
+                .toString()),
+            max: double.parse(searchResultController
+                .getMaxYear(searchResultController.filteredCars)
+                .toString()),
             // divisions: 10,
             labels: RangeLabels(
               '£${currentRangeValues.start.round()}',
@@ -524,6 +597,16 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Widget typeFilter() {
+    searchResultController.carTypes
+        .assignAll(searchResultController.filteredCars.map((car) {
+      return {'type': car.typeCarburant, 'isSelected': false};
+    }));
+    searchResultController.carTypes.add(
+      {'type': 'Tous types', 'isSelected': false},
+    );
+    searchResultController
+        .carTypes(searchResultController.carTypes.reversed.toList());
+    print(searchResultController.carTypes.toJson());
     return StatefulBuilder(builder: (context, setStater) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -558,7 +641,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                       });
 
                       // Active la première marque pour l'exemple
-                      searchResultController.carTypes[0]['isSelected'] = true;
+                      // searchResultController.carTypes[0]['isSelected'] = true;
 
                       // Met à jour l'interface
                       searchResultController.update();
@@ -575,18 +658,30 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             ),
             Obx(() {
               return Column(
-                children: searchResultController.carTypes.map((brand) {
+                children: searchResultController.carTypes.map((type) {
+                  print(searchResultController.carTypes.toJson());
                   return GestureDetector(
                     onTap: () {
-                      setStater(() {
-                        brand['isSelected'] = !brand['isSelected'];
-                        searchResultController.update();
-                      });
+                      if (type['type'] == "Tous types") {
+                        searchResultController.carTypes.forEach((type) {
+                          setStater(() {
+                            type['isSelected'] = true;
+                          });
+                        });
+                      } else {
+                        searchResultController.carTypes[
+                                searchResultController.carTypes.length - 1]
+                            ['isSelected'] = true;
+                        setStater(() {
+                          type['isSelected'] = !type['isSelected'];
+                          searchResultController.update();
+                        });
+                      }
                     },
                     child: Column(
                       children: [
                         brandOrTypeComponent(
-                            brand['type'], brand['isSelected'], setStater),
+                            type['type'], type['isSelected'], setStater),
                         gapH12,
                       ],
                     ),
@@ -597,13 +692,23 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             gapH8,
             PrimaryButton(
                 title: 'Filtrer',
-                onPressed: () {
+                onPressed: () async {
+                  searchResultController.carFilter.makes =
+                      searchResultController.carTypes
+                          .where((element) =>
+                              element['isSelected'] &&
+                              element['type'] != "Tous types")
+                          .toList()
+                          .map((toElement) => toElement['type'] as String)
+                          .toList();
                   searchResultController.appliedFilters.value.addIf(
                       !searchResultController.appliedFilters.value
                           .contains('type'),
                       'type');
                   searchResultController.update();
                   print(searchResultController.appliedFilters);
+
+                  await searchResultController.searchCar();
                   Get.back();
                   // Get.offNamed('/success_post');
                 })
@@ -614,6 +719,15 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Widget brandFilter() {
+    searchResultController.carBrands
+        .assignAll(searchResultController.filteredCars.map((car) {
+      return {'name': car.make, 'isSelected': false};
+    }));
+    searchResultController.carBrands
+        .add({'name': 'Toutes marques', 'isSelected': false});
+    searchResultController
+        .carBrands(searchResultController.carBrands.reversed.toList());
+    print(searchResultController.carBrands.toJson());
     return StatefulBuilder(builder: (context, setStater) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -648,7 +762,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                       });
 
                       // Active la première marque pour l'exemple
-                      searchResultController.carBrands[0]['isSelected'] = true;
+                      // searchResultController.carBrands[0]['isSelected'] = true;
 
                       // Met à jour l'interface
                       searchResultController.update();
@@ -668,10 +782,22 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                 children: searchResultController.carBrands.map((brand) {
                   return GestureDetector(
                     onTap: () {
-                      setStater(() {
-                        brand['isSelected'] = !brand['isSelected'];
-                        searchResultController.update();
-                      });
+                      print(brand['name'] == "Toutes marques");
+                      if (brand['name'] == "Toutes marques") {
+                        searchResultController.carBrands.forEach((brand) {
+                          setStater(() {
+                            brand['isSelected'] = true;
+                          });
+                        });
+                      } else {
+                        searchResultController.carBrands[
+                                searchResultController.carBrands.length - 1]
+                            ['isSelected'] = true;
+                        setStater(() {
+                          brand['isSelected'] = !brand['isSelected'];
+                          searchResultController.update();
+                        });
+                      }
                     },
                     child: Column(
                       children: [
@@ -687,16 +813,24 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             gapH8,
             PrimaryButton(
                 title: 'Filtrer',
-                onPressed: () {
-                  searchResultController.carFilter.make = searchResultController
-                      .carBrands
-                      .firstWhere((element) => element['isSelected'])['name'];
+                onPressed: () async {
+                  searchResultController.carFilter.makes =
+                      searchResultController.carBrands
+                          .where((element) =>
+                              element['isSelected'] &&
+                              element['name'] != "Toutes marques")
+                          .map((toElement) {
+                    return toElement['name'] as String;
+                  }).toList();
+
                   searchResultController.appliedFilters.value.addIf(
                       !searchResultController.appliedFilters.value
                           .contains('brand'),
                       'brand');
                   searchResultController.update();
                   print(searchResultController.appliedFilters);
+
+                  await searchResultController.searchCar();
                   Get.back();
                   // Get.offNamed('/success_post');
                 })

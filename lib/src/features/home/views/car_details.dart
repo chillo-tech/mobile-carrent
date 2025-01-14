@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +32,8 @@ class CarDetails extends StatefulWidget {
 class _CarDetailsState extends State<CarDetails> {
   final CarResponse carResponse = Get.arguments;
   final _formKey = GlobalKey<FormState>();
-  CarDetailsController carDetailsController = Get.put(CarDetailsController());
+  CarDetailsController carDetailsController =
+      Get.put(CarDetailsController(carResponse: Get.arguments));
   int _currentIndex = 0;
 
   List<Review> reviews = [
@@ -49,6 +52,24 @@ class _CarDetailsState extends State<CarDetails> {
           "Professionnel et fiable. J'apprécie leur approche respectueuse de l'environnement.",
     ),
   ];
+
+  // @override
+  // void initState() {
+  //   print(Get.arguments.id);
+  //   // carDetailsController.carResponse = Get.arguments;
+  //   // final loggedIn = GetStorage().read(StorageConstants.loggedIn);
+  //   // if (loggedIn != null && loggedIn) {
+  //   Future.delayed(Duration(seconds: 0), () {
+  //     carDetailsController.rating = 0.obs;
+  //     carDetailsController.cars.value =
+  //         List.from(carDetailsController.homeController.cars);
+  //     carDetailsController.cars.removeWhere((car) {
+  //       return carResponse.id == car.id;
+  //     });
+  //     carDetailsController.getPostReviews();
+  //   });
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +115,60 @@ class _CarDetailsState extends State<CarDetails> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              Image.network(
-                                "https://files.chillo.fr/$url",
-                                fit: BoxFit.cover,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    // Affiche un CircularProgressIndicator pendant le chargement
+                                    Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    // Image réseau avec gestion des erreurs
+                                    Image.network(
+                                      "https://files.chillo.fr/$url",
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          // Retourne l'image une fois chargée
+                                          return child;
+                                        }
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            color: ColorStyle.lightPrimaryColor,
+                                            backgroundColor: ColorStyle.grey,
+                                            value: loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    (loadingProgress
+                                                            .expectedTotalBytes ??
+                                                        1)
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                        return Center(
+                                          child: Icon(
+                                            Icons.error,
+                                            color: Colors.red,
+                                            size: 50.0,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
+                              // Image.network(
+                              //   "https://files.chillo.fr/$url",
+                              //   fit: BoxFit.cover,
+                              // ),
                               Padding(
                                 padding: const EdgeInsets.only(
                                     left: 16.0, right: 16.0, top: 30.0),
@@ -191,34 +262,28 @@ class _CarDetailsState extends State<CarDetails> {
                         ),
                       ),
                       gapH8,
-                      Row(
-                        children: [
-                          // TODO: Implement rating here
-                          Text(
-                            '4/5',
-                            style: GoogleFonts.lato(
-                              color: ColorStyle.fontColorLight,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          gapW6,
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                Icons.star,
-                                color: index != 4
-                                    ? Colors.yellow
-                                    : ColorStyle.bgFieldGrey,
-                                size: 18,
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
+                      Obx(() {
+                        return carDetailsController.reviews.isNotEmpty
+                            ? Row(
+                                children: [
+                                  Text(
+                                    '${((carDetailsController.reviews.map((review) => review.rating ?? 0).reduce((a, b) => a + b) / carDetailsController.reviews.length))}/5',
+                                    style: GoogleFonts.lato(
+                                      color: ColorStyle.fontColorLight,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  gapW6,
+                                  headStarsFromRating(
+                                      carDetailsController.reviews),
+                                ],
+                              )
+                            : SizedBox();
+                      }),
                       gapH8,
                       SizedBox(
-                        height: 35.0,
+                        height: 30.0,
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
@@ -426,32 +491,10 @@ class _CarDetailsState extends State<CarDetails> {
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            Row(
-                                              children:
-                                                  List.generate(5, (index) {
-                                                return Icon(
-                                                  Icons.star,
-                                                  color: index <=
-                                                          (carDetailsController
-                                                                          .reviews
-                                                                          .map((review) =>
-                                                                              review.rating ??
-                                                                              0)
-                                                                          .reduce((a, b) =>
-                                                                              a +
-                                                                              b) /
-                                                                      carDetailsController
-                                                                          .reviews
-                                                                          .length)
-                                                                  .round() -
-                                                              1
-                                                      ? ColorStyle
-                                                          .lightPrimaryColor
-                                                      : ColorStyle.bgFieldGrey,
-                                                  size: 18,
-                                                );
-                                              }),
-                                            ),
+                                            headStarsFromRating(
+                                                carDetailsController.reviews,
+                                                enableColor: ColorStyle
+                                                    .lightPrimaryColor),
                                             Text(
                                               carDetailsController
                                                   .reviews.length
@@ -532,8 +575,11 @@ class _CarDetailsState extends State<CarDetails> {
                                             const EdgeInsets.only(top: 16.0),
                                         child: reviewWidget(
                                           image: reviews[1].image!,
-                                          name: reviews[0].name!,
-                                          location: reviews[0].location!,
+                                          name: carDetailsController
+                                              .reviews[index]
+                                              .userName!
+                                              .capitalize!,
+                                          location: '****@****.***',
                                           rate: carDetailsController
                                               .reviews[index].rating!,
                                           review: carDetailsController
@@ -544,14 +590,14 @@ class _CarDetailsState extends State<CarDetails> {
                                       );
                                     },
                                   ),
-                                  gapH10,
-                                  if (carDetailsController.reviews.length > 2)
-                                    PrimaryButton(
-                                        isRoundedBorder: true,
-                                        color: ColorStyle.grey,
-                                        textColor: ColorStyle.fontColorLight,
-                                        title: 'Voir plus',
-                                        onPressed: () {}),
+                                  // gapH10,
+                                  // if (carDetailsController.reviews.length > 2)
+                                  //   PrimaryButton(
+                                  //       isRoundedBorder: true,
+                                  //       color: ColorStyle.grey,
+                                  //       textColor: ColorStyle.fontColorLight,
+                                  //       title: 'Voir plus',
+                                  //       onPressed: () {}),
                                 ],
                               )
                             : SizedBox();
@@ -610,7 +656,7 @@ class _CarDetailsState extends State<CarDetails> {
                               controller: carDetailsController.reviewController,
                               fieldValidator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter the review';
+                                  return 'Entrez un avis';
                                 }
                                 return null;
                               },
@@ -645,39 +691,40 @@ class _CarDetailsState extends State<CarDetails> {
                           ],
                         ),
                       ),
-                      Obx(() {
-                        return carDetailsController.cars.isNotEmpty
-                            ? ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: carDetailsController.cars.length,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext context, index) {
-                                  print(carDetailsController.cars);
-                                  return Column(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          Get.toNamed('/car_details',
-                                              arguments: carDetailsController
-                                                  .cars[index]);
-                                        },
-                                        child: carComponent(
-                                          title: carDetailsController
-                                              .cars[index].make,
-                                          image:
-                                              "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
-                                          rating: 4.95,
-                                          commands: 120,
-                                          price: carDetailsController
-                                              .cars[index].price,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16.0),
-                                    ],
-                                  );
-                                })
-                            : SizedBox();
-                      }),
+                      // Obx(() {
+                      //   return carDetailsController.cars.isNotEmpty
+                      //       ? ListView.builder(
+                      //           shrinkWrap: true,
+                      //           itemCount: carDetailsController.cars.length,
+                      //           physics: NeverScrollableScrollPhysics(),
+                      //           itemBuilder: (BuildContext context, index) {
+                      //             print(carDetailsController.cars);
+                      //             return Column(
+                      //               children: [
+                      //                 GestureDetector(
+                      //                   onTap: () {
+                      //                     Get.toNamed('/car_details',
+                      //                         preventDuplicates: false,
+                      //                         arguments: carDetailsController
+                      //                             .cars[index]);
+                      //                   },
+                      //                   child: carComponent(
+                      //                     title: carDetailsController
+                      //                         .cars[index].make,
+                      //                     image:
+                      //                         "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
+                      //                     rating: 4.95,
+                      //                     commands: 120,
+                      //                     price: carDetailsController
+                      //                         .cars[index].price,
+                      //                   ),
+                      //                 ),
+                      //                 const SizedBox(height: 16.0),
+                      //               ],
+                      //             );
+                      //           })
+                      //       : SizedBox();
+                      // }),
                     ],
                   ),
                 ),
@@ -751,6 +798,20 @@ class _CarDetailsState extends State<CarDetails> {
                           //   isScrollControlled: true,
                           //   backgroundColor: Colors.transparent,
                           // );
+                          final loggedIn =
+                              GetStorage().read(StorageConstants.loggedIn);
+                          if (!(loggedIn != null && loggedIn)) {
+                            Get.dialog(
+                              Utility.simpleBinaryDialog(
+                                title: "Réservation",
+                                content:
+                                    "Vous devez vous connecter pour acceder à cette fonctionnalité",
+                                onBackPressed: () => Get.back(),
+                                onContinuePressed: () =>
+                                    Get.offAllNamed('/login'),
+                              ),
+                            );
+                          }
                           Get.toNamed('/booking', arguments: carResponse);
                         },
                       )
@@ -774,7 +835,7 @@ class _CarDetailsState extends State<CarDetails> {
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          if (action != null) carDetailsController.executeActionOnTap(action);
+          // if (action != null) carDetailsController.executeActionOnTap(action);
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -827,9 +888,20 @@ class _CarDetailsState extends State<CarDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 30.0,
-                  backgroundImage: AssetImage(image),
+                Container(
+                  padding: const EdgeInsets.all(18.0),
+                  decoration: const BoxDecoration(
+                    color: ColorStyle.lightPrimaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    name[0],
+                    style: GoogleFonts.lato(
+                      color: ColorStyle.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20.0,
+                    ),
+                  ),
                 ),
                 Row(
                   children: List.generate(5, (index) {

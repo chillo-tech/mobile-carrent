@@ -7,6 +7,7 @@ import '../src/features/auth/login/views/login.dart';
 import '../src/features/auth/otp/views/confirm_otp.dart';
 import '../src/features/auth/register/views/create_account.dart';
 import '../src/features/booking/views/booking.dart';
+import '../src/features/bookings/views/booking_details.dart';
 import '../src/features/bottom_nav/views/bottom_nav.dart';
 import '../src/features/create_post/views/create_post.dart';
 import '../src/features/create_post/views/create_post_or_booking_success.dart';
@@ -20,6 +21,7 @@ import '../src/features/search_result/views/search_result.dart';
 import '../src/features/settings/views/update_profile.dart';
 import '../src/features/splash/splash.dart';
 import '../src/features/success/success.dart';
+import '../src/features/web_view/web_view.dart';
 import '../src/features/welcome/welcome.dart';
 import '../src/features/withdraw_booking/views/withdraw_booking.dart';
 
@@ -44,9 +46,12 @@ class Router {
     GetPage(name: '/create_post', page: () => CreatePost()),
     GetPage(name: '/success_post', page: () => CreatePostSuccess()),
     GetPage(name: '/post_details', page: () => PostDetails()),
+    GetPage(name: '/booking_details', page: () => BookingDetails()),
     GetPage(name: '/edit_post', page: () => EditPost()),
     GetPage(name: '/update_profile', page: () => UpdateProfile()),
     GetPage(name: '/notification', page: () => NotificationsScreen()),
+    
+    GetPage(name: '/web_view', page: () => ReservationWebView()),
     
   ];
 }

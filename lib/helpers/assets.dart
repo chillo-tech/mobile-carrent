@@ -50,4 +50,8 @@ class Assets {
 
   static const String car_alert = 'assets/icons/car_alert.svg';
   static const String smile_star = 'assets/icons/smile_star.svg';
+
+  static const String alert_inverse = 'assets/icons/alert_inverse.svg';
+  static const String check = 'assets/icons/check.svg';
+  static const String bookmark = 'assets/icons/bookmark.svg';
 }

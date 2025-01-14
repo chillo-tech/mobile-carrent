@@ -22,8 +22,8 @@ class ReviewService {
   Future<List<Review>> getPostReviews(String carId) async {
     log.info('HEADERS ${apiProvider.headers}');
 
-    String token = await GetStorage().read(StorageConstants.refreshToken);
-    apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
+    // String token = await GetStorage().read(StorageConstants.refreshToken);
+    // apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
     // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); // $token');
     final response = await apiProvider.get(
       Env.getUserManagementApiBaseUrl(),

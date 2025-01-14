@@ -1,3 +1,4 @@
+import '../../../../../common/common_fonctions.dart';
 import '../../../../../theme/theme.dart';
 import '../../../widgets/form_input_field.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +116,12 @@ class Login extends StatelessWidget {
                               if (value == null || value.isEmpty) {
                                 return 'Veuillez entrer votre e-mail';
                               }
-                              return null;
+
+                              if (!emailRegex().hasMatch(value)) {
+                                return 'Veuillez entrer une adresse e-mail valide';
+                              }
+
+                              return null; // Pas d'erreur
                             },
                           );
                   }),
@@ -204,16 +210,16 @@ class Login extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 15.0),
-                  PrimaryButton(
-                    title: 'Continuer avec Google',
-                    image: 'assets/icons/google.svg',
-                    color: ColorStyle.lightWhite,
-                    textColor: ColorStyle.fontColorLight,
-                    onPressed: () {
-                      Get.offAllNamed('/bottom_nav');
-                    },
-                  ),
+                  // const SizedBox(height: 15.0),
+                  // PrimaryButton(
+                  //   title: 'Continuer avec Google',
+                  //   image: 'assets/icons/google.svg',
+                  //   color: ColorStyle.lightWhite,
+                  //   textColor: ColorStyle.fontColorLight,
+                  //   onPressed: () {
+                  //     Get.offAllNamed('/bottom_nav');
+                  //   },
+                  // ),
                   const SizedBox(height: 10.0),
                   GestureDetector(
                     onTap: () {

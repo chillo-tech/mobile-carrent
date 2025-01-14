@@ -1,5 +1,6 @@
 class CarFilter {
-  String? make;
+  List<String>? makes;
+  List<String>? typesCarburant;
   String? startDisponibilityDate;
   String? endDisponibilityDate;
   double? priceMin;
@@ -8,7 +9,8 @@ class CarFilter {
   int? yearMax;
 
   CarFilter({
-    this.make,
+    this.makes,
+    this.typesCarburant,
     this.startDisponibilityDate,
     this.endDisponibilityDate,
     this.priceMin,
@@ -18,24 +20,26 @@ class CarFilter {
   });
 
   // Méthode pour convertir un Map en instance de CarFilter
-  factory CarFilter.fromJson(Map<String, dynamic> map) {
-    return CarFilter(
-      make: map['make'] as String?,
-      startDisponibilityDate: map['startDisponibilityDate'],
-      endDisponibilityDate: map['endDisponibilityDate'],
-      priceMin:
-          map['priceMin'] != null ? (map['priceMin'] as num).toDouble() : null,
-      priceMax:
-          map['priceMax'] != null ? (map['priceMax'] as num).toDouble() : null,
-      yearMin: map['yearMin'] as int?,
-      yearMax: map['yearMax'] as int?,
-    );
-  }
+  // factory CarFilter.fromJson(Map<String, dynamic> map) {
+  //   return CarFilter(
+  //     make: map['make'] as String?,
+  //     typeCarburant: map['typeCarburants'] as String?,
+  //     startDisponibilityDate: map['startDisponibilityDate'],
+  //     endDisponibilityDate: map['endDisponibilityDate'],
+  //     priceMin:
+  //         map['priceMin'] != null ? (map['priceMin'] as num).toDouble() : null,
+  //     priceMax:
+  //         map['priceMax'] != null ? (map['priceMax'] as num).toDouble() : null,
+  //     yearMin: map['yearMin'] as int?,
+  //     yearMax: map['yearMax'] as int?,
+  //   );
+  // }
 
   // Méthode pour convertir une instance de CarFilter en Map
   Map<String, dynamic> toJson() {
     return {
-      'make': make,
+      'makes': makes?.join(','),
+      'typesCarburant': typesCarburant?.join(','),
       'startDisponibilityDate': startDisponibilityDate,
       'endDisponibilityDate': endDisponibilityDate,
       'priceMin': priceMin,

@@ -223,10 +223,10 @@ class Utility {
       return amountFormatterWithoutDecimal.format(amount).replaceAll(',', ' ');
   }
 
-  static Widget simpleBinaryDialog({
+  static Widget simpleDialog({
     required String title,
     required String content,
-    VoidCallback? onBackPressed,
+    String continueButtonText = "Continuer",
     VoidCallback? onContinuePressed,
   }) {
     return SimpleDialog(
@@ -258,37 +258,143 @@ class Utility {
                 ),
               ),
               const SizedBox(height: 20),
+              // onBackPressed != null
+              //     ?
+              // Expanded(
+              //   child:
               Row(
                 children: [
-                  Expanded(
-                    child: IntrinsicHeight(
-                      child: OutlinedButton(
-                        onPressed: onBackPressed,
-                        child: Text(
-                          'Annuler'.tr,
-                          style: GoogleFonts.lato(
-                            color: ColorStyle.lightPrimaryColor,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Get.theme.primaryColor,
-                          side: BorderSide(color: Get.theme.primaryColor),
-                          textStyle: GoogleFonts.lato(
-                            color: ColorStyle.lightPrimaryColor,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
                   Expanded(
                     child: IntrinsicHeight(
                       child: ElevatedButton(
                         onPressed: onContinuePressed,
                         child: Text(
-                          'Continuer'.tr,
+                          continueButtonText,
+                          style: GoogleFonts.lato(
+                            color: ColorStyle.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Get.theme.primaryColor,
+                          textStyle: GoogleFonts.lato(
+                            color: ColorStyle.white,
+                            fontSize: 16.0,
+                          ),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // )
+              // : IntrinsicHeight(
+              //     child: ElevatedButton(
+              //       onPressed: onContinuePressed,
+              //       child: Text(
+              //         'Continuer'.tr,
+              //         style: GoogleFonts.lato(
+              //           color: ColorStyle.white,
+              //           fontSize: 16.0,
+              //         ),
+              //       ),
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: Get.theme.primaryColor,
+              //         textStyle: GoogleFonts.lato(
+              //           color: ColorStyle.white,
+              //           fontSize: 16.0,
+              //         ),
+              //         elevation: 0,
+              //         padding: const EdgeInsets.symmetric(
+              //           horizontal: 15,
+              //           vertical: 14,
+              //         ),
+              //       ),
+              //     ),
+              //   )
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  static Widget simpleBinaryDialog({
+    required String title,
+    required String content,
+    String backButtonText = "Annuler",
+    String continueButtonText = "Continuer",
+    VoidCallback? onBackPressed,
+    VoidCallback? onContinuePressed,
+  }) {
+    return SimpleDialog(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Image.asset('assets/alert.png'),
+              // const SizedBox(height: 16),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                content,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // onBackPressed != null
+              //     ?
+              Row(
+                children: [
+                  if (onBackPressed != null)
+                    Expanded(
+                      child: IntrinsicHeight(
+                        child: OutlinedButton(
+                          onPressed: onBackPressed,
+                          child: Text(
+                            backButtonText,
+                            style: GoogleFonts.lato(
+                              color: ColorStyle.lightPrimaryColor,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Get.theme.primaryColor,
+                            side: BorderSide(color: Get.theme.primaryColor),
+                            textStyle: GoogleFonts.lato(
+                              color: ColorStyle.lightPrimaryColor,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (onBackPressed != null) const SizedBox(width: 15),
+                  Expanded(
+                    child: IntrinsicHeight(
+                      child: ElevatedButton(
+                        onPressed: onContinuePressed,
+                        child: Text(
+                          continueButtonText,
                           style: GoogleFonts.lato(
                             color: ColorStyle.white,
                             fontSize: 16.0,
@@ -311,6 +417,30 @@ class Utility {
                   ),
                 ],
               )
+              // : IntrinsicHeight(
+              //     child: ElevatedButton(
+              //       onPressed: onContinuePressed,
+              //       child: Text(
+              //         'Continuer'.tr,
+              //         style: GoogleFonts.lato(
+              //           color: ColorStyle.white,
+              //           fontSize: 16.0,
+              //         ),
+              //       ),
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: Get.theme.primaryColor,
+              //         textStyle: GoogleFonts.lato(
+              //           color: ColorStyle.white,
+              //           fontSize: 16.0,
+              //         ),
+              //         elevation: 0,
+              //         padding: const EdgeInsets.symmetric(
+              //           horizontal: 15,
+              //           vertical: 14,
+              //         ),
+              //       ),
+              //     ),
+              //   )
             ],
           ),
         )

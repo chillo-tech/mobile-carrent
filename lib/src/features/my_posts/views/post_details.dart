@@ -138,12 +138,47 @@ class PostDetails extends StatelessWidget {
                         childrenDelegate: SliverChildBuilderDelegate(
                           childCount: post.imagePathCar?.length,
                           (context, index) => ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(
-                              "https://files.chillo.fr/${post.imagePathCar![index]}",
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                              borderRadius: BorderRadius.circular(8.0),
+                              // child: Image.network(
+                              //   "https://files.chillo.fr/${post.imagePathCar![index]}",
+                              //   fit: BoxFit.cover,
+                              // ),
+                              child: Image.network(
+                                "https://files.chillo.fr/${post.imagePathCar![index]}",
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    // Retourne l'image une fois chargée
+                                    return child;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      color: ColorStyle.lightPrimaryColor,
+                                      backgroundColor: ColorStyle.grey,
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                              : null,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                  return Center(
+                                    child: Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 50.0,
+                                    ),
+                                  );
+                                },
+                              )),
                         ),
                       )
                     : Container(
@@ -154,9 +189,41 @@ class PostDetails extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8.0)),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
+                          // child: Image.network(
+                          //   "https://files.chillo.fr/${post.imagePathCar![0]}",
+                          //   fit: BoxFit.cover,
+                          // ),
                           child: Image.network(
                             "https://files.chillo.fr/${post.imagePathCar![0]}",
                             fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                // Retourne l'image une fois chargée
+                                return child;
+                              }
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: ColorStyle.lightPrimaryColor,
+                                  backgroundColor: ColorStyle.grey,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                              return Center(
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 50.0,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

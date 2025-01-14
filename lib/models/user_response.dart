@@ -1,15 +1,18 @@
+import 'dart:convert';
+
+UserResponse userResponseFromJson(String str) =>
+    UserResponse.fromJson(json.decode(str));
+
 class UserResponse {
   final String id;
-  final String firstName;
-  final String lastName;
+  final String completeName;
   final String? email;
   final String? password;
   final String phoneNumber;
 
   UserResponse({
     required this.id,
-    required this.firstName,
-    required this.lastName,
+    required this.completeName,
     this.email,
     this.password,
     required this.phoneNumber,
@@ -18,8 +21,7 @@ class UserResponse {
   factory UserResponse.fromJson(Map<String, dynamic> json) {
     return UserResponse(
       id: json['id'] as String,
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
+      completeName: json['completeName'] as String,
       email: json['email'] as String?,
       password: json['password'] as String,
       phoneNumber: json['phoneNumber'] as String,
@@ -29,8 +31,7 @@ class UserResponse {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'firstName': firstName,
-      'lastName': lastName,
+      'completeName': completeName,
       'email': email,
       'password': password,
       'phoneNumber': phoneNumber,

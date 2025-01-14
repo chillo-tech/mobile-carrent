@@ -20,6 +20,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final SearchBarController _searchBarController =
       Get.put(SearchBarController());
   final _formKey = GlobalKey<FormState>();
+  String _searchQuery = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,12 +34,10 @@ class _SearchScreenState extends State<SearchScreen> {
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   FormInputField(
-                    // labelText: 'Email address',
                     hasBorderRadius: true,
-                    placeholder: 'Ville, prix, type, disponibilité, emplacement...',
+                    placeholder: 'Marque, prix, type, disponibilité, année...',
                     fillColor: ColorStyle.bgFieldGrey,
                     filled: true,
                     textInputType: TextInputType.text,
@@ -45,43 +45,42 @@ class _SearchScreenState extends State<SearchScreen> {
                       FontAwesomeIcons.magnifyingGlass,
                       size: 18.0,
                     ),
-                    // controller: authController.emailTextController,
-                    // prefix: const Icon(FontAwesomeIcons.search),
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre email';
-                      }
-                      return null;
+                    onChanged: (value) {
+                      _searchBarController.searchQuery.value = value;
                     },
                   ),
-                  ListView.builder(
-                    itemCount: _searchBarController.searchSections.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          sectionTitle(
-                            _searchBarController.searchSections[index].title,
-                          ),
-                          // Convert the map result to a list of widgets using .toList()
-                          Column(
-                            children: _searchBarController
-                                .searchSections[index].sections
-                                .map(
-                                  (section) => carComponent(
-                                    title: section.title,
-                                    icon: section.icon,
-                                    description: section.description,
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                  Obx(() {
+                    final filteredSections = _searchBarController
+                        .searchASections(_searchBarController.searchSections());
+
+                    return ListView.builder(
+                      itemCount: filteredSections.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final section = filteredSections[index];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            sectionTitle(section.title),
+                            Column(
+                              children: section.sections
+                                  .map(
+                                    (sectionItem) => carComponent(
+                                      title: sectionItem.title,
+                                      icon: sectionItem.icon,
+                                      description: sectionItem.description,
+                                      action: sectionItem.action,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }),
                 ],
               ),
             ),
@@ -100,61 +99,60 @@ Widget sectionTitle(String title) {
       style: GoogleFonts.lato(
         color: ColorStyle.textBlackColor,
         fontSize: 16.0,
-        // fontWeight: FontWeight.w600,
       ),
     ),
   );
 }
 
-Widget carComponent({required String icon, title, String? description}) {
+Widget carComponent({
+  required String icon,
+  required String title,
+  String? description,
+  required void Function() action,
+}) {
   return GestureDetector(
-    onTap: () {
-      Get.offAllNamed('/bottom_nav', arguments: {'activateSearchPlace': true});
-    },
-    child: Container(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      decoration: const BoxDecoration(
-        // color: ColorStyle.carComponentBg,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12.0),
-          topRight: Radius.circular(12.0),
+      onTap: action,
+      child: Container(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12.0),
+            topRight: Radius.circular(12.0),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-                color: ColorStyle.containerBg,
-                borderRadius: BorderRadius.circular(8.0)),
-            child: SvgPicture.asset(icon),
-          ),
-          gapW6,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.lato(
-                  color: ColorStyle.textBlackColor,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                  color: ColorStyle.containerBg,
+                  borderRadius: BorderRadius.circular(8.0)),
+              child: SvgPicture.asset(icon),
+            ),
+            gapW6,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.lato(
+                    color: ColorStyle.textBlackColor,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              description != null
-                  ? Text(
-                      description.toString(),
-                      style: GoogleFonts.lato(
-                        color: ColorStyle.textBlackColor,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  : const SizedBox(),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
+                if (description != null)
+                  Text(
+                    description,
+                    style: GoogleFonts.lato(
+                      color: ColorStyle.textBlackColor,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ));
 }

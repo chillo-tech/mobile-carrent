@@ -20,9 +20,7 @@ class UserController extends GetxController {
     await flutterSecureStorage.write(
         key: StorageConstants.id, value: response.user.id);
     await flutterSecureStorage.write(
-        key: StorageConstants.firstName, value: response.user.firstName);
-    await flutterSecureStorage.write(
-        key: StorageConstants.lastName, value: response.user.lastName);
+        key: StorageConstants.completeName, value: response.user.completeName);
     await flutterSecureStorage.write(
         key: StorageConstants.email, value: response.user.email);
     await flutterSecureStorage.write(
@@ -31,10 +29,8 @@ class UserController extends GetxController {
 
   Future<void> retreiveUserData() async {
     String id = await flutterSecureStorage.read(key: StorageConstants.id) ?? '';
-    String firstName =
-        await flutterSecureStorage.read(key: StorageConstants.firstName) ?? '';
-    String lastName =
-        await flutterSecureStorage.read(key: StorageConstants.lastName) ?? '';
+    String completeName =
+        await flutterSecureStorage.read(key: StorageConstants.completeName) ?? '';
     String email =
         await flutterSecureStorage.read(key: StorageConstants.email) ?? '';
     String phone =
@@ -42,16 +38,14 @@ class UserController extends GetxController {
 
     currentuser = UserResponse(
         id: id,
-        firstName: firstName,
         email: email,
-        lastName: lastName,
+        completeName: completeName,
         phoneNumber: phone);
   }
 
   Future<void> clearUserData() async {
     await flutterSecureStorage.delete(key: StorageConstants.id);
-    await flutterSecureStorage.delete(key: StorageConstants.firstName);
-    await flutterSecureStorage.delete(key: StorageConstants.lastName);
+    await flutterSecureStorage.delete(key: StorageConstants.completeName);
     await flutterSecureStorage.delete(key: StorageConstants.email);
     await flutterSecureStorage.delete(key: StorageConstants.phone);
   }

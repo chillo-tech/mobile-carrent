@@ -1,4 +1,5 @@
 import '../../../../common/app_sizes.dart';
+import '../../bookings/controllers/bookings_controller.dart';
 import '../../create_post/controllers/post_controller.dart';
 import '../controllers/home_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,13 +24,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  RangeValues _currentRangeValues = const RangeValues(1000, 20000);
   final HomeController homeController = Get.put(HomeController());
-  final PostController postController = Get.put(PostController());
   @override
   initState() {
-    Future.delayed(Duration.zero, () {
-      homeController.getCars();
+    Future.delayed(Duration.zero, () async {
+      await homeController.loadData();
     });
     super.initState();
   }
@@ -84,91 +83,99 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              sectionTitle('Vu récemment'),
               Obx(() {
-                return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: homeController.cars.length,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, index) {
-                      print(homeController.cars);
-                      return Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Get.toNamed('/car_details',
-                                  arguments: homeController.cars[index]);
-                            },
-                            child: carComponent(
-                              title: homeController.cars[index].make,
-                              image:
-                                  "https://files.chillo.fr/${homeController.cars[index].imagePathCar![0]}",
-                              rating: 4.95,
-                              commands: 120,
-                              price: homeController.cars[index].price,
-                            ),
-                          ),
-                          const SizedBox(height: 16.0),
-                        ],
-                      );
-                    });
-              }),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 350,
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(12.0),
-                              bottomRight: Radius.circular(12.0),
-                            ),
-                            child: Image.asset(Assets.car3)),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(12.0),
-                                bottomRight: Radius.circular(12.0),
+                return homeController.cars.isNotEmpty
+                    ? ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: homeController.cars.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, index) {
+                          print(homeController.cars);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              gapH6,
+                              sectionTitle('Vu récemment'),
+                              GestureDetector(
+                                onTap: () {
+                                  Get.toNamed('/car_details',
+                                      arguments: homeController.cars[index]);
+                                },
+                                child: carComponent(
+                                  title: homeController.cars[index].make,
+                                  image:
+                                      "https://files.chillo.fr/${homeController.cars[index].imagePathCar![0]}",
+                                  rating:
+                                      homeController.cars[index].reviewNumber,
+                                  commands: homeController
+                                      .cars[index].reservationNumber,
+                                  price: homeController.cars[index].price,
+                                ),
                               ),
-                              child: Image.asset(Assets.car4)),
+                              const SizedBox(height: 16.0),
+                            ],
+                          );
+                        })
+                    : Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 350,
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topRight: Radius.circular(12.0),
+                                        bottomRight: Radius.circular(12.0),
+                                      ),
+                                      child: Image.asset(Assets.car3)),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topRight: Radius.circular(12.0),
+                                          bottomRight: Radius.circular(12.0),
+                                        ),
+                                        child: Image.asset(Assets.car4)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 1.5,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Louez, Roulez, Retournez – Aussi simple que ça!",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.lato(
+                                      color: ColorStyle.fontColorLight,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.lato(
+                                      color: ColorStyle.greyColor,
+                                      fontSize: 16.0,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            // const SizedBox(height: 16.0),
+                            // PrimaryButton(
+                            //   title: 'Parcourir les voitures',
+                            //   onPressed: () {},
+                            // )
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.5,
-                    child: Column(
-                      children: [
-                        Text(
-                          "Louez, Roulez, Retournez – Aussi simple que ça!",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.lato(
-                            color: ColorStyle.fontColorLight,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                        Text(
-                          "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.lato(
-                            color: ColorStyle.greyColor,
-                            fontSize: 16.0,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  PrimaryButton(
-                    title: 'Parcourir les voitures',
-                    onPressed: () {},
-                  )
-                ],
-              ),
+                    );
+              }),
             ],
           ),
         ),

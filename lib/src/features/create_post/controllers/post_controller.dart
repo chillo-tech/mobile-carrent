@@ -24,6 +24,9 @@ import '../../../../services/post.dart';
 import '../../../../controllers/countries_controller.dart';
 
 class PostController extends GetxController {
+  bool launchInitState = true;
+  PostController({this.launchInitState = true});
+
   ErrorController errorController = ErrorController();
 
   final Rx<XFile?> imageFile = XFile('').obs;
@@ -57,25 +60,14 @@ class PostController extends GetxController {
   ];
   CountriesController countriesController = Get.put(CountriesController());
 
-  @override
-  onInit() {
-    super.onInit();
-
-    Future.delayed(Duration.zero, () {
-      final loggedIn = GetStorage().read(StorageConstants.loggedIn);
-      if (loggedIn != null && loggedIn) {
-        getMyPosts();
-      }
-      getPost();
-    });
-  }
-
-  void getMyPosts() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+  Future<void> getMyPosts({required bool launchLoader}) async {
+    if (launchLoader) {
+      Get.dialog(Center(
+        child: CircularProgressIndicator(
+          color: Get.theme.colorScheme.secondary,
+        ),
+      ));
+    }
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     PostService postService = PostService();
 
@@ -86,10 +78,14 @@ class PostController extends GetxController {
         myCars.value = response;
         print("---------------------");
         print(response);
-        Get.back();
+        if (launchLoader) {
+          Get.back();
+        }
       });
     } catch (error) {
-      Get.back();
+      if (launchLoader) {
+        Get.back();
+      }
       errorController.handleError(error);
     }
   }
@@ -105,32 +101,6 @@ class PostController extends GetxController {
           return PostResponse.fromJson(post);
         }).toList();
       }
-    }
-  }
-
-  Color getColorByStatus(String status) {
-    switch (status) {
-      case 'In review':
-        return ColorStyle.hintColor;
-      case 'Approved':
-        return ColorStyle.success;
-      case 'Not Approved':
-        return ColorStyle.lightPrimaryColor;
-      default:
-        return ColorStyle.success;
-    }
-  }
-
-  IconData getIconByStatus(String status) {
-    switch (status) {
-      case 'In review':
-        return FontAwesomeIcons.clock;
-      case 'Approved':
-        return FontAwesomeIcons.checkCircle;
-      case 'Not Approved':
-        return FontAwesomeIcons.close;
-      default:
-        return FontAwesomeIcons.checkCircle;
     }
   }
 
@@ -158,10 +128,8 @@ class PostController extends GetxController {
       request.fields['phoneNumberProprietor'] =
           '+${countriesController.selectedCountry.value.phonecode}${phoneNumberProprietorController.text}';
       request.fields['description'] = descriptionController.text;
-      request.fields['startDisponibilityDate'] =
-          "${startAvailableDate.value} 00:00";
-      request.fields['endDisponibilityDate'] =
-          "${endAvailableDate.value} 00:00";
+      request.fields['startDisponibilityDate'] = startAvailableDate.value;
+      request.fields['endDisponibilityDate'] = endAvailableDate.value;
       // request.fields['price'] = priceController.text;
       // request.fields['price'] = priceController.text;
       request.fields['price'] = priceController.text;
@@ -252,10 +220,8 @@ class PostController extends GetxController {
       request.fields['phoneNumberProprietor'] =
           '+${countriesController.selectedCountry.value.phonecode}${phoneNumberProprietorController.text}';
       request.fields['description'] = descriptionController.text;
-      request.fields['startDisponibilityDate'] =
-          "${startAvailableDate.value} 00:00";
-      request.fields['endDisponibilityDate'] =
-          "${endAvailableDate.value} 00:00";
+      request.fields['startDisponibilityDate'] = startAvailableDate.value;
+      request.fields['endDisponibilityDate'] = endAvailableDate.value;
       // request.fields['price'] = priceController.text;
       // request.fields['price'] = priceController.text;
       request.fields['price'] = priceController.text;
@@ -330,61 +296,52 @@ class PostController extends GetxController {
           color: Get.theme.colorScheme.secondary,
         ),
       ));
-      // Vérifier la plateforme
+
       Directory? directory;
       final String fileUrl =
           "https://files.chillo.fr/${currentPost.imagePathDocument}";
-      // print(await Permission.storage.request().isBlank);
-      print(await Permission.storage.request().isDenied);
-      // print(await Permission.storage.request().isGranted);
-      // print(await Permission.storage.request().isPermanentlyDenied);
-      // print(await Permission.storage.request().isRestricted);
-      // print(await Permission.storage.request().isProvisional);
-      // print(await Permission.storage.request().isLimited);
+
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        throw Exception("Permission d'accès au stockage refusée.");
+      }
+
       if (Platform.isAndroid) {
-        // Demander la permission d'accès au stockage sur Android
-        if (true) {
-          directory = Directory('/storage/emulated/0/Download');
-          if (!await directory.exists()) {
-            throw Exception("Le dossier Downloads n'existe pas.");
-          }
-        } else {
-          throw Exception("Permission d'accès au stockage refusée.");
+        directory = await getExternalStorageDirectory();
+        if (directory == null || !await directory.exists()) {
+          throw Exception("Impossible d'accéder au répertoire de stockage.");
         }
       } else if (Platform.isIOS) {
-        // Utiliser le répertoire des documents sur iOS
         directory = await getApplicationDocumentsDirectory();
       } else {
         throw Exception("Plateforme non prise en charge.");
       }
 
-      // Téléchargement du fichier
       final response = await http.get(Uri.parse(fileUrl));
-      final String fileName =
-          currentPost.make + currentPost.model + fileUrl.split('.').last;
-
       if (response.statusCode == 200) {
-        // Construire le chemin complet du fichier
-        final filePath = '${directory.path}/${fileName.replaceAll(' ', '')}';
-
-        // Écrire les données dans un fichier
+        final fileName = cleanFileName(
+            '${currentPost.make}_${currentPost.model}.${fileUrl.split('.').last}');
+        final filePath = '${directory.path}/$fileName';
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
+
         errorController
             .showMessage("Fichier téléchargé avec succès : $filePath");
         Get.back();
       } else {
         Get.back();
         errorController.handleError("Échec du téléchargement. Reessayez");
-        // throw Exception(
-        //     "Échec du téléchargement. Statut HTTP : ${response.statusCode}");
       }
     } catch (e) {
       Get.back();
-      errorController.handleError("Échec du téléchargement. Reessayez");
-      print("Erreur : $e");
+      errorController.handleError("Erreur : ${e.toString()}");
     }
   }
+
+  String cleanFileName(String fileName) {
+    return fileName.replaceAll(RegExp(r'[^\w\.\-]'), '_');
+  }
+
 
   Future<void> deleteMyPost(String currentPostId) async {
     Get.dialog(Center(
@@ -405,12 +362,13 @@ class PostController extends GetxController {
           print("---------------------");
           print(response);
 
-          errorController.handleError("Le vehicule supprime avec succes");
+          errorController.showMessage("Le vehicule supprime avec succes");
         } else {
           errorController
-              .handleError("Le vehicule n'a pas ete supprime, ressayer.");
+              .showMessage("Le vehicule n'a pas ete supprime, ressayer.");
         }
         Get.back();
+        Get.offAllNamed('/bottom_nav');
       });
     } catch (error) {
       Get.back();

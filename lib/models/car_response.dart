@@ -23,6 +23,8 @@ class CarResponse {
   final String? startDisponibilityDate;
   final String? endDisponibilityDate;
   final String? createdDate;
+  final int? reviewNumber;
+  final int? reservationNumber;
 
   CarResponse({
     required this.id,
@@ -40,6 +42,8 @@ class CarResponse {
     this.startDisponibilityDate,
     this.endDisponibilityDate,
     this.createdDate,
+    this.reviewNumber,
+    this.reservationNumber,
   });
 
   // Factory method to create a Car instance from JSON
@@ -56,10 +60,14 @@ class CarResponse {
       imagePathCar: json['imagePathCar'],
       imagePathDocument: json['imagePathDocument'],
       phoneNumberProprietor: json['phoneNumberProprietor'],
-      price: (json['price'] ?? 0.0).toString(),
+      price: (double.tryParse(json['price']?.toString() ?? '0')
+              ?.toStringAsFixed(0) ??
+          "0"),
       startDisponibilityDate: json['startDisponibilityDate'],
       endDisponibilityDate: json['endDisponibilityDate'],
       createdDate: json['createdDate'],
+      reviewNumber: json['reviewNumber'] ?? 0,
+      reservationNumber: json['reservationNumber'] ?? 0,
     );
   }
 
@@ -81,6 +89,8 @@ class CarResponse {
       'startDisponibilityDate': startDisponibilityDate,
       'endDisponibilityDate': endDisponibilityDate,
       'createdDate': createdDate,
+      'reviewNumber': reviewNumber,
+      'reservationNumber': reservationNumber,
     };
   }
 }
@@ -100,6 +110,7 @@ class Review {
   final String? location;
   final String review;
   final String? createdDate;
+  final String? userName;
 
   Review({
     this.id,
@@ -110,6 +121,7 @@ class Review {
     this.location,
     required this.review,
     this.createdDate,
+    this.userName,
   });
 
   /// Convertir un objet Review en un Map<String, dynamic> (JSON)
@@ -132,6 +144,7 @@ class Review {
       // location: json['location'],
       review: json['message'],
       createdDate: json['createdDate'],
+      userName: json['userName'],
     );
   }
 }

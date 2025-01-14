@@ -65,7 +65,7 @@ class CreatePostSuccess extends StatelessWidget {
               child: PrimaryButton(
                 title: 'Continuer',
                 onPressed: () {
-                  _bottomNavController.selectedIndex.value = 2;
+                  // _bottomNavController.selectedIndex.value = 2;
                   Get.offAllNamed(route);
                 },
               ),

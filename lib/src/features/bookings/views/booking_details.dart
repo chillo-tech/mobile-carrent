@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carrent/models/booking.dart';
 import 'package:intl/intl.dart';
 import '../../../../common/app_sizes.dart';
 import '../../../../common/common_fonctions.dart';
@@ -24,10 +25,12 @@ class BookingDetails extends StatefulWidget {
 }
 
 class _BookingDetailsState extends State<BookingDetails> {
-  final CarResponse carResponse = Get.arguments;
+  final BookingResponse bookingResponse = Get.arguments;
+  CarResponse? carResponse;
   final _formKey = GlobalKey<FormState>();
-  BookingsController bookingsController = Get.put(BookingsController());
-  CarDetailsController carDetailsController = Get.put(CarDetailsController());
+  BookingsController bookingsController = Get.find();
+  CarDetailsController carDetailsController =
+      Get.put(CarDetailsController(carResponse: Get.arguments.car));
   int _currentIndex = 0;
 
   List<Review> reviews = [
@@ -72,23 +75,33 @@ class _BookingDetailsState extends State<BookingDetails> {
   ];
 
   @override
+  initState() {
+    super.initState();
+    carResponse = bookingResponse.car;
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> badges = [
       {
-        'text': 'Reservé',
-        'color': ColorStyle.grey,
+        'title': bookingResponse.reservationStatus == 'Ouvert'
+            ? 'Reservé'
+            : bookingResponse.reservationStatus == 'Validé'
+                ? 'Récupéré'
+                : bookingResponse.reservationStatus,
+        'color': Color(0xFF777777),
         'textColor': ColorStyle.lightWhiteBackground,
       },
       {
         'icon': Assets.double_check,
-        'title': '${double.parse(carResponse.condition!).toInt()}/10',
+        'title': '${double.parse(carResponse!.condition!).toInt()}/10',
         'color': ColorStyle.lightGreyColor1,
         'textColor': ColorStyle.fontColorLight,
       },
       {
         'icon': Assets.counter,
         'title': carDetailsController.formatTimeAgo(
-          carResponse.createdDate ?? "10/11/2024 23:00",
+          carResponse!.createdDate ?? "10/11/2024 23:00",
         ),
         'color': ColorStyle.lightGreyColor1,
         'textColor': ColorStyle.fontColorLight,
@@ -104,7 +117,7 @@ class _BookingDetailsState extends State<BookingDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CarouselSlider(
-                  items: carResponse.imagePathCar!.map((url) {
+                  items: carResponse!.imagePathCar!.map((url) {
                     return Builder(
                       builder: (BuildContext context) {
                         return ClipRRect(
@@ -117,6 +130,38 @@ class _BookingDetailsState extends State<BookingDetails> {
                               Image.network(
                                 "https://files.chillo.fr/$url",
                                 fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    // Retourne l'image une fois chargée
+                                    return child;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      color: ColorStyle.lightPrimaryColor,
+                                      backgroundColor: ColorStyle.grey,
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                              : null,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                  return Center(
+                                    child: Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 50.0,
+                                    ),
+                                  );
+                                },
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(
@@ -151,7 +196,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                 bottom: 10,
                                 right: 10,
                                 child: Text(
-                                  '${_currentIndex + 1}/${carResponse.imagePathCar!.length}',
+                                  '${_currentIndex + 1}/${carResponse!.imagePathCar!.length}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -161,9 +206,9 @@ class _BookingDetailsState extends State<BookingDetails> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: carResponse.imagePathCar!.map((url) {
+                                children: carResponse!.imagePathCar!.map((url) {
                                   int index =
-                                      carResponse.imagePathCar!.indexOf(url);
+                                      carResponse!.imagePathCar!.indexOf(url);
                                   return Container(
                                     width: 8.0,
                                     height: 8.0,
@@ -203,7 +248,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${carResponse.make} ${carResponse.model}',
+                        '${carResponse!.make} ${carResponse!.model}',
                         style: GoogleFonts.lato(
                           color: ColorStyle.fontColorLight,
                           fontSize: 20.0,
@@ -211,47 +256,43 @@ class _BookingDetailsState extends State<BookingDetails> {
                         ),
                       ),
                       gapH8,
-                      Row(
-                        children: [
-                          // TODO: Implement rating here
-                          Text(
-                            '4/5',
-                            style: GoogleFonts.lato(
-                              color: ColorStyle.fontColorLight,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          gapW6,
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                Icons.star,
-                                color: index != 4
-                                    ? Colors.yellow
-                                    : ColorStyle.bgFieldGrey,
-                                size: 18,
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
+                      Obx(() {
+                        return carDetailsController.reviews.isNotEmpty
+                            ? Row(
+                                children: [
+                                  Text(
+                                    '${((carDetailsController.reviews.map((review) => review.rating ?? 0).reduce((a, b) => a + b) / carDetailsController.reviews.length))}/5',
+                                    style: GoogleFonts.lato(
+                                      color: ColorStyle.fontColorLight,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  gapW6,
+                                  headStarsFromRating(
+                                      carDetailsController.reviews),
+                                ],
+                              )
+                            : SizedBox();
+                      }),
                       gapH8,
                       SizedBox(
-                        height: 35.0,
+                        height: 30.0,
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.zero,
                             itemCount: badges.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 10.0),
                                 child: containerWithOrWithoutcon(
                                     text: badges[index]['title'] as String,
-                                    icon: badges[index]['icon'] as String,
+                                    icon: badges[index]['icon'] as String?,
                                     color: badges[index]['color'] as Color?,
                                     textColor:
-                                        badges[index]['textColor'] as Color?),
+                                        badges[index]['textColor'] as Color?,
+                                    booking: bookingResponse),
                               );
                             }),
                       ),
@@ -280,12 +321,31 @@ class _BookingDetailsState extends State<BookingDetails> {
                                     child: containerWithOrWithoutcon(
                                         text: actions[index]['title'] as String,
                                         icon: actions[index]['icon'] as String,
-                                        color:
-                                            actions[index]['color'] as Color?,
-                                        textColor: actions[index]['textColor']
-                                            as Color?,
-                                        action:
-                                            actions[index]['action'] as String),
+                                        color: bookingResponse.reservationStatus != 'Annulé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'Validé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'En litige'
+                                            ? actions[index]['color'] as Color?
+                                            : ColorStyle.opacGrey,
+                                        textColor: bookingResponse
+                                                        .reservationStatus !=
+                                                    'Annulé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'Validé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'En litige'
+                                            ? actions[index]['textColor']
+                                                as Color?
+                                            : ColorStyle.lightWhite,
+                                        action: bookingResponse.reservationStatus != 'Annulé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'Validé' &&
+                                                bookingResponse.reservationStatus !=
+                                                    'En litige'
+                                            ? actions[index]['action'] as String
+                                            : null,
+                                        booking: bookingResponse),
                                   );
                                 }),
                           ),
@@ -361,8 +421,8 @@ class _BookingDetailsState extends State<BookingDetails> {
                           },
                         ),
                       ),
-                      if (carResponse.description != null &&
-                          carResponse.description!.isNotEmpty)
+                      if (carResponse!.description != null &&
+                          carResponse!.description!.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -377,7 +437,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                             ),
                             gapH8,
                             Text(
-                              carResponse.description!,
+                              carResponse!.description!,
                               style: GoogleFonts.lato(
                                 color: ColorStyle.greyColor,
                                 fontSize: 14.0,
@@ -436,32 +496,10 @@ class _BookingDetailsState extends State<BookingDetails> {
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            Row(
-                                              children:
-                                                  List.generate(5, (index) {
-                                                return Icon(
-                                                  Icons.star,
-                                                  color: index <=
-                                                          (carDetailsController
-                                                                          .reviews
-                                                                          .map((review) =>
-                                                                              review.rating ??
-                                                                              0)
-                                                                          .reduce((a, b) =>
-                                                                              a +
-                                                                              b) /
-                                                                      carDetailsController
-                                                                          .reviews
-                                                                          .length)
-                                                                  .round() -
-                                                              1
-                                                      ? ColorStyle
-                                                          .lightPrimaryColor
-                                                      : ColorStyle.bgFieldGrey,
-                                                  size: 18,
-                                                );
-                                              }),
-                                            ),
+                                            headStarsFromRating(
+                                                carDetailsController.reviews,
+                                                enableColor: ColorStyle
+                                                    .lightPrimaryColor),
                                             Text(
                                               carDetailsController
                                                   .reviews.length
@@ -542,8 +580,11 @@ class _BookingDetailsState extends State<BookingDetails> {
                                             const EdgeInsets.only(top: 16.0),
                                         child: reviewWidget(
                                           image: reviews[1].image!,
-                                          name: reviews[0].name!,
-                                          location: reviews[0].location!,
+                                          name: carDetailsController
+                                              .reviews[index]
+                                              .userName!
+                                              .capitalize!,
+                                          location: '****@****.***',
                                           rate: carDetailsController
                                               .reviews[index].rating!,
                                           review: carDetailsController
@@ -554,14 +595,14 @@ class _BookingDetailsState extends State<BookingDetails> {
                                       );
                                     },
                                   ),
-                                  gapH10,
-                                  if (carDetailsController.reviews.length > 2)
-                                    PrimaryButton(
-                                        isRoundedBorder: true,
-                                        color: ColorStyle.grey,
-                                        textColor: ColorStyle.fontColorLight,
-                                        title: 'Voir plus',
-                                        onPressed: () {}),
+                                  // gapH10,
+                                  //       if (carDetailsController.reviews.length > 2)
+                                  //         PrimaryButton(
+                                  //             isRoundedBorder: true,
+                                  //             color: ColorStyle.grey,
+                                  //             textColor: ColorStyle.fontColorLight,
+                                  //             title: 'Voir plus',
+                                  //             onPressed: () {}),
                                 ],
                               )
                             : SizedBox();
@@ -620,7 +661,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                               controller: carDetailsController.reviewController,
                               fieldValidator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter the review';
+                                  return 'Entrez un avis';
                                 }
                                 return null;
                               },
@@ -640,39 +681,40 @@ class _BookingDetailsState extends State<BookingDetails> {
                           ],
                         ),
                       ),
-                      Obx(() {
-                        return carDetailsController.cars.isNotEmpty
-                            ? ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: carDetailsController.cars.length,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext context, index) {
-                                  print(carDetailsController.cars);
-                                  return Column(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          Get.toNamed('/car_details',
-                                              arguments: carDetailsController
-                                                  .cars[index]);
-                                        },
-                                        child: carComponent(
-                                          title: carDetailsController
-                                              .cars[index].make,
-                                          image:
-                                              "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
-                                          rating: 4.95,
-                                          commands: 120,
-                                          price: carDetailsController
-                                              .cars[index].price,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16.0),
-                                    ],
-                                  );
-                                })
-                            : SizedBox();
-                      }),
+                      // Obx(() {
+                      //   return carDetailsController.cars.isNotEmpty
+                      //       ? ListView.builder(
+                      //           shrinkWrap: true,
+                      //           itemCount: carDetailsController.cars.length,
+                      //           physics: NeverScrollableScrollPhysics(),
+                      //           itemBuilder: (BuildContext context, index) {
+                      //             print(carDetailsController.cars);
+                      //             return Column(
+                      //               children: [
+                      //                 GestureDetector(
+                      //                   onTap: () {
+                      //                     Get.toNamed('/booking_details',
+                      //                         preventDuplicates: false,
+                      //                         arguments: carDetailsController
+                      //                             .cars[index]);
+                      //                   },
+                      //                   child: carComponent(
+                      //                     title: carDetailsController
+                      //                         .cars[index].make,
+                      //                     image:
+                      //                         "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
+                      //                     rating: 4.95,
+                      //                     commands: 120,
+                      //                     price: carDetailsController
+                      //                         .cars[index].price,
+                      //                   ),
+                      //                 ),
+                      //                 const SizedBox(height: 16.0),
+                      //               ],
+                      //             );
+                      //           })
+                      //       : SizedBox();
+                      // }),
                     ],
                   ),
                 ),
@@ -702,9 +744,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            formatDateRangeFromStrings(
-                                carResponse.startDisponibilityDate!,
-                                carResponse.endDisponibilityDate!),
+                            "Réservé ${formatDateRangeFromStrings(bookingResponse.startDate!, bookingResponse.endDate!)}",
                             style: GoogleFonts.lato(
                               color: ColorStyle.fontColorLight,
                               fontSize: 14.0,
@@ -724,7 +764,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                   SvgPicture.asset(Assets.cash),
                                   gapW6,
                                   Text(
-                                    '${carResponse.price} FCFA / jour',
+                                    '${carResponse!.price} FCFA / jour',
                                     style: GoogleFonts.lato(
                                       color: ColorStyle.fontColorLight,
                                       fontSize: 16.0,
@@ -739,15 +779,26 @@ class _BookingDetailsState extends State<BookingDetails> {
                       ),
                       PrimaryButton(
                         isHalfWidth: true,
-                        title: 'Réserver la voiture',
-                        onPressed: () {
-                          // Get.bottomSheet(
-                          //   conflictSheet(carResponse: carResponse),
-                          //   isScrollControlled: true,
-                          //   backgroundColor: Colors.transparent,
-                          // );
-                          Get.toNamed('/booking', arguments: carResponse);
-                        },
+                        title: 'Récupérer la voiture',
+                        color: bookingResponse.reservationStatus != 'Annulé' &&
+                                bookingResponse.reservationStatus != 'Validé' &&
+                                bookingResponse.reservationStatus != 'En litige'
+                            ? ColorStyle.lightPrimaryColor
+                            : ColorStyle.opacGrey,
+                        onPressed: bookingResponse.reservationStatus !=
+                                    'Annulé' &&
+                                bookingResponse.reservationStatus != 'Validé' &&
+                                bookingResponse.reservationStatus != 'En litige'
+                            ? () {
+                                // Get.bottomSheet(
+                                //   conflictSheet(carResponse: carResponse),
+                                //   isScrollControlled: true,
+                                //   backgroundColor: Colors.transparent,
+                                // );
+                                Get.toNamed('/booking_withdraw',
+                                    arguments: bookingResponse);
+                              }
+                            : () {},
                       )
                     ],
                   ),
@@ -765,11 +816,13 @@ class _BookingDetailsState extends State<BookingDetails> {
       String? icon,
       Color? color = ColorStyle.lightGreyColor1,
       Color? textColor = ColorStyle.fontColorLight,
-      String? action}) {
+      String? action,
+      required BookingResponse booking}) {
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          if (action != null) bookingsController.executeActionOnTap(action);
+          if (action != null)
+            bookingsController.executeActionOnTap(action!, booking);
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -822,9 +875,20 @@ class _BookingDetailsState extends State<BookingDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 30.0,
-                  backgroundImage: AssetImage(image),
+                Container(
+                  padding: const EdgeInsets.all(18.0),
+                  decoration: const BoxDecoration(
+                    color: ColorStyle.lightPrimaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    name[0],
+                    style: GoogleFonts.lato(
+                      color: ColorStyle.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20.0,
+                    ),
+                  ),
                 ),
                 Row(
                   children: List.generate(5, (index) {

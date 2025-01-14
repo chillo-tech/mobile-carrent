@@ -9,57 +9,72 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../common/storage_constants.dart';
 import '../network/app_exception.dart';
+import '../src/features/settings/controllers/settings_controller.dart';
 import 'toast_controller.dart';
 
 class ErrorController {
+  final SettingsController _settingsController = Get.put(SettingsController());
   String utf8convert(String text) {
     List<int> bytes = text.toString().codeUnits;
     return utf8.decode(bytes);
   }
 
   late ToastController toastController;
-  handleError(errorResponseString) {
-    print(errorResponseString);
+  void handleError(dynamic errorResponse) {
     try {
-      if (errorResponseString is DioException) {
-        var errorObj = json.decode(errorResponseString.response.toString());
-        var statusCode = errorObj['status'];
+      print(errorResponse);
+
+      String extractMessage(dynamic errorObj) {
+        try {
+          return errorObj['message'] ?? errorObj['detail'] ?? "";
+        } catch (_) {
+          return "";
+        }
+      }
+
+      void handleCommonError(String message) {
+        if (message.contains('Connection refused')) {
+          showMessage('Connexion refusée'.tr);
+        } else {
+          showMessage(
+              message.isNotEmpty ? message : "Une erreur s'est produite".tr);
+        }
+      }
+
+      if (errorResponse is DioException) {
+        final statusCode = errorResponse.response?.statusCode;
+        if (statusCode == 403 || statusCode == 401) {
+          _settingsController.logoutUser("Session expirée");
+          return;
+        }
+
+        final responseBody = errorResponse.response?.data;
+        final message = responseBody is String
+            ? extractMessage(json.decode(responseBody))
+            : extractMessage(responseBody);
+
+        handleCommonError(message);
+      } else if (errorResponse is AppException) {
+        final statusCode = errorResponse.response?['statusCode'];
         if (statusCode == 403) {
-          logoutUser();
-        } else {
-          var message = errorObj['message'] ?? errorObj['detail'];
-          if (message.contains('Connection refused')) {
-            showMessage('Connexion refusée'.tr);
-          } else {
-            if (message.isEmpty) message = "Une erreur s'est produite".tr;
-            showMessage(message);
-          }
+          _settingsController.logoutUser("Session expirée");
+          return;
         }
-      } else if (errorResponseString is AppException) {
-        // var response = errorResponseString.response.toString();
-        var errorObj = errorResponseString.response;
-        print('${errorResponseString.response}');
-        if (errorObj['statusCode'] == 403) {
-          logoutUser();
-        } else {
-          var message = errorObj['message'];
-          if (message.contains('Connection refused')) {
-            showMessage('Connexion refusée'.tr);
-          } else {
-            if (message.isEmpty) message = "une_erreur_s'est_produite".tr;
-            showMessage(message);
-          }
-        }
+
+        final message = extractMessage(errorResponse.response);
+        handleCommonError(message);
       } else {
-        // Handle other types of errors if needed
         showMessage('Erreur inattendue'.tr);
         print(
-            'Type d\'erreur inattendu de: ${errorResponseString.runtimeType} $errorResponseString');
+            "Type d'erreur inattendu: ${errorResponse.runtimeType} $errorResponse");
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
+      print('Unhandled error: $error');
+      print('Stack trace: $stackTrace');
       showMessage('Erreur inattendue'.tr);
     }
   }
+
 
   void showMessage(message) {
     BotToast.showText(
@@ -74,12 +89,12 @@ class ErrorController {
     );
   }
 
-  void logoutUser() async {
-    var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
-    isLoggedIn = isLoggedIn ?? false;
-    if (isLoggedIn) {
-      // HomeController homeController = Get.find();
-      // homeController.logoutUser('session_expirée'.tr);
-    }
-  }
+  // void logoutUser() async {
+  //   var isLoggedIn = GetStorage().read(StorageConstants.loggedIn);
+  //   isLoggedIn = isLoggedIn ?? false;
+  //   if (isLoggedIn) {
+  //     // HomeController homeController = Get.find();
+  //     // homeController.logoutUser('session_expirée'.tr);
+  //   }
+  // }
 }

@@ -97,26 +97,30 @@ class EditPostController extends GetxController {
   }
 
   Future<void> retreiveFiles() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    try {
+      Get.dialog(Center(
+        child: CircularProgressIndicator(
+          color: Get.theme.colorScheme.secondary,
+        ),
+      ));
 
-    currentPost.imagePathCar?.forEach((element) async {
-      imageFiles.add(XFile(
-          await urlToFile("https://files.chillo.fr/$element").then((file) {
+      currentPost.imagePathCar?.forEach((element) async {
+        imageFiles.add(XFile(
+            await urlToFile("https://files.chillo.fr/$element").then((file) {
+          print(file.path);
+          return file.path;
+        })));
+      });
+
+      pickedFile(XFile(await urlToFile(
+              "https://files.chillo.fr/${currentPost.imagePathDocument}")
+          .then((file) {
         print(file.path);
         return file.path;
       })));
-    });
-
-    pickedFile(XFile(await urlToFile(
-            "https://files.chillo.fr/${currentPost.imagePathDocument}")
-        .then((file) {
-      print(file.path);
-      return file.path;
-    })));
+    } catch (e) {
+      errorController.showMessage('Échec du téléchargement des elements');
+    }
     Get.back();
   }
 
@@ -183,10 +187,8 @@ class EditPostController extends GetxController {
       request.fields['phoneNumberProprietor'] =
           '+${countriesController.selectedCountry.value.phonecode}${phoneNumberProprietorController.text}';
       request.fields['description'] = descriptionController.text;
-      request.fields['startDisponibilityDate'] =
-          "${startAvailableDate.value} 00:00";
-      request.fields['endDisponibilityDate'] =
-          "${endAvailableDate.value} 00:00";
+      request.fields['startDisponibilityDate'] = startAvailableDate.value;
+      request.fields['endDisponibilityDate'] = endAvailableDate.value;
       // request.fields['price'] = priceController.text;
       // request.fields['price'] = priceController.text;
       request.fields['price'] = priceController.text;

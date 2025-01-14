@@ -40,7 +40,7 @@ class EditPost extends StatelessWidget {
   List<String> fuelType = [
     'Super',
     'Gazoil',
-    'Électrique',
+    'Electrique',
   ];
   @override
   Widget build(BuildContext context) {

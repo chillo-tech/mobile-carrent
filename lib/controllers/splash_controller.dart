@@ -25,8 +25,9 @@ class SplashController extends GetxController {
   }
 
   void routeUser() async {
-    final loggedIn = GetStorage().read(StorageConstants.loggedIn);
-    Get.offAllNamed(loggedIn != null && loggedIn ? '/bottom_nav' : '/welcome');
+    // final loggedIn = GetStorage().read(StorageConstants.loggedIn);
+    Get.offAllNamed('/bottom_nav');
+    // Get.offAllNamed(loggedIn != null && loggedIn ? '/bottom_nav' : '/welcome');
 
   }
 

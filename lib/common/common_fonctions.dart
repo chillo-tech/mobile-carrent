@@ -16,24 +16,29 @@ import '../src/features/widgets/primary_button.dart';
 import '../theme/theme.dart';
 import 'app_sizes.dart';
 
+RegExp emailRegex() {
+  return RegExp(
+      r'^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+}
+
 String convertDate(String inputDate) {
   DateTime dateTime = DateTime.parse(inputDate);
-  String day = dateTime.day.toString();
-  // String month = getMonthName(dateTime.month);
+  String day = dateTime.day.toString().padLeft(2, '0');
+  String month = dateTime.month.toString().padLeft(2, '0');
   String year = dateTime.year.toString();
-  return '$day/${dateTime.month}/$year';
+  return '$day/$month/$year';
 }
 
 String convertDateToDayMonthYear(String inputDate) {
   // Parse la date
-  DateTime parsedDate = DateFormat("dd/MM/yyyy HH:mm").parse(inputDate);
+  DateTime parsedDate = DateFormat("dd/MM/yyyy").parse(inputDate);
 
   return '${parsedDate.day}/${parsedDate.month}/${parsedDate.year}';
 }
 
 String convertDateToPlainString(String inputDate) {
   // Parse la date
-  DateTime parsedDate = DateFormat("dd/MM/yyyy HH:mm").parse(inputDate);
+  DateTime parsedDate = DateFormat("dd/MM/yyyy").parse(inputDate);
 
   // Formatte la date au format souhaité
   String formattedDate = DateFormat("EEE d MMM", 'fr_FR').format(parsedDate);
@@ -43,7 +48,7 @@ String convertDateToPlainString(String inputDate) {
 
 String formatDateRangeFromStrings(String startDateStr, String endDateStr) {
   // Format pour analyser les chaînes de date
-  final inputFormat = DateFormat('dd/MM/yyyy HH:mm');
+  final inputFormat = DateFormat('dd/MM/yyyy');
 
   // Format de sortie pour afficher les dates
   final outputFormat = DateFormat('d MMM');
@@ -60,9 +65,10 @@ String formatDateRangeFromStrings(String startDateStr, String endDateStr) {
   return '$start - $end';
 }
 
-String formatDateRangewithYearFromStrings(String startDateStr, String endDateStr) {
+String formatDateRangewithYearFromStrings(
+    String startDateStr, String endDateStr) {
   // Format pour analyser les chaînes de date
-  final inputFormat = DateFormat('dd/MM/yyyy HH:mm');
+  final inputFormat = DateFormat('dd/MM/yyyy');
 
   // Format de sortie pour afficher les dates
   final outputFormat = DateFormat('d MMM yy');
@@ -86,8 +92,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
   final SearchBarController searchBarController =
       Get.put(SearchBarController());
 
-  final SearchResultController searchResultController =
-      Get.put(SearchResultController());
+  final SearchResultController searchResultController = Get.find();
   locationFocusNode.requestFocus();
   return Form(
     key: formKey,
@@ -104,32 +109,32 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                   searchBarController.isPlaceSearchActivated.value = false;
                 },
                 child: const Icon(FontAwesomeIcons.arrowLeft)),
-            Padding(
-              padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
-              child: Text(
-                'Ou',
-                style: GoogleFonts.lato(
-                  color: ColorStyle.textBlackColor,
-                  fontSize: 16.0,
-                  // fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            FormInputField(
-              // labelText: "",
-              placeholder: "N'importe ou",
-              fillColor: ColorStyle.bgFieldGrey,
-              filled: true,
-              textInputType: TextInputType.emailAddress,
-              focusNode: locationFocusNode,
-              controller: searchBarController.searchPlace,
-              // fieldValidator: (value) {
-              //   if (value == null || value.isEmpty) {
-              //     return 'Please enter your location';
-              //   }
-              //   return null;
-              // },
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
+            //   child: Text(
+            //     'Ou',
+            //     style: GoogleFonts.lato(
+            //       color: ColorStyle.textBlackColor,
+            //       fontSize: 16.0,
+            //       // fontWeight: FontWeight.w600,
+            //     ),
+            //   ),
+            // ),
+            // FormInputField(
+            //   // labelText: "",
+            //   placeholder: "N'importe ou",
+            //   fillColor: ColorStyle.bgFieldGrey,
+            //   filled: true,
+            //   textInputType: TextInputType.emailAddress,
+            //   focusNode: locationFocusNode,
+            //   controller: searchBarController.searchPlace,
+            //   // fieldValidator: (value) {
+            //   //   if (value == null || value.isEmpty) {
+            //   //     return 'Please enter your location';
+            //   //   }
+            //   //   return null;
+            //   // },
+            // ),
             Padding(
               padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
               child: Text(
@@ -273,7 +278,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                       searchResultController.carFilter.endDisponibilityDate =
                           searchBarController.endAvailableDate.value;
                       await searchResultController.searchCar();
-                      Get.toNamed('/search_result');
+                      // Get.toNamed('/search_result');
                     }
                     // _searchBarController.createPost();
                   }
@@ -305,11 +310,46 @@ Widget carComponent(
             topLeft: Radius.circular(12.0),
             topRight: Radius.circular(12.0),
           ),
+          // child: Image.network(
+          //   image,
+          //   fit: BoxFit.cover,
+          //   height: 180.0,
+          //   width: double.infinity,
+          // ),
           child: Image.network(
             image,
             fit: BoxFit.cover,
             height: 180.0,
             width: double.infinity,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) {
+                // Retourne l'image une fois chargée
+                return child;
+              }
+              return Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: CircularProgressIndicator(
+                    color: ColorStyle.lightPrimaryColor,
+                    backgroundColor: ColorStyle.grey,
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            (loadingProgress.expectedTotalBytes ?? 1)
+                        : null,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              // Retourne un placeholder ou un widget d'erreur si l'image échoue
+              return Center(
+                child: Icon(
+                  Icons.error,
+                  color: Colors.red,
+                  size: 50.0,
+                ),
+              );
+            },
           ),
         ),
         Padding(
@@ -367,9 +407,10 @@ Widget carComponent(
 }
 
 Widget conflictSheet(
-    {final CarResponse? carResponse,
+    {final BookingResponse? bookingResponse,
     List<BookingResponse> bookings = const []}) {
   ConflitController conflitcontroller = Get.put(ConflitController());
+  final _formKey = GlobalKey<FormState>();
   return IntrinsicHeight(
     child: GestureDetector(
       onTap: () {},
@@ -381,108 +422,246 @@ Widget conflictSheet(
                 topLeft: Radius.circular(12.0),
                 topRight: Radius.circular(12.0))),
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-              height: 3.0,
-              width: 50.0,
-              decoration: BoxDecoration(
-                color: ColorStyle.containerBg,
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Gérer un conflit',
-                  style: GoogleFonts.lato(
-                    color: ColorStyle.fontColorLight,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w400,
-                  ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                height: 3.0,
+                width: 50.0,
+                decoration: BoxDecoration(
+                  color: ColorStyle.containerBg,
+                  borderRadius: BorderRadius.circular(30.0),
                 ),
-                gapH18,
-                carResponse != null
-                    ? Text.rich(
-                        style: GoogleFonts.lato(
-                          color: ColorStyle.fontColorLight,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        TextSpan(
-                          text: 'Reservation: ',
-                          children: [
-                            TextSpan(
-                              text: "${carResponse.make} ${carResponse.model}",
-                              style: GoogleFonts.lato(
-                                color: ColorStyle.lightPrimaryColor,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w500,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Gérer un conflit',
+                    style: GoogleFonts.lato(
+                      color: ColorStyle.fontColorLight,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  gapH18,
+                  bookingResponse != null
+                      ? Text.rich(
+                          style: GoogleFonts.lato(
+                            color: ColorStyle.fontColorLight,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          TextSpan(
+                            text: 'Reservation: ',
+                            children: [
+                              TextSpan(
+                                text:
+                                    "${bookingResponse.car?.make} ${bookingResponse.car?.model}",
+                                style: GoogleFonts.lato(
+                                  color: ColorStyle.lightPrimaryColor,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                            ],
+                          ),
+                        )
+                      : DropdownButtonFormField(
+                          validator: (value) {
+                            if (value == null) {
+                              // if (value == null || value.isEmpty) {
+                              return 'Veuillez sélectionner une réservation';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: ColorStyle.bgFieldGrey,
+                            labelText: 'Sélectionnez le service en conflit',
+                            labelStyle: GoogleFonts.lato(
+                              color: ColorStyle.hintColor,
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.w300,
                             ),
-                          ],
-                        ),
-                      )
-                    : DropdownButtonFormField(
-                        validator: (value) {
-                          if (value == null) {
-                            // if (value == null || value.isEmpty) {
-                            return 'Veuillez sélectionner une réservation';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: ColorStyle.bgFieldGrey,
-                          labelText: 'Sélectionnez le service en conflit',
-                          labelStyle: GoogleFonts.lato(
-                            color: ColorStyle.hintColor,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w300,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide.none,
+                            ),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide.none,
-                          ),
+                          items: bookings
+                              .map((booking) => DropdownMenuItem(
+                                    value: booking,
+                                    child: Text(booking.car?.make ?? ''),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            conflitcontroller.conflitBooking(value);
+                          },
                         ),
-                        items: bookings
-                            .map((booking) => DropdownMenuItem(
-                                  value: booking,
-                                  child: Text(booking.car?.make ?? ''),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          conflitcontroller.conflitBooking(value);
-                        },
-                      ),
-                gapH20,
-                FormInputField(
-                  labelText: 'Description',
-                  placeholder: 'Entrez la description du conflit',
-                  fillColor: ColorStyle.bgFieldGrey,
-                  filled: true,
-                  maxLines: 3,
-                  textInputType: TextInputType.text,
-                  controller: conflitcontroller.conflictDescription,
-                  // fieldValidator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return 'Please enter the daily rental price of the vehicle';
-                  //   }
-                  //   return null;
-                  // },
-                )
-              ],
-            ),
-            gapH18,
-            PrimaryButton(
-              title: 'Soumettre',
-              onPressed: () {},
-            )
-          ],
+                  gapH20,
+                  FormInputField(
+                    labelText: 'Description',
+                    placeholder: 'Entrez la description du conflit',
+                    fillColor: ColorStyle.bgFieldGrey,
+                    filled: true,
+                    maxLines: 3,
+                    textInputType: TextInputType.text,
+                    controller: conflitcontroller.conflictDescription,
+                    fieldValidator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer la description du conflit';
+                      }
+                      return null;
+                    },
+                  )
+                ],
+              ),
+              gapH18,
+              PrimaryButton(
+                title: 'Soumettre',
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    conflitcontroller.reportAConflict(
+                        booking: bookings.isNotEmpty
+                            ? conflitcontroller.conflitBooking.value
+                            : bookingResponse!);
+                  }
+                },
+              )
+            ],
+          ),
         ),
       ),
     ),
+  );
+}
+
+Color getPostColorByStatus(String status) {
+  switch (status) {
+    case 'In review':
+      return ColorStyle.hintColor;
+    case 'Approved':
+      return ColorStyle.success;
+    case 'Not Approved':
+      return ColorStyle.lightPrimaryColor;
+    default:
+      return ColorStyle.success;
+  }
+}
+
+Color getPostBorderColorByStatus(String status) {
+  switch (status) {
+    case 'In review':
+      return ColorStyle.white;
+    case 'Approved':
+      return ColorStyle.success;
+    case 'Not Approved':
+      return ColorStyle.lightPrimaryColor;
+    default:
+      return ColorStyle.success;
+  }
+}
+
+IconData getPostIconByStatus(String status) {
+  switch (status) {
+    case 'In review':
+      return FontAwesomeIcons.clock;
+    case 'Approved':
+      return FontAwesomeIcons.checkCircle;
+    case 'Not Approved':
+      return FontAwesomeIcons.close;
+    default:
+      return FontAwesomeIcons.checkCircle;
+  }
+}
+
+Color getBookingColorByStatus(String status) {
+  switch (status.toLowerCase()) {
+    case 'en cours' || 'ouvert' || 'confirmé':
+      return ColorStyle.hintColor;
+    case 'not approved' || 'en attente':
+      return Color(0xFFBF1C30);
+    case 'annulé' || 'en litige':
+      return ColorStyle.white;
+    case 'retiré' || 'récupéré':
+      return ColorStyle.success;
+    default:
+      return ColorStyle.success;
+  }
+}
+
+Color getBookingBackgroundColorByStatus(String status) {
+  switch (status.toLowerCase()) {
+    case 'en cours' || 'ouvert' || 'retiré' || 'récupéré' || 'confirmé':
+      return ColorStyle.bgFieldGrey;
+    case 'approved':
+      return ColorStyle.success;
+    case 'not approved' || 'annulé' || 'en litige':
+      return Color(0xFFBF1C30);
+    case 'en attente':
+      return Color(0xFFFEEDEF);
+    default:
+      return ColorStyle.success;
+  }
+}
+
+Color getBookingBorderColorByStatus(String status) {
+  switch (status.toLowerCase()) {
+    case 'en cours' || 'ouvert' || 'confirmé':
+      return ColorStyle.white;
+    case 'Approved':
+      return ColorStyle.success;
+    case 'not approved' || 'annulé' || 'en attente' || 'en litige':
+      return Color(0xFFF9A7B1);
+    case 'retiré' || 'récupéré':
+      return Color(0xFFECFBF3);
+    default:
+      return ColorStyle.success;
+  }
+}
+
+String getBookingIconByStatus(String status) {
+  switch (status) {
+    case 'Validé':
+      return Assets.check;
+    default:
+      return Assets.alert_inverse;
+  }
+}
+
+Widget headStarsFromRating(List<Review> reviews, {Color enableColor = Colors.yellow}) {
+  return Row(
+    children: List.generate(5, (index) {
+      final averageRating =
+          reviews.map((review) => review.rating ?? 0).reduce((a, b) => a + b) /
+              reviews.length;
+
+      final fullStar = averageRating.floor(); // Nombre d'étoiles pleines
+      final hasPartialStar = averageRating - fullStar > 0; // Étoile partielle
+
+      if (index < fullStar) {
+        // Étoiles pleines
+        return Icon(Icons.star, color: enableColor, size: 18);
+      } else if (index == fullStar && hasPartialStar) {
+        // Étoile partielle
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            final fraction = (averageRating - fullStar).clamp(0.0, 1.0);
+            return LinearGradient(
+              stops: [fraction, fraction],
+              colors: [enableColor, ColorStyle.bgFieldGrey],
+            ).createShader(bounds);
+          },
+          child: Icon(Icons.star, color: enableColor, size: 18),
+        );
+      } else {
+        // Étoiles vides
+        return Icon(Icons.star, color: ColorStyle.bgFieldGrey, size: 18);
+      }
+    }),
   );
 }

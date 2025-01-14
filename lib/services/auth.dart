@@ -14,11 +14,6 @@ class AuthService {
   final langCode = GetStorage().read(StorageConstants.langCode) ?? 'en';
 
   Future<LoginResponse> login(dynamic authObject) async {
-    // Map<String, String> correlationMap =
-    //     await AuthHeaders().getCorrelationMap();
-
-    // apiProvider.headers = correlationMap;
-    // apiProvider.headers!.putIfAbsent("Accept-Language", () => langCode);
     apiProvider.headers!.remove("Authorization");
     log.info('HEADERS ${apiProvider.headers}');
     final response = await apiProvider.post(

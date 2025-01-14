@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../../../common/app_sizes.dart';
 import '../../../../models/car_response.dart';
 import '../controllers/booking_controller.dart';
@@ -16,31 +18,7 @@ import '../../widgets/primary_button.dart';
 class Booking extends StatelessWidget {
   Booking({super.key});
   CarResponse carResponse = Get.arguments;
-
-  // TODO: Remove this
-  // Map<String, dynamic> carData = {
-  //   "id": "6728d020c0cc901e4e2f6c3b",
-  //   "make": "Mazda",
-  //   "model": "CX30",
-  //   "year": "2017",
-  //   "condition": "5",
-  //   "numberOfPlaces": 5,
-  //   "imagePathCar": [
-  //     "carrent/ad/6728d020c0cc901e4e2f6c3b/1730727968365_1000000033.jpg",
-  //     "carrent/ad/6728d020c0cc901e4e2f6c3b/1730727968411_1000000034.jpg"
-  //   ],
-  //   "imagePathDocument":
-  //       "carrent/ad/6728d020c0cc901e4e2f6c3b/1730727968477_IMG_20240910_130923.jpg",
-  //   "phoneNumberProprietor": "+241612345678",
-  //   "status": "En cours d'examen",
-  //   "description": "This is a custom description",
-  //   "typeCarburant": "Super",
-  //   "evaluationOfCar": 5.0,
-  //   "startDisponibilityDate": '25/11/2024 23:00',
-  //   "endDisponibilityDate": '29/11/2024 23:00'
-  // };
-
-  BookingController _bookingController = Get.put(BookingController());
+  final BookingController _bookingController = Get.put(BookingController());
 
   @override
   Widget build(BuildContext context) {
@@ -94,12 +72,52 @@ class Booking extends StatelessWidget {
                         child: Container(
                           height: 150.0,
                           width: double.infinity,
-                          decoration: BoxDecoration(
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(10.0),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                  "https://files.chillo.fr/${carResponse.imagePathCar![0]}"),
-                              fit: BoxFit.cover,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                // Affiche un CircularProgressIndicator pendant le chargement
+                                Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                // Image réseau avec gestion des erreurs
+                                Image.network(
+                                  "https://files.chillo.fr/${carResponse.imagePathCar![0]}",
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      // Retourne l'image une fois chargée
+                                      return child;
+                                    }
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorStyle.lightPrimaryColor,
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                (loadingProgress
+                                                        .expectedTotalBytes ??
+                                                    1)
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                    return Center(
+                                      child: Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                        size: 50.0,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -182,15 +200,22 @@ class Booking extends StatelessWidget {
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2030));
+                                  initialDate: DateFormat("dd/MM/yyyy")
+                                      .parse(
+                                          carResponse.startDisponibilityDate!)
+                                      .add(Duration(days: 1)),
+                                  firstDate: DateFormat("dd/MM/yyyy")
+                                      .parse(
+                                          carResponse.startDisponibilityDate!)
+                                      .add(Duration(days: 1)),
+                                  lastDate: DateFormat("dd/MM/yyyy").parse(
+                                      carResponse.endDisponibilityDate!));
                               print(picked);
                               if (picked != null &&
                                   picked.toString() !=
                                       _bookingController
-                                          .startBookingDate.value) {
-                                _bookingController.startBookingDate(
+                                          .bookingStartDate.value) {
+                                _bookingController.bookingStartDate(
                                     convertDate(picked.toString()));
                               }
                             },
@@ -208,9 +233,9 @@ class Booking extends StatelessWidget {
                                   Obx(() {
                                     return Text(
                                       _bookingController
-                                              .startBookingDate.isNotEmpty
+                                              .bookingStartDate.isNotEmpty
                                           ? _bookingController
-                                              .startBookingDate.value
+                                              .bookingStartDate.value
                                           : 'JJ/MM/AAAA',
                                       style: GoogleFonts.lato(
                                         color: ColorStyle.hintColor,
@@ -230,14 +255,21 @@ class Booking extends StatelessWidget {
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2030));
+                                  initialDate: DateFormat("dd/MM/yyyy")
+                                      .parse(
+                                          carResponse.startDisponibilityDate!)
+                                      .add(Duration(days: 1)),
+                                  firstDate: DateFormat("dd/MM/yyyy")
+                                      .parse(
+                                          carResponse.startDisponibilityDate!)
+                                      .add(Duration(days: 1)),
+                                  lastDate: DateFormat("dd/MM/yyyy").parse(
+                                      carResponse.endDisponibilityDate!));
                               print(picked);
                               if (picked != null &&
                                   picked.toString() !=
-                                      _bookingController.endBookingDate.value) {
-                                _bookingController.endBookingDate(
+                                      _bookingController.bookingEndDate.value) {
+                                _bookingController.bookingEndDate(
                                     convertDate(picked.toString()));
                               }
                             },
@@ -255,9 +287,9 @@ class Booking extends StatelessWidget {
                                   Obx(() {
                                     return Text(
                                       _bookingController
-                                              .endBookingDate.isNotEmpty
+                                              .bookingEndDate.isNotEmpty
                                           ? (_bookingController
-                                              .endBookingDate.value)
+                                              .bookingEndDate.value)
                                           : 'JJ/MM/AAAA',
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.lato(
@@ -296,79 +328,25 @@ class Booking extends StatelessWidget {
                             ),
                           )
                         ],
-                      )
+                      ),
+                      Obx(() {
+                        return _bookingController.bookingStartDate.isEmpty ||
+                                _bookingController.bookingEndDate.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Text(
+                                  "Veuillez entrer une plage de dates valide",
+                                  style: GoogleFonts.lato(
+                                    color: ColorStyle.lightPrimaryColor,
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              )
+                            : SizedBox();
+                      }),
                     ],
                   ),
-                  FormInputField(
-                    labelText: 'Ajouter une carte de crédit',
-                    placeholder: 'Numéro de carte',
-                    hasCountry: false,
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    // prefixIcon: SvgPicture.asset(Assets.credit_card, width: 5.0,),
-                    textInputType: TextInputType.phone,
-                    // controller: loginController.loginEmailTextController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre numéro de carte';
-                      }
-                      return null;
-                    },
-                  ),
-                  gapH8,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      FormInputField(
-                        placeholder: 'MM/YY',
-                        hasCountry: false,
-                        isDoubleOnLine: true,
-                        fillColor: ColorStyle.bgFieldGrey,
-                        filled: true,
-                        // prefixIcon: SvgPicture.asset(Assets.credit_card, width: 5.0,),
-                        textInputType: TextInputType.phone,
-                        // controller: loginController.loginEmailTextController,
-                        fieldValidator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre numéro de carte';
-                          }
-                          return null;
-                        },
-                      ),
-                      FormInputField(
-                        placeholder: 'CVV',
-                        hasCountry: false,
-                        isDoubleOnLine: true,
-                        fillColor: ColorStyle.bgFieldGrey,
-                        filled: true,
-                        // prefixIcon: SvgPicture.asset(Assets.credit_card, width: 5.0,),
-                        textInputType: TextInputType.phone,
-                        // controller: loginController.loginEmailTextController,
-                        fieldValidator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre numéro de carte';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                  gapH8,
-                  FormInputField(
-                    placeholder: 'Nom sur la carte',
-                    hasCountry: false,
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    // prefixIcon: SvgPicture.asset(Assets.credit_card, width: 5.0,),
-                    textInputType: TextInputType.phone,
-                    // controller: loginController.loginEmailTextController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer le nom sur la carte';
-                      }
-                      return null;
-                    },
-                  )
                 ],
               ),
             ),
@@ -379,16 +357,26 @@ class Booking extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16.0, right: 16.0, top: 30.0, bottom: 20.0),
               child: PrimaryButton(
-                title: 'Next',
+                title: 'Suivant',
                 onPressed: () {
-                  Get.toNamed('/success_post', arguments: {
-                    'image': Assets.success_withdraw,
-                        'title': 'Votre réservation a été traitée avec succès',
-                        'description':
-                          "Vous recevrez un contrat confirmant la réservation, qui contiendra également les informations du propriétaire. Veuillez procéder à la récupération du véhicule.",
-                        'buttonTitle': 'Continuer',
-                        'route': '/bottom_nav'
-                      });
+                  if (_bookingController.bookingStartDate.value.isNotEmpty &&
+                      _bookingController.bookingEndDate.value.isNotEmpty) {
+                    _bookingController.bookACar(
+                      carId: carResponse.id,
+                      carBrand: carResponse.make,
+                      startDate: _bookingController.bookingStartDate.value,
+                      endDate: _bookingController.bookingEndDate.value,
+                    );
+                  }
+                  // Get.toNamed('/web_view', arguments: carResponse.make);
+                  // Get.toNamed('/success_post', arguments: {
+                  //   'image': Assets.success_withdraw,
+                  //       'title': 'Votre réservation a été traitée avec succès',
+                  //       'description':
+                  //         "Vous recevrez un contrat confirmant la réservation, qui contiendra également les informations du propriétaire. Veuillez procéder à la récupération du véhicule.",
+                  //       'buttonTitle': 'Continuer',
+                  //       'route': '/bottom_nav'
+                  //     });
                 },
               ),
             ),

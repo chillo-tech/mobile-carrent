@@ -1,3 +1,4 @@
+import '../../../../../common/common_fonctions.dart';
 import '../../../../../controllers/countries_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,12 +84,14 @@ class CreateAccount extends StatelessWidget {
                     filled: true,
                     textInputType: TextInputType.emailAddress,
                     controller: registerController.emailTextController,
-                    // fieldValidator: (value) {
-                    //   if (value == null || value.isEmpty) {
-                    //     return 'Veuillez entrer votre email';
-                    //   }
-                    //   return null;
-                    // },
+                    fieldValidator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return null;
+                      } else if (!emailRegex().hasMatch(value)) {
+                        return 'Veuillez entrer une adresse e-mail valide';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 25.0),
                   FormInputField(
@@ -147,16 +150,16 @@ class CreateAccount extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 15.0),
-                  PrimaryButton(
-                    title: 'Continuer avec Google',
-                    image: 'assets/icons/google.svg',
-                    color: ColorStyle.lightWhite,
-                    textColor: ColorStyle.fontColorLight,
-                    onPressed: () {
-                      Get.offAllNamed('/bottom_nav');
-                    },
-                  ),
+                  // const SizedBox(height: 15.0),
+                  // PrimaryButton(
+                  //   title: 'Continuer avec Google',
+                  //   image: 'assets/icons/google.svg',
+                  //   color: ColorStyle.lightWhite,
+                  //   textColor: ColorStyle.fontColorLight,
+                  //   onPressed: () {
+                  //     Get.offAllNamed('/bottom_nav');
+                  //   },
+                  // ),
                   const SizedBox(height: 10.0),
                   GestureDetector(
                     onTap: () {

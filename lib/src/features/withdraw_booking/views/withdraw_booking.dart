@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:carrent/common/app_sizes.dart';
+import 'package:carrent/models/booking.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -16,6 +17,7 @@ class BookingWithdraw extends StatelessWidget {
 
   final BookingWithdrawController _withdrawBookingController =
       Get.put(BookingWithdrawController());
+  BookingResponse booking = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -147,15 +149,17 @@ class BookingWithdraw extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: PrimaryButton(
-                      title: 'Créer',
+                      title: 'Continuer',
                       onPressed: () {
                         if (_withdrawBookingController.carImageFiles.isEmpty) {
                           _withdrawBookingController.hasErrorOnCarImage(true);
                           return;
                         }
                         // _withdrawBookingController.withdraw();
-                        Get.toNamed('/confirm_otp',
-                            arguments: {'operationType': 'car_withraw'});
+                        Get.toNamed('/confirm_otp', arguments: {
+                          'operationType': 'car_withraw',
+                          'booking': booking
+                        });
                       }),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../../common/common_fonctions.dart';
 import '../../../../../theme/theme.dart';
 import '../../../widgets/back_button.dart';
 import '../../../widgets/form_input_field.dart';
@@ -122,6 +123,10 @@ class ForgotPassword extends StatelessWidget {
                               fieldValidator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Veuillez entrer votre e-mail';
+                                }
+
+                                if (!emailRegex().hasMatch(value)) {
+                                  return 'Veuillez entrer une adresse e-mail valide';
                                 }
                                 return null;
                               },

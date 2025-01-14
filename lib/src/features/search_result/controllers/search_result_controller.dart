@@ -18,25 +18,69 @@ class SearchResultController extends GetxController {
 
   Rx<List<String>> appliedFilters = Rx<List<String>>([]);
   RxList<Map<String, dynamic>> carBrands = RxList<Map<String, dynamic>>([
-    {'name': 'Toutes marques', 'isSelected': true},
-    {'name': 'Toyota Corolla', 'isSelected': false},
-    {'name': 'Honda Civic', 'isSelected': false},
-    {'name': 'Ford Mustang', 'isSelected': false},
-    {'name': 'Chevrolet Silverado', 'isSelected': false},
-    {'name': 'Volkswagen Golf', 'isSelected': false},
-    {'name': 'BMW 3 Series', 'isSelected': false},
+    // {'name': 'Toutes marques', 'isSelected': true},
+    // {'name': 'Toyota Corolla', 'isSelected': false},
+    // {'name': 'Honda Civic', 'isSelected': false},
+    // {'name': 'Ford Mustang', 'isSelected': false},
+    // {'name': 'Chevrolet Silverado', 'isSelected': false},
+    // {'name': 'Volkswagen Golf', 'isSelected': false},
+    // {'name': 'BMW 3 Series', 'isSelected': false},
   ]);
 
   RxList<Map<String, dynamic>> carTypes = RxList<Map<String, dynamic>>([
-    {'type': 'Tous types', 'isSelected': true},
-    {'type': 'Voitures de ville', 'isSelected': false},
-    {'type': 'Voitures compact', 'isSelected': false},
-    {'type': 'Grandes voitures', 'isSelected': false},
-    {'type': 'Voitures de luxe', 'isSelected': false},
-    {'type': 'SUVs', 'isSelected': false},
+    // {'type': 'Tous types', 'isSelected': true},
+    // {'type': 'Voitures de ville', 'isSelected': false},
+    // {'type': 'Voitures compact', 'isSelected': false},
+    // {'type': 'Grandes voitures', 'isSelected': false},
+    // {'type': 'Voitures de luxe', 'isSelected': false},
+    // {'type': 'SUVs', 'isSelected': false},
   ]);
 
-  searchCar() async {
+  int? getMinPrice(List<CarResponse> cars) {
+    if (cars.isEmpty) return 0;
+    final prices = cars
+        .map((car) => (int.tryParse(
+            double.tryParse(car.price ?? '0')?.toStringAsFixed(0) ?? "0")))
+        .toList();
+    final minPrice = prices.reduce((a, b) => a! < b! ? a : b);
+
+    return minPrice;
+  }
+
+  int? getMaxPrice(List<CarResponse> cars) {
+    if (cars.isEmpty) return 0;
+    final prices = cars
+        .map((car) => (int.tryParse(
+            double.tryParse(car.price ?? '0')?.toStringAsFixed(0) ?? "0")))
+        .toList();
+    final maxPrice = prices.reduce((a, b) => a! > b! ? a : b);
+
+    return maxPrice;
+  }
+
+  int? getMinYear(List<CarResponse> cars) {
+    if (cars.isEmpty) return 0;
+    final years = cars
+        .map((car) => (int.tryParse(
+            double.tryParse(car.year ?? '0')?.toStringAsFixed(0) ?? "0")))
+        .toList();
+    final minYear = years.reduce((a, b) => a! < b! ? a : b);
+
+    return minYear;
+  }
+
+  int? getMaxYear(List<CarResponse> cars) {
+    if (cars.isEmpty) return 0;
+    final prices = cars
+        .map((car) => (int.tryParse(
+            double.tryParse(car.year ?? '0')?.toStringAsFixed(0) ?? "0")))
+        .toList();
+    final maxYear = prices.reduce((a, b) => a! > b! ? a : b);
+
+    return maxYear;
+  }
+
+  searchCar({bool navigate = false}) async {
     Get.dialog(Center(
       child: CircularProgressIndicator(
         color: Get.theme.colorScheme.secondary,
@@ -55,6 +99,11 @@ class SearchResultController extends GetxController {
         filteredCars.value = response;
 
         Get.back();
+        print(filteredCars.toJson());
+        if (navigate) {
+          Get.toNamed('/search_result',
+              arguments: {'activateSearchPlace': true});
+        }
       });
     } catch (error) {
       Get.back();

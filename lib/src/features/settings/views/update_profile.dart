@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../common/common_fonctions.dart';
 import '../../../../controllers/user_controller.dart';
 import '../../../../theme/theme.dart';
 import '../../widgets/form_input_field.dart';
@@ -22,7 +23,7 @@ class UpdateProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _updateProfileController.fullNameTextController.text =
-        _userController.currentuser?.firstName ?? '';
+        "${_userController.currentuser?.completeName}";
     _updateProfileController.phoneTextController.text =
         _userController.currentuser?.phoneNumber ?? '';
     _updateProfileController.emailTextController.text =
@@ -75,7 +76,6 @@ class UpdateProfile extends StatelessWidget {
                       ),
                       gapH30,
                       FormInputField(
-                        // initialValue: _userController.currentuser?.firstName,
                         labelText: 'Nom',
                         placeholder: 'Entrez votre nom complet',
                         fillColor: ColorStyle.bgFieldGrey,
@@ -92,6 +92,9 @@ class UpdateProfile extends StatelessWidget {
                       ),
                       gapH18,
                       FormInputField(
+                        // readOnly: true,
+                        readOnly: _updateProfileController
+                            .phoneTextController.text.isNotEmpty,
                         // initialValue: _userController.currentuser?.phoneNumber,
                         labelText: 'Téléphone',
                         placeholder: '(999) 999-9999',
@@ -110,6 +113,9 @@ class UpdateProfile extends StatelessWidget {
                       ),
                       gapH18,
                       FormInputField(
+                        // readOnly: true,
+                        readOnly: _updateProfileController
+                            .emailTextController.text.isNotEmpty,
                         // initialValue: _userController.currentuser?.email,
                         labelText: 'Email',
                         placeholder: 'Entrez votre email',
@@ -118,31 +124,33 @@ class UpdateProfile extends StatelessWidget {
                         textInputType: TextInputType.emailAddress,
                         controller:
                             _updateProfileController.emailTextController,
-                        // fieldValidator: (value) {
-                        //   if (value == null || value.isEmpty) {
-                        //     return 'Veuillez entrer votre email';
-                        //   }
-                        //   return null;
-                        // },
-                      ),
-                      gapH18,
-                      FormInputField(
-                        // initialValue: "************",
-                        labelText: 'Mot de passe',
-                        placeholder: 'Entrez votre mot de passe',
-                        fillColor: ColorStyle.bgFieldGrey,
-                        filled: true,
-                        password: true,
-                        textInputType: TextInputType.visiblePassword,
-                        controller:
-                            _updateProfileController.passwordTextController,
                         fieldValidator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un mot de passe';
+                            return null;
+                          } else if (!emailRegex().hasMatch(value)) {
+                            return 'Veuillez entrer une adresse e-mail valide';
                           }
                           return null;
                         },
                       ),
+                      // gapH18,
+                      // FormInputField(
+                      //   // initialValue: "************",
+                      //   labelText: 'Mot de passe',
+                      //   placeholder: 'Entrez votre mot de passe',
+                      //   fillColor: ColorStyle.bgFieldGrey,
+                      //   filled: true,
+                      //   password: true,
+                      //   textInputType: TextInputType.visiblePassword,
+                      //   controller:
+                      //       _updateProfileController.passwordTextController,
+                      //   fieldValidator: (value) {
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Veuillez entrer un mot de passe';
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
                     ],
                   ),
                 ),
@@ -157,7 +165,7 @@ class UpdateProfile extends StatelessWidget {
                   title: 'Enregistrer',
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // _updateProfileController.createAccount();
+                      _updateProfileController.updateUserprofile();
                     }
                     // Get.offAllNamed('/confirm_otp');
                   },

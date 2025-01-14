@@ -61,12 +61,7 @@ class RegisterController extends GetxController {
     try {
       // Register request object
       var requestObject = {
-        "firstName": fullNameTextController.text.split(' ').length >= 2
-            ? fullNameTextController.text.split(' ')[0]
-            : fullNameTextController.text,
-        "lastName": fullNameTextController.text.split(' ').length >= 2
-            ? fullNameTextController.text.split(' ')[1]
-            : fullNameTextController.text,
+        "completeName": fullNameTextController.text,
         "email": emailTextController.text.isNotEmpty
             ? emailTextController.text
             : null,

@@ -17,10 +17,10 @@ import 'home_controller.dart';
 
 class CarDetailsController extends GetxController {
   // final CarRepository _carRepository = Get.find<CarRepository>();
-  // final Car car;
+  final CarResponse carResponse;
   // final RxBool isFavorite = false.obs;
 
-  // CarDetailsController(this.car);
+  CarDetailsController({required this.carResponse});
 
   // @override
   // void onInit() {
@@ -31,7 +31,7 @@ class CarDetailsController extends GetxController {
   // void toggleFavorite() {
   //   isFavorite.value = _carRepository.toggleFavorite(car);
   // }'
-  final CarResponse carResponse = Get.arguments;
+  // final CarResponse carResponse = Get.arguments;
 
   final ErrorController errorController = ErrorController();
   List<Map<String, String>> carDetailsItems = [];
@@ -91,15 +91,15 @@ class CarDetailsController extends GetxController {
 
     rating = 0.obs;
     cars.value = List.from(homeController.cars);
-    final loggedIn = GetStorage().read(StorageConstants.loggedIn);
-    if (loggedIn != null && loggedIn) {
-      Future.delayed(Duration(seconds: 0), () {
-        cars.removeWhere((car) {
-          return carResponse.id == car.id;
-        });
-        getPostReviews();
+    // final loggedIn = GetStorage().read(StorageConstants.loggedIn);
+    // if (loggedIn != null && loggedIn) {
+    Future.delayed(Duration(seconds: 0), () {
+      cars.removeWhere((car) {
+        return carResponse.id == car.id;
       });
-    }
+      getPostReviews();
+    });
+    // }
     super.onInit();
   }
 
@@ -131,7 +131,7 @@ class CarDetailsController extends GetxController {
       });
     } catch (error) {
       Get.back();
-      errorController.handleError('Erreur lors de la récupération des avis');
+      errorController.showMessage('Erreur lors de la récupération des avis');
       // errorController.handleError(error);
     }
   }
@@ -188,34 +188,6 @@ class CarDetailsController extends GetxController {
       // Pour les dates plus anciennes, afficher la date formatée
       DateFormat outputFormat = DateFormat("dd MMM yyyy à HH:mm");
       return "le ${outputFormat.format(parsedDate)}";
-    }
-  }
-
-  void executeActionOnTap(String action) {
-    switch (action) {
-      case 'booking_withdraw':
-        Get.toNamed('/booking_withdraw', arguments: carResponse);
-        break;
-      case 'report_conflict':
-        Get.bottomSheet(
-          conflictSheet(carResponse: carResponse),
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-        );
-        break;
-      case 'cancel_booking':
-        Get.dialog(
-          Utility.simpleBinaryDialog(
-            title: "Annuler la réservation",
-            content: "Voulez-vous vraiment annuler cette réservation ?",
-            onBackPressed: () => Get.back(),
-            // TODO: Implement vehicle booking cancellation
-            onContinuePressed: () => Get.back(),
-          ),
-        );
-        break;
-      default:
-        break;
     }
   }
 }

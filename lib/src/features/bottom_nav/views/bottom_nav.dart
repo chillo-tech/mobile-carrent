@@ -25,7 +25,7 @@ class BottomNav extends StatelessWidget {
 
   List<Widget> pages = [
     Home(),
-    const Bookings(),
+    Bookings(),
     MyPosts(),
     Settings(),
   ];

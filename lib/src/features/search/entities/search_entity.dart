@@ -24,16 +24,17 @@ class SearchEntity {
   }
 }
 
-
 class Section {
   String icon;
   String title;
   String? description;
+  void Function() action;
 
   Section({
     required this.icon,
     required this.title,
     this.description,
+    required this.action,
   });
 
   factory Section.fromJson(Map<String, dynamic> json) {
@@ -41,6 +42,7 @@ class Section {
       icon: json['icon'],
       title: json['title'],
       description: json['description'],
+        action: json['action'],
     );
   }
 
@@ -49,6 +51,7 @@ class Section {
       'icon': icon,
       'title': title,
       'description': description,
+      'action': action,
     };
   }
 }

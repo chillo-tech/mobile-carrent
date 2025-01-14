@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../common/common_fonctions.dart';
 import '../../../../common/storage_constants.dart';
 import '../../../../helpers/assets.dart';
 import '../../../../theme/theme.dart';
@@ -26,7 +27,7 @@ class _MyPostsState extends State<MyPosts> {
     Future.delayed(Duration.zero, () {
       final loggedIn = GetStorage().read(StorageConstants.loggedIn);
       if (loggedIn != null && loggedIn) {
-        _postController.getMyPosts();
+        _postController.getMyPosts(launchLoader: true);
       }
     });
     super.initState();
@@ -135,7 +136,9 @@ class _MyPostsState extends State<MyPosts> {
                           PrimaryButton(
                             isRoundedBorder: true,
                             title: 'Parcourir les voitures',
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.offAllNamed('/bottom_nav');
+                            },
                           )
                         ],
                       )
@@ -263,23 +266,25 @@ class _MyPostsState extends State<MyPosts> {
                     children: [
                       IntrinsicWidth(
                         child: Container(
-                          padding: const EdgeInsets.all(5.0),
-                          decoration:
-                              const BoxDecoration(color: Color(0xFFE8E8E8)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4.0, vertical: 2.0),
+                          decoration: BoxDecoration(
+                              color: Color(0xFFE8E8E8),
+                              border: Border.all(color: ColorStyle.white),
+                              borderRadius: BorderRadius.circular(5.0)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Icon(
-                                _postController.getIconByStatus(status),
+                                getPostIconByStatus(status),
                                 size: 17.0,
-                                color: _postController.getColorByStatus(status),
+                                color: getPostColorByStatus(status),
                               ),
                               const SizedBox(width: 7.0),
                               Text(status,
                                   style: GoogleFonts.lato(
-                                    color: _postController
-                                        .getColorByStatus(status),
+                                    color: getPostColorByStatus(status),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 17.0,
                                   )),
@@ -342,9 +347,39 @@ class _MyPostsState extends State<MyPosts> {
                       //   image,
                       //   fit: BoxFit.cover,
                       // ),
+                      // child: Image.network(
+                      //   image,
+                      //   fit: BoxFit.cover,
+                      // ),
                       child: Image.network(
                         image,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            // Retourne l'image une fois chargée
+                            return child;
+                          }
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: ColorStyle.lightPrimaryColor,
+                              backgroundColor: ColorStyle.grey,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                          return Center(
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 50.0,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
