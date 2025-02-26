@@ -57,11 +57,13 @@ class LoginController extends GetxController {
   }
 
   void authenticate() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     AuthService authService = AuthService();
 

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../common/common_fonctions.dart';
 import '../../../../common/storage_constants.dart';
+import '../../../../controllers/toast_controller.dart';
 import '../../../../helpers/assets.dart';
 import '../../../../theme/theme.dart';
 import '../../../../utils/utility.dart';
@@ -32,6 +33,25 @@ class BottomNav extends StatelessWidget {
   final SearchBarController _searchBarController =
       Get.put(SearchBarController());
 
+  Future<bool> onWillPop() {
+    DateTime now = DateTime.now();
+    Duration timeDifference =
+        now.difference(_bottomNavController.currentBackPressTime.value ?? now);
+
+    if (timeDifference > Duration(seconds: 2)) {
+      _bottomNavController.currentBackPressTime.value = now;
+      displayBackWarning();
+      return Future.value(false);
+    }
+
+    return Future.value(true);
+  }
+
+  void displayBackWarning() {
+    ToastController(title: '', message: 'Appuyez à nouveau pour quitter')
+        .showToast();
+  }
+
   @override
   Widget build(BuildContext context) {
     print(_searchBarController.isPlaceSearchActivated);
@@ -39,55 +59,58 @@ class BottomNav extends StatelessWidget {
       children: [
         Scaffold(
           backgroundColor: ColorStyle.lightWhiteBackground,
-          appBar: !_searchBarController.isPlaceSearchActivated.value
-              ? AppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0.0,
-                  automaticallyImplyLeading: false,
-                  // leading: GestureDetector(
-                  //   onTap: () {
-                  //     _bottomNavController.logoutUser("Deconnexion...");
-                  //   },
-                  //   child: const Icon(
-                  //     FontAwesomeIcons.signOutAlt,
-                  //     color: ColorStyle.textBlackColor,
-                  //     size: 20.0,
-                  //   ),
-                  // ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          Get.toNamed('/notification');
-                        },
-                        child: SvgPicture.asset(
-                          Assets.bell,
-                          height: 20.0,
-                        ),
-                      ),
-                    )
-                  ],
-                )
-              : null,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 16.0),
-                    child: Obx(() {
-                      return pages[_bottomNavController.selectedIndex.value];
-                    }),
+          // appBar: !_searchBarController.isPlaceSearchActivated.value
+          //     ? AppBar(
+          //         backgroundColor: Colors.transparent,
+          //         elevation: 0.0,
+          //         automaticallyImplyLeading: false,
+          //         // leading: GestureDetector(
+          //         //   onTap: () {
+          //         //     _bottomNavController.logoutUser("Deconnexion...");
+          //         //   },
+          //         //   child: const Icon(
+          //         //     FontAwesomeIcons.signOutAlt,
+          //         //     color: ColorStyle.textBlackColor,
+          //         //     size: 20.0,
+          //         //   ),
+          //         // ),
+          //         actions: [
+          //           Padding(
+          //             padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          //             child: GestureDetector(
+          //               onTap: () {
+          //                 Get.toNamed('/notification');
+          //               },
+          //               child: SvgPicture.asset(
+          //                 Assets.bell,
+          //                 height: 20.0,
+          //               ),
+          //             ),
+          //           )
+          //         ],
+          //       )
+          //     : null,
+          body: WillPopScope(
+            onWillPop: null, //onWillPop,
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 16.0),
+                      child: Obx(() {
+                        return pages[_bottomNavController.selectedIndex.value];
+                      }),
+                    ),
                   ),
-                ),
-                Obx(() {
-                  return _searchBarController.isPlaceSearchActivated.value
-                      ? topSheet(context)
-                      : const SizedBox();
-                }),
-              ],
+                  Obx(() {
+                    return _searchBarController.isPlaceSearchActivated.value
+                        ? topSheet(context)
+                        : const SizedBox();
+                  }),
+                ],
+              ),
             ),
           ),
           floatingActionButton: Obx(() {
@@ -139,7 +162,7 @@ class BottomNav extends StatelessWidget {
                           ? ColorStyle.lightPrimaryColor
                           : ColorStyle.unselectedTabColor,
                     ),
-                    label: 'Search',
+                    label: 'Recherche',
                   ),
                   BottomNavigationBarItem(
                     icon: SvgPicture.asset(
@@ -149,7 +172,7 @@ class BottomNav extends StatelessWidget {
                           ? ColorStyle.lightPrimaryColor
                           : ColorStyle.unselectedTabColor,
                     ),
-                    label: 'Reservations',
+                    label: 'Réservations',
                   ),
                   BottomNavigationBarItem(
                     icon: SvgPicture.asset(
@@ -169,7 +192,7 @@ class BottomNav extends StatelessWidget {
                           ? ColorStyle.lightPrimaryColor
                           : ColorStyle.unselectedTabColor,
                     ),
-                    label: 'Settings',
+                    label: 'Paramètres',
                   ),
                 ],
                 currentIndex: _bottomNavController.selectedIndex.value,
@@ -177,11 +200,11 @@ class BottomNav extends StatelessWidget {
                 unselectedItemColor: ColorStyle.unselectedTabColor,
                 selectedItemColor: ColorStyle.lightPrimaryColor,
                 selectedLabelStyle: GoogleFonts.lato(
-                  fontSize: 15.0,
+                  fontSize: 13.0, //15.0
                   fontWeight: FontWeight.w600,
                 ),
                 unselectedLabelStyle: GoogleFonts.lato(
-                  fontSize: 15.0,
+                  fontSize: 13.0, //15.0
                   fontWeight: FontWeight.w600,
                 ),
                 backgroundColor: ColorStyle.grey,

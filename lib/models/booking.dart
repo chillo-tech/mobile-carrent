@@ -20,7 +20,7 @@ class BookingResponse {
   // final String? phoneNumberReservation;
   final String? idPayment;
   final bool? confirm;
-  final String? sessionId;
+  // final String? sessionId;
   final String? withdrawStatus;
   final String? reservationStatus;
 
@@ -35,7 +35,7 @@ class BookingResponse {
     //  this.phoneNumberReservation,
     this.idPayment,
     this.confirm,
-    this.sessionId,
+    // this.sessionId,
     this.withdrawStatus,
     this.reservationStatus,
   });
@@ -44,7 +44,7 @@ class BookingResponse {
     return BookingResponse(
       id: json['id'] as String,
       car: CarResponse.fromJson(json['car']),
-      userId: json['userId'] as String,
+      userId: "json['userId']" as String,
       createDate: json['createDate'] as String,
       updateDate: json['updateDate'] as String,
       startDate: json['startDate'] as String,
@@ -52,7 +52,7 @@ class BookingResponse {
       // phoneNumberReservation: json['phoneNumberReservation'] as String,
       idPayment: json['idPayment'] as String?,
       confirm: json['confirm'] as bool,
-      sessionId: json['sessionId'] as String,
+      // sessionId: json['sessionId'] as String,
       withdrawStatus: json['withdrawStatus'].toString().trim(),
       reservationStatus: json['reservationStatus'].toString().trim(),
     );
@@ -70,7 +70,7 @@ class BookingResponse {
       // 'phoneNumberReservation': phoneNumberReservation,
       'idPayment': idPayment,
       'confirm': confirm,
-      'sessionId': sessionId,
+      // 'sessionId': sessionId,
       'withdrawStatus': withdrawStatus,
       'reservationStatus': reservationStatus,
     };

@@ -63,12 +63,21 @@ class _MyPostsState extends State<MyPosts> {
                         },
                         child: postComponent(
                           context: context,
-                          status: 'En révision',
+                          status: _postController.myCars[index].status!
+                                  .contains('cours')
+                              ? 'En révision'
+                              : _postController.myCars[index].status!,
                           // status: _postController.myCars[index]['status'],
                           title:
                               '${_postController.myCars[index].make} ${_postController.myCars[index].model}',
-                          image:
-                              "https://files.chillo.fr/${_postController.myCars[index].imagePathCar![0]}",
+                          image: _postController.myCars[index].imagePathCar!
+                                      .contains(
+                                          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                  _postController
+                                          .myCars[index].imagePathCar![0] ==
+                                      'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                              ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                              : "https://files.chillo.fr/${_postController.myCars[index].imagePathCar![0]}",
                           // description: _postController.myCars[index].description ??
                           description: _postController
                                           .myCars[index].description !=

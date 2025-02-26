@@ -103,8 +103,15 @@ class _HomeState extends State<Home> {
                                 },
                                 child: carComponent(
                                   title: homeController.cars[index].make,
-                                  image:
-                                      "https://files.chillo.fr/${homeController.cars[index].imagePathCar![0]}",
+                                  image: homeController
+                                              .cars[index].imagePathCar!
+                                              .contains(
+                                                  'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                          homeController.cars[index]
+                                                  .imagePathCar![0] ==
+                                              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                      ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                      : "https://files.chillo.fr/${homeController.cars[index].imagePathCar![0]}",
                                   rating:
                                       homeController.cars[index].reviewNumber,
                                   commands: homeController
@@ -117,8 +124,8 @@ class _HomeState extends State<Home> {
                           );
                         })
                     : Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Column(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
@@ -174,7 +181,7 @@ class _HomeState extends State<Home> {
                             // )
                           ],
                         ),
-                    );
+                      );
               }),
             ],
           ),

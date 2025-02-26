@@ -68,7 +68,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> getCars() async {
-    // Get.dialog(Center(
+    // Get.dialog(barrierDismissible: false,Center(
     //   child: CircularProgressIndicator(
     //     color: Get.theme.colorScheme.secondary,
     //   ),
@@ -92,11 +92,13 @@ class HomeController extends GetxController {
   }
 
   Future<void> loadData() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     await getCars();
     final loggedIn = GetStorage().read(StorageConstants.loggedIn);
     if (loggedIn != null && loggedIn) {

@@ -101,6 +101,18 @@ class Login extends StatelessWidget {
                               if (value == null || value.isEmpty) {
                                 return 'Veuillez entrer votre téléphone';
                               }
+                              if (value.contains('+')) {
+                                // return 'Veuillez entrer votre téléphone sans le "+"';
+                                return 'Veuillez entrer votre téléphone sans indicatif';
+                              }
+                              if (value.contains(' ')) {
+                                return 'Veuillez entrer votre téléphone sans les espaces';
+                              }
+                              if (value.substring(0, 1) == "00" ||
+                                  value.substring(0, 2) == "+00") {
+                                // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                                return 'Veuillez entrer votre téléphone sans indicatif';
+                              }
                               return null;
                             },
                           )
@@ -138,6 +150,9 @@ class Login extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer votre mot de passe';
                       }
+                      // if (!passwordRegex().hasMatch(value)) {
+                      //   return "Le mot de passe doit etre d'au moins 6 caractères";
+                      // }
                       return null;
                     },
                   ),

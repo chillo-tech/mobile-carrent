@@ -1,13 +1,16 @@
 import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import '../../../../common/app_sizes.dart';
 import '../../../../common/common_fonctions.dart';
 import '../../../../common/storage_constants.dart';
 import '../../../../controllers/error_controller.dart';
 import '../../../../controllers/toast_controller.dart';
+import '../../../../controllers/user_controller.dart';
 import '../../../../models/car_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,6 +37,7 @@ class _CarDetailsState extends State<CarDetails> {
   final _formKey = GlobalKey<FormState>();
   CarDetailsController carDetailsController =
       Get.put(CarDetailsController(carResponse: Get.arguments));
+  final UserController _userController = Get.put(UserController());
   int _currentIndex = 0;
 
   List<Review> reviews = [
@@ -108,128 +112,145 @@ class _CarDetailsState extends State<CarDetails> {
                   items: carResponse.imagePathCar!.map((url) {
                     return Builder(
                       builder: (BuildContext context) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(24.0),
-                              bottomRight: Radius.circular(24.0)),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10.0),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    // Affiche un CircularProgressIndicator pendant le chargement
-                                    Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                    // Image réseau avec gestion des erreurs
-                                    Image.network(
-                                      "https://files.chillo.fr/$url",
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null) {
-                                          // Retourne l'image une fois chargée
-                                          return child;
-                                        }
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            color: ColorStyle.lightPrimaryColor,
-                                            backgroundColor: ColorStyle.grey,
-                                            value: loadingProgress
-                                                        .expectedTotalBytes !=
-                                                    null
-                                                ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    (loadingProgress
-                                                            .expectedTotalBytes ??
-                                                        1)
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        // Retourne un placeholder ou un widget d'erreur si l'image échoue
-                                        return Center(
-                                          child: Icon(
-                                            Icons.error,
-                                            color: Colors.red,
-                                            size: 50.0,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Image.network(
-                              //   "https://files.chillo.fr/$url",
-                              //   fit: BoxFit.cover,
-                              // ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0, top: 30.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.back();
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(
-                                          color: ColorStyle.lightGreyColor1
-                                              .withOpacity(0.3),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.arrow_back,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
+                        return GestureDetector(
+                          onTap: () {
+                            Get.toNamed('/image_view', arguments: {
+                              'imageUrls': carResponse.imagePathCar,
+                              'initialIndex': carResponse.imagePathCar
+                                  ?.indexWhere((imageUrl) => imageUrl == url),
+                            });
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(24.0),
+                                bottomRight: Radius.circular(24.0)),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      // Affiche un CircularProgressIndicator pendant le chargement
+                                      Center(
+                                        child: CircularProgressIndicator(),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 10,
-                                right: 10,
-                                child: Text(
-                                  '${_currentIndex + 1}/${carResponse.imagePathCar!.length}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
+                                      // Image réseau avec gestion des erreurs
+                                      Image.network(
+                                        carResponse.imagePathCar!.contains(
+                                                    'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                                carResponse.imagePathCar![0] ==
+                                                    'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                            ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                            : "https://files.chillo.fr/$url",
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            // Retourne l'image une fois chargée
+                                            return child;
+                                          }
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              color:
+                                                  ColorStyle.lightPrimaryColor,
+                                              backgroundColor: ColorStyle.grey,
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      (loadingProgress
+                                                              .expectedTotalBytes ??
+                                                          1)
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                          return Center(
+                                            child: Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                              size: 50.0,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: carResponse.imagePathCar!.map((url) {
-                                  int index =
-                                      carResponse.imagePathCar!.indexOf(url);
-                                  return Container(
-                                    width: 8.0,
-                                    height: 8.0,
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: 10.0, horizontal: 4.0),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _currentIndex == index
-                                          ? ColorStyle.greyColor1
-                                          : ColorStyle.lightWhite,
+                                // Image.network(
+                                //   "https://files.chillo.fr/$url",
+                                //   fit: BoxFit.cover,
+                                // ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 16.0, right: 16.0, top: 30.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Get.back();
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(8.0),
+                                          decoration: BoxDecoration(
+                                            color: ColorStyle.lightGreyColor1
+                                                .withOpacity(0.3),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.arrow_back,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 10,
+                                  right: 10,
+                                  child: Text(
+                                    '${_currentIndex + 1}/${carResponse.imagePathCar!.length}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
                                     ),
-                                  );
-                                }).toList(),
-                              )
-                            ],
+                                  ),
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children:
+                                      carResponse.imagePathCar!.map((url) {
+                                    int index =
+                                        carResponse.imagePathCar!.indexOf(url);
+                                    return Container(
+                                      width: 8.0,
+                                      height: 8.0,
+                                      margin: EdgeInsets.symmetric(
+                                          vertical: 10.0, horizontal: 4.0),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: _currentIndex == index
+                                            ? ColorStyle.greyColor1
+                                            : ColorStyle.lightWhite,
+                                      ),
+                                    );
+                                  }).toList(),
+                                )
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -353,62 +374,87 @@ class _CarDetailsState extends State<CarDetails> {
                           (index) {
                             return Column(
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(15.0),
-                                      decoration: BoxDecoration(
-                                        color: ColorStyle.lightGreyColor1,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      child: SvgPicture.asset(
-                                          carDetailsController
-                                              .carDetailsItems[index]['icon']!),
-                                    ),
-                                    gapW8,
-                                    carDetailsController.carDetailsItems[index]
-                                                ['description'] !=
-                                            null
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['title']!,
-                                                style: GoogleFonts.lato(
-                                                  color:
-                                                      ColorStyle.fontColorLight,
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              Text(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['description']!,
-                                                style: GoogleFonts.lato(
-                                                  color:
-                                                      ColorStyle.fontColorLight,
-                                                  fontSize: 12.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        : Text(
-                                            carDetailsController
+                                GestureDetector(
+                                  onTap: () async {
+                                    // if (carDetailsController
+                                    //         .carDetailsItems[index]['icon']
+                                    //         .runtimeType !=
+                                    //     String) {
+                                    //   await launchUrl(carDetailsController
+                                    //         .carDetailsItems[index]['title']);
+                                    // }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(15.0),
+                                        decoration: BoxDecoration(
+                                          color: ColorStyle.lightGreyColor1,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        child: carDetailsController
                                                     .carDetailsItems[index]
-                                                ['title']!,
-                                            style: GoogleFonts.lato(
-                                              color: ColorStyle.fontColorLight,
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          )
-                                  ],
+                                                        ['icon']
+                                                    .runtimeType ==
+                                                String
+                                            ? SvgPicture.asset(
+                                                carDetailsController
+                                                        .carDetailsItems[index]
+                                                    ['icon']!)
+                                            : Icon(
+                                                carDetailsController
+                                                        .carDetailsItems[index]
+                                                    ['icon'],
+                                                size: 14.0,
+                                              ),
+                                      ),
+                                      gapW8,
+                                      carDetailsController
+                                                      .carDetailsItems[index]
+                                                  ['description'] !=
+                                              null
+                                          ? Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  carDetailsController
+                                                          .carDetailsItems[
+                                                      index]['title']!,
+                                                  style: GoogleFonts.lato(
+                                                    color: ColorStyle
+                                                        .fontColorLight,
+                                                    fontSize: 14.0,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  carDetailsController
+                                                          .carDetailsItems[
+                                                      index]['description']!,
+                                                  style: GoogleFonts.lato(
+                                                    color: ColorStyle
+                                                        .fontColorLight,
+                                                    fontSize: 12.0,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          : Text(
+                                              carDetailsController
+                                                      .carDetailsItems[index]
+                                                  ['title']!,
+                                              style: GoogleFonts.lato(
+                                                color:
+                                                    ColorStyle.fontColorLight,
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            )
+                                    ],
+                                  ),
                                 ),
                                 gapH8,
                               ],
@@ -754,7 +800,7 @@ class _CarDetailsState extends State<CarDetails> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            formatDateRangeFromStrings(
+                            formatDateRangewithYearFromStrings(
                                 carResponse.startDisponibilityDate!,
                                 carResponse.endDisponibilityDate!),
                             style: GoogleFonts.lato(
@@ -765,10 +811,10 @@ class _CarDetailsState extends State<CarDetails> {
                           gapH4,
                           IntrinsicWidth(
                             child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4.0, horizontal: 8.0),
+                              padding: EdgeInsets.symmetric(vertical: 4.0),
+                              // vertical: 4.0, horizontal: 8.0),
                               decoration: BoxDecoration(
-                                color: ColorStyle.lightGreyColor1,
+                                // color: ColorStyle.lightGreyColor1,
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Row(
@@ -789,6 +835,7 @@ class _CarDetailsState extends State<CarDetails> {
                           )
                         ],
                       ),
+                      gapW4,
                       PrimaryButton(
                         isHalfWidth: true,
                         title: 'Réserver la voiture',
@@ -811,8 +858,28 @@ class _CarDetailsState extends State<CarDetails> {
                                     Get.offAllNamed('/login'),
                               ),
                             );
+                          } else {
+                            if (carResponse.proprietorId ==
+                                _userController.currentuser!.id) {
+                              Get.dialog(
+                                Utility.simpleBinaryDialog(
+                                  title: "Vous avez besoin de votre véhicule?",
+                                  content:
+                                      "Vous pouvez mettre a jour le calendrier de disponibilité de votre véhicule",
+                                  backButtonText: 'Annuler',
+                                  onBackPressed: () {
+                                    Get.back();
+                                  },
+                                  continueButtonText: 'Continuer',
+                                  onContinuePressed: () => Get.toNamed(
+                                      '/edit_post',
+                                      arguments: carResponse),
+                                ),
+                              );
+                              return;
+                            }
+                            Get.toNamed('/booking', arguments: carResponse);
                           }
-                          Get.toNamed('/booking', arguments: carResponse);
                         },
                       )
                     ],
@@ -936,7 +1003,7 @@ class _CarDetailsState extends State<CarDetails> {
                       Text(
                         location,
                         style: GoogleFonts.lato(
-                          color: ColorStyle.grey,
+                          color: ColorStyle.greyColor1,
                           fontSize: 13.0,
                           fontWeight: FontWeight.w400,
                         ),
@@ -944,7 +1011,7 @@ class _CarDetailsState extends State<CarDetails> {
                       Text(
                         carDetailsController.formatTimeAgo(date),
                         style: GoogleFonts.lato(
-                          color: ColorStyle.grey,
+                          color: ColorStyle.greyColor1,
                           fontSize: 13.0,
                           fontWeight: FontWeight.w400,
                         ),

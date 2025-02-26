@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../../common/common_fonctions.dart';
 import '../../../../../theme/theme.dart';
 import '../../../widgets/back_button.dart';
 import '../../../widgets/form_input_field.dart';
 import '../../../widgets/primary_button.dart';
 import '../controllers/forgot_password_controller.dart';
 
-class EnterNewPassword extends StatelessWidget {
+class EnterNewPassword extends StatefulWidget {
   EnterNewPassword({super.key});
+
+  @override
+  State<EnterNewPassword> createState() => _EnterNewPasswordState();
+}
+
+class _EnterNewPasswordState extends State<EnterNewPassword> {
   ForgotPasswordController forgotPasswordController =
       Get.put(ForgotPasswordController());
 
@@ -55,7 +62,17 @@ class EnterNewPassword extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Veuillez entrer un mot de passe';
                         }
+                        if (!passwordRegex().hasMatch(value)) {
+                          return "Le mot de passe doit etre d'au moins 6 caractères";
+                        }
                         return null;
+                      },
+                      onChanged: (value) {
+                        if (value.isNotEmpty &&
+                            passwordRegex().hasMatch(value)) {
+                          setState(() {});
+                          _formKey.currentState!.validate();
+                        }
                       },
                     ),
                     const SizedBox(height: 25.0),
@@ -71,12 +88,24 @@ class EnterNewPassword extends StatelessWidget {
                       fieldValidator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Veuillez entrer un mot de passe';
+                        } else if (!passwordRegex().hasMatch(value)) {
+                          return "Le mot de passe doit etre d'au moins 6 caractères";
                         } else if (forgotPasswordController
                                 .newPasswordInputController.text !=
                             value) {
-                         return 'Les mots de passe ne correspondent pas';
+                          return 'Les mots de passe ne correspondent pas';
                         }
                         return null;
+                      },
+                      onChanged: (value) {
+                        if (value.isNotEmpty &&
+                            passwordRegex().hasMatch(value)) {
+                          setState(() {});
+                          _formKey.currentState!.validate();
+                        } else {
+                          setState(() {});
+                          // _formKey.currentState!.;
+                        }
                       },
                     ),
                     const SizedBox(height: 30.0),

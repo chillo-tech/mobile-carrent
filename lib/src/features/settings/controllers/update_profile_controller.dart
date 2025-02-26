@@ -24,11 +24,13 @@ class UpdateProfileController extends GetxController {
   FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage();
 
   void updateUserprofile() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     UserService userService = UserService();
 
@@ -42,13 +44,13 @@ class UpdateProfileController extends GetxController {
       request.fields['completeName'] = fullNameTextController.text;
       if (_userController.currentuser != null &&
           (_userController.currentuser?.phoneNumber == null ||
-          _userController.currentuser!.phoneNumber.isEmpty) &&
+              _userController.currentuser!.phoneNumber.isEmpty) &&
           phoneTextController.text.isNotEmpty) {
         request.fields['phoneNumber'] = phoneTextController.text;
       }
       if (_userController.currentuser != null &&
           (_userController.currentuser?.email == null ||
-          _userController.currentuser!.email!.isEmpty) &&
+              _userController.currentuser!.email!.isEmpty) &&
           emailTextController.text.isNotEmpty) {
         request.fields['email'] = emailTextController.text;
       }

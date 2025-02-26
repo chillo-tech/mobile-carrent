@@ -29,26 +29,26 @@ class PostController extends GetxController {
 
   ErrorController errorController = ErrorController();
 
-  final Rx<XFile?> imageFile = XFile('').obs;
-  final Rx<XFile?> pickedFile = XFile('').obs;
-  final TextEditingController makeController = TextEditingController();
-  final TextEditingController modelController = TextEditingController();
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController conditionController = TextEditingController();
-  final TextEditingController typeCarburantController = TextEditingController();
-  final TextEditingController numberOfPlacesController =
+  Rx<XFile?> imageFile = XFile('').obs;
+  Rx<XFile?> pickedFile = XFile('').obs;
+  TextEditingController makeController = TextEditingController();
+  TextEditingController modelController = TextEditingController();
+  TextEditingController yearController = TextEditingController();
+  TextEditingController conditionController = TextEditingController();
+  TextEditingController typeCarburantController = TextEditingController();
+  TextEditingController numberOfPlacesController = TextEditingController();
+  TextEditingController imagePathCarController = TextEditingController();
+  TextEditingController imagePathDocumentController = TextEditingController();
+  TextEditingController phoneNumberProprietorController =
       TextEditingController();
-  final TextEditingController imagePathCarController = TextEditingController();
-  final TextEditingController imagePathDocumentController =
-      TextEditingController();
-  final TextEditingController phoneNumberProprietorController =
-      TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final RxString startAvailableDate = ''.obs;
-  final RxString endAvailableDate = ''.obs;
+  TextEditingController priceController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  RxString startAvailableDate = ''.obs;
+  RxString endAvailableDate = ''.obs;
   RxList<XFile?> imageFiles = RxList();
   RxBool hasErrorOnDocument = false.obs;
+  RxBool hasErrorOnImages = false.obs;
+  RxBool isOnPageOpening = true.obs;
   RxList<CarResponse> myCars = (List<CarResponse>.of([])).obs;
 
   RxList<PostResponse> posts = (List<PostResponse>.of([])).obs;
@@ -58,15 +58,18 @@ class PostController extends GetxController {
     Assets.car3,
     Assets.car4,
   ];
+
   CountriesController countriesController = Get.put(CountriesController());
 
   Future<void> getMyPosts({required bool launchLoader}) async {
     if (launchLoader) {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
     }
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     PostService postService = PostService();
@@ -105,11 +108,13 @@ class PostController extends GetxController {
   }
 
   void createPost() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     PostService postService = PostService();
 
@@ -197,11 +202,13 @@ class PostController extends GetxController {
   }
 
   void editPost() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     PostService postService = PostService();
 
@@ -288,18 +295,52 @@ class PostController extends GetxController {
     }
   }
 
+  Future<void> validateOrRejectPost(
+      {required String carId, bool isValidate = true}) async {
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
+    PostService postService = PostService();
+    try {
+      await postService
+          .validateOrRejectPost(carId: carId, isValidate: isValidate)
+          .then((response) async {
+        Get.back();
+        Get.offAllNamed('/success_post', arguments: {
+          'image': Assets.success_post,
+          'title': 'Annonce validée avec succès ✨',
+          'description':
+              "Vous venez de valider l'annonce. L'annonce est maintenant publiée et visible par tous les utilisateurs de Carrent.",
+          'buttonTitle': 'Continuer',
+          'route': '/bottom_nav'
+        });
+      });
+    } catch (error) {
+      Get.back();
+      errorController.handleError(error);
+    }
+  }
+
   // TODO: review this implementation
   Future<void> downloadFile(CarResponse currentPost) async {
     try {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
 
       Directory? directory;
-      final String fileUrl =
-          "https://files.chillo.fr/${currentPost.imagePathDocument}";
+      final String fileUrl = currentPost.imagePathDocument ==
+              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+          ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+          : "https://files.chillo.fr/${currentPost.imagePathDocument}";
 
       final status = await Permission.storage.request();
       if (!status.isGranted) {
@@ -342,13 +383,14 @@ class PostController extends GetxController {
     return fileName.replaceAll(RegExp(r'[^\w\.\-]'), '_');
   }
 
-
   Future<void> deleteMyPost(String currentPostId) async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     PostService postService = PostService();
 
     posts.removeWhere((element) => element.id == currentPostId);
@@ -362,10 +404,10 @@ class PostController extends GetxController {
           print("---------------------");
           print(response);
 
-          errorController.showMessage("Le vehicule supprime avec succes");
+          errorController.showMessage("Le vehicule supprimé avec succes");
         } else {
           errorController
-              .showMessage("Le vehicule n'a pas ete supprime, ressayer.");
+              .showMessage("Le vehicule n'a pas été supprimé, ressayer.");
         }
         Get.back();
         Get.offAllNamed('/bottom_nav');

@@ -36,6 +36,17 @@ class SearchResultController extends GetxController {
     // {'type': 'SUVs', 'isSelected': false},
   ]);
 
+  List<Map<String, dynamic>> removeDuplicatesByType(
+      RxList<Map<String, dynamic>> list) {
+    // Utiliser un Set pour conserver uniquement les types uniques
+    final seenTypes = <String>{};
+
+    // Filtrer la liste pour ne conserver que le premier élément de chaque type
+    return list(list
+        .where((element) => seenTypes.add(element['type'] as String))
+        .toList());
+  }
+
   int? getMinPrice(List<CarResponse> cars) {
     if (cars.isEmpty) return 0;
     final prices = cars
@@ -81,11 +92,13 @@ class SearchResultController extends GetxController {
   }
 
   searchCar({bool navigate = false}) async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     SearchService searchService = SearchService();
 

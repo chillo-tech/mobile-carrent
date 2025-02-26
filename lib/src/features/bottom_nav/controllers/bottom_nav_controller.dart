@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../search/controllers/search_controller.dart';
 
 class BottomNavController extends GetxController {
+  Rx<DateTime?> currentBackPressTime = null.obs;
   final SearchBarController _searchBarController =
       Get.put(SearchBarController());
   RxInt selectedIndex = 0.obs;

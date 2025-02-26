@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import '../../../../common/app_sizes.dart';
+import '../../../../controllers/error_controller.dart';
 import '../../../../models/car_response.dart';
 import '../controllers/booking_controller.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,23 @@ import '../../../../theme/theme.dart';
 import '../../widgets/form_input_field.dart';
 import '../../widgets/primary_button.dart';
 
-class Booking extends StatelessWidget {
+class Booking extends StatefulWidget {
   Booking({super.key});
+
+  @override
+  State<Booking> createState() => _BookingState();
+}
+
+class _BookingState extends State<Booking> {
   CarResponse carResponse = Get.arguments;
+
   final BookingController _bookingController = Get.put(BookingController());
+
+// @override
+//   void initState() {
+//     _bookingController.isOnPageOpening(true);
+//     super.initState();
+//   }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +97,12 @@ class Booking extends StatelessWidget {
                                 ),
                                 // Image réseau avec gestion des erreurs
                                 Image.network(
-                                  "https://files.chillo.fr/${carResponse.imagePathCar![0]}",
+                                  carResponse.imagePathCar!.contains(
+                                              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                          carResponse.imagePathCar![0] ==
+                                              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                      ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                      : "https://files.chillo.fr/${carResponse.imagePathCar![0]}",
                                   fit: BoxFit.cover,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
@@ -138,7 +157,7 @@ class Booking extends StatelessWidget {
                             ),
                             gapH4,
                             Text(
-                              formatDateRangeFromStrings(
+                              formatDateRangewithYearFromStrings(
                                   carResponse.startDisponibilityDate!,
                                   carResponse.endDisponibilityDate!),
                               style: GoogleFonts.lato(
@@ -195,28 +214,45 @@ class Booking extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateFormat("dd/MM/yyyy")
-                                      .parse(
-                                          carResponse.startDisponibilityDate!)
-                                      .add(Duration(days: 1)),
-                                  firstDate: DateFormat("dd/MM/yyyy")
-                                      .parse(
-                                          carResponse.startDisponibilityDate!)
-                                      .add(Duration(days: 1)),
-                                  lastDate: DateFormat("dd/MM/yyyy").parse(
-                                      carResponse.endDisponibilityDate!));
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
+                                  lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _bookingController
-                                          .bookingStartDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _bookingController
+                              //             .bookingStartDate.value) {
+                              //   _bookingController.bookingStartDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _bookingController.bookingStartDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _bookingController.bookingStartDate.value);
+                                DateTime endDate = parseDate(
+                                    _bookingController.bookingEndDate.value);
+
+                                // Vérifier que la date de début ne soit pas après la date de fin
+                                if (startDate.isAfter(endDate)) {
+                                  _bookingController.isOnPageOpening(false);
+                                  _bookingController.errorMessage(
+                                      'La date de début ne peut pas être après la date de fin.');
+                                  _bookingController.bookingStartDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de début ne peut pas être après la date de fin.');
+                                } else {
+                                  _bookingController.bookingStartDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -250,27 +286,44 @@ class Booking extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  initialDate: DateFormat("dd/MM/yyyy")
-                                      .parse(
-                                          carResponse.startDisponibilityDate!)
-                                      .add(Duration(days: 1)),
-                                  firstDate: DateFormat("dd/MM/yyyy")
-                                      .parse(
-                                          carResponse.startDisponibilityDate!)
-                                      .add(Duration(days: 1)),
-                                  lastDate: DateFormat("dd/MM/yyyy").parse(
-                                      carResponse.endDisponibilityDate!));
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
+                                  lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _bookingController.bookingEndDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _bookingController.bookingEndDate.value) {
+                              //   _bookingController.bookingEndDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _bookingController.bookingEndDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _bookingController.bookingStartDate.value);
+                                DateTime endDate = parseDate(
+                                    _bookingController.bookingEndDate.value);
+
+                                // Vérifier que la date de fin ne soit pas avant la date de début
+                                if (endDate.isBefore(startDate)) {
+                                  _bookingController.isOnPageOpening(false);
+                                  _bookingController.errorMessage(
+                                      'La date de fin ne peut pas être avant la date de début.');
+                                  _bookingController.bookingEndDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de fin ne peut pas être avant la date de début.');
+                                } else {
+                                  _bookingController.bookingEndDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -330,12 +383,14 @@ class Booking extends StatelessWidget {
                         ],
                       ),
                       Obx(() {
-                        return _bookingController.bookingStartDate.isEmpty ||
-                                _bookingController.bookingEndDate.isEmpty
+                        return (_bookingController.bookingStartDate.isEmpty ||
+                                    _bookingController
+                                        .bookingEndDate.isEmpty) &&
+                                !_bookingController.isOnPageOpening.value
                             ? Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
+                                padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
-                                  "Veuillez entrer une plage de dates valide",
+                                  _bookingController.errorMessage.value,
                                   style: GoogleFonts.lato(
                                     color: ColorStyle.lightPrimaryColor,
                                     fontSize: 12.0,
@@ -359,7 +414,40 @@ class Booking extends StatelessWidget {
               child: PrimaryButton(
                 title: 'Suivant',
                 onPressed: () {
-                  if (_bookingController.bookingStartDate.value.isNotEmpty &&
+                  _bookingController.isOnPageOpening(false);
+                  DateTime selectedStartDate =
+                      parseDate(_bookingController.bookingStartDate.value);
+                  DateTime selectedEndDate =
+                      parseDate(_bookingController.bookingEndDate.value);
+
+                  DateTime bookingStartDate =
+                      parseDate(carResponse.startDisponibilityDate!);
+                  DateTime bookingEndDate =
+                      parseDate(carResponse.endDisponibilityDate!);
+
+                  if (_bookingController.bookingStartDate.value.isEmpty ||
+                      _bookingController.bookingEndDate.value.isEmpty) {
+                    _bookingController.isOnPageOpening(false);
+                    _bookingController.errorMessage(
+                        'Veuillez entrer une plage valide correspondante à la disponibilité du véhicule.');
+                    return;
+                  } else if (selectedStartDate.isBefore(bookingStartDate) ||
+                      selectedEndDate.isAfter(bookingEndDate) ||
+                      selectedStartDate.isAfter(bookingEndDate) ||
+                      selectedEndDate.isBefore(bookingStartDate)) {
+                    print(
+                        'selectedStartDate.isBefore(bookingEndDate) $selectedEndDate  ${selectedStartDate.isBefore(bookingEndDate)}');
+                    print(
+                        'selectedEndDate.isAfter(bookingStartDate) ${selectedEndDate.isAfter(bookingStartDate)}');
+                    _bookingController.isOnPageOpening(false);
+                    _bookingController.errorMessage(
+                        'Veuillez entrer une plage correspondante à la disponibilité du véhicule.');
+                    _bookingController.bookingStartDate('');
+                    _bookingController.bookingEndDate('');
+                    // ErrorController().showMessage(
+                    //     'La date de début ne peut pas être après la date de fin.');
+                  } else if (_bookingController
+                          .bookingStartDate.value.isNotEmpty &&
                       _bookingController.bookingEndDate.value.isNotEmpty) {
                     _bookingController.bookACar(
                       carId: carResponse.id,
@@ -367,6 +455,9 @@ class Booking extends StatelessWidget {
                       startDate: _bookingController.bookingStartDate.value,
                       endDate: _bookingController.bookingEndDate.value,
                     );
+                  } else {
+                    // _bookingController.hasClick(true);
+                    return;
                   }
                   // Get.toNamed('/web_view', arguments: carResponse.make);
                   // Get.toNamed('/success_post', arguments: {

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../common/storage_constants.dart';
 import '../../../../controllers/error_controller.dart';
+import '../../../../helpers/assets.dart';
 import '../../../../services/booking.dart';
 import '../../../../utils/utility.dart';
 
@@ -11,18 +12,28 @@ class BookingController extends GetxController {
   ErrorController errorController = ErrorController();
   final RxString bookingStartDate = ''.obs;
   final RxString bookingEndDate = ''.obs;
+  final RxString errorMessage = ''.obs;
+  final RxBool isOnPageOpening = true.obs;
   FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage();
+
+  @override
+  void onInit() {
+    super.onInit();
+    isOnPageOpening.value = true;
+  }
 
   void bookACar(
       {required String carId,
       required String carBrand,
       required String startDate,
       required String endDate}) async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     BookingService bookingService = BookingService();
 
     try {
@@ -36,7 +47,7 @@ class BookingController extends GetxController {
         "endDate": bookingEndDate.value,
         "phoneNumberReservation": phone, // "+237678424125",
         "idCar": carId,
-        "userId": userId
+        // "userId": userId
       };
       // Check if login details are correct by authenticating
 
@@ -44,60 +55,70 @@ class BookingController extends GetxController {
         print("---------------------");
         print(response);
         Get.back();
-        if (response['Link'] != null && response['Link']!.isNotEmpty) {
-          var isPaymentSuccess = await Get.toNamed(
-            '/web_view',
-            arguments: {
-              'car': carBrand,
-              'url': response['Link'],
-            },
-          );
 
-          if (isPaymentSuccess != null && isPaymentSuccess) {
-            Get.dialog(
-              Utility.simpleDialog(
-                title: "Réservation réussie",
-                content: "Votre réservation a été confirmée.",
-                continueButtonText: 'Continuer',
-                onContinuePressed: () => Get.offAllNamed('/bottom_nav'),
-              ),
-            );
-          } else {
-            Get.dialog(
-              Utility.simpleBinaryDialog(
-                title: "Réservation échouée",
-                content: "Votre réservation a échouée.",
-                backButtonText: 'Annuler',
-                continueButtonText: 'Reessayer',
-                onBackPressed: () => Get.offAllNamed('/bottom_nav'),
-                onContinuePressed: () {
-                  Get.back();
-                  bookACar(
-                      carId: carId,
-                      carBrand: carBrand,
-                      startDate: startDate,
-                      endDate: endDate);
-                },
-              ),
-            );
-          }
-          // } else {
-          // Get.dialog(
-          //   AlertDialog(
-          //   title: Text('Booking Failed'),
-          //   content: Text('Your booking for $carBrand could not be completed.'),
-          //   actions: [
-          //     TextButton(
-          //     onPressed: () {
-          //       Get.back();
-          //     },
-          //     child: Text('OK'),
-          //     ),
-          //   ],
-          //   ),
-          // );
-          // }
-        }
+        Get.dialog(
+          Utility.simpleDialog(
+            title: "Demande de réservation envoyée",
+            content:
+                "Votre demande de réservation a été envoyée au propriétaire du véhicule. Il prendra contact avec vous rapidement.",
+            continueButtonText: 'Continuer',
+            onContinuePressed: () => Get.offAllNamed('/bottom_nav'),
+          ),
+        );
+        // if (response['Link'] != null && response['Link']!.isNotEmpty) {
+        //   var isPaymentSuccess = await Get.toNamed(
+        //     '/web_view',
+        //     arguments: {
+        //       'car': carBrand,
+        //       'url': response['Link'],
+        //     },
+        //   );
+
+        //   if (isPaymentSuccess != null && isPaymentSuccess) {
+        //     Get.dialog(
+        //       Utility.simpleDialog(
+        //         title: "Réservation réussie",
+        //         content: "Votre réservation a été confirmée.",
+        //         continueButtonText: 'Continuer',
+        //         onContinuePressed: () => Get.offAllNamed('/bottom_nav'),
+        //       ),
+        //     );
+        //   } else {
+        //     Get.dialog(
+        //       Utility.simpleBinaryDialog(
+        //         title: "Réservation échouée",
+        //         content: "Votre réservation a échouée.",
+        //         backButtonText: 'Annuler',
+        //         continueButtonText: 'Reessayer',
+        //         onBackPressed: () => Get.offAllNamed('/bottom_nav'),
+        //         onContinuePressed: () {
+        //           Get.back();
+        //           bookACar(
+        //               carId: carId,
+        //               carBrand: carBrand,
+        //               startDate: startDate,
+        //               endDate: endDate);
+        //         },
+        //       ),
+        //     );
+        //   }
+        // } else {
+        // Get.dialog(
+        //   AlertDialog(
+        //   title: Text('Booking Failed'),
+        //   content: Text('Your booking for $carBrand could not be completed.'),
+        //   actions: [
+        //     TextButton(
+        //     onPressed: () {
+        //       Get.back();
+        //     },
+        //     child: Text('OK'),
+        //     ),
+        //   ],
+        //   ),
+        // );
+        // }
+        // }
         // if (response != null &&
         //     response.user.id != null &&
         //     response.user.id.isNotEmpty) {

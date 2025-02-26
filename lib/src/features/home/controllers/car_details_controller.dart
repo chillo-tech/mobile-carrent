@@ -1,3 +1,4 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/common_fonctions.dart';
@@ -34,7 +35,7 @@ class CarDetailsController extends GetxController {
   // final CarResponse carResponse = Get.arguments;
 
   final ErrorController errorController = ErrorController();
-  List<Map<String, String>> carDetailsItems = [];
+  List<Map<String, dynamic>> carDetailsItems = [];
   List<Map<String, dynamic>> actions = [];
   TextEditingController reviewController = TextEditingController();
   RxInt rating = 0.obs;
@@ -63,6 +64,13 @@ class CarDetailsController extends GetxController {
         'title': '${carResponse.price} FCFA par jour',
         'icon': Assets.cash,
       },
+      if (carResponse.phoneNumberProprietor != null &&
+          carResponse.phoneNumberProprietor!.isNotEmpty)
+        {
+          'title': carResponse.phoneNumberProprietor!,
+          // 'description': carResponse.typeCarburant ?? "Super",
+          'icon': FontAwesomeIcons.user,
+        },
     ];
 
     actions = [
@@ -105,18 +113,20 @@ class CarDetailsController extends GetxController {
 
   getPostReviews({bool launchLoaders = true}) async {
     if (launchLoaders) {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
     }
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     ReviewService reviewService = ReviewService();
 
     try {
       // Check if login details are correct by authenticating
-
+      reviews.clear();
       await reviewService.getPostReviews(carResponse.id).then((response) async {
         // myCars.value = response;
         print("---------------------");
@@ -131,17 +141,19 @@ class CarDetailsController extends GetxController {
       });
     } catch (error) {
       Get.back();
-      errorController.showMessage('Erreur lors de la récupération des avis');
-      // errorController.handleError(error);
+      errorController.handleError(error);
+      // errorController.showMessage('Erreur lors de la récupération des avis');
     }
   }
 
   void reviewAPost() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     ReviewService reviewService = ReviewService();
 

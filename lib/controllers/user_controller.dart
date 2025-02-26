@@ -23,6 +23,8 @@ class UserController extends GetxController {
         key: StorageConstants.completeName, value: response.user.completeName);
     await flutterSecureStorage.write(
         key: StorageConstants.email, value: response.user.email);
+        await flutterSecureStorage.write(
+            key: StorageConstants.role, value: response.user.role);
     await flutterSecureStorage.write(
         key: StorageConstants.phone, value: response.user.phoneNumber);
   }
@@ -33,12 +35,15 @@ class UserController extends GetxController {
         await flutterSecureStorage.read(key: StorageConstants.completeName) ?? '';
     String email =
         await flutterSecureStorage.read(key: StorageConstants.email) ?? '';
+        String role =
+        await flutterSecureStorage.read(key: StorageConstants.role) ?? '';
     String phone =
         await flutterSecureStorage.read(key: StorageConstants.phone) ?? '';
 
     currentuser = UserResponse(
         id: id,
         email: email,
+        role: role,
         completeName: completeName,
         phoneNumber: phone);
   }
@@ -47,6 +52,7 @@ class UserController extends GetxController {
     await flutterSecureStorage.delete(key: StorageConstants.id);
     await flutterSecureStorage.delete(key: StorageConstants.completeName);
     await flutterSecureStorage.delete(key: StorageConstants.email);
+    await flutterSecureStorage.delete(key: StorageConstants.role);
     await flutterSecureStorage.delete(key: StorageConstants.phone);
   }
 }

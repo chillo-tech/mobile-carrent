@@ -15,6 +15,7 @@ class CarResponse {
   final String? condition;
   final String? typeCarburant;
   final String? description;
+  final String? status;
   final int numberOfPlaces;
   final List<dynamic>? imagePathCar;
   final String? imagePathDocument;
@@ -25,6 +26,7 @@ class CarResponse {
   final String? createdDate;
   final int? reviewNumber;
   final int? reservationNumber;
+  final String? proprietorId;
 
   CarResponse({
     required this.id,
@@ -34,6 +36,7 @@ class CarResponse {
     required this.condition,
     this.typeCarburant,
     required this.description,
+    required this.status,
     required this.numberOfPlaces,
     this.imagePathCar,
     this.imagePathDocument,
@@ -44,6 +47,7 @@ class CarResponse {
     this.createdDate,
     this.reviewNumber,
     this.reservationNumber,
+    this.proprietorId,
   });
 
   // Factory method to create a Car instance from JSON
@@ -56,10 +60,15 @@ class CarResponse {
       condition: (json['condition'] ?? 0.0).toString(),
       typeCarburant: json['typeCarburant'],
       description: json['description'],
+      status: json['status'],
       numberOfPlaces: json['numberOfPlaces'] ?? 0, // Default to 0 if null
-      imagePathCar: json['imagePathCar'],
-      imagePathDocument: json['imagePathDocument'],
-      phoneNumberProprietor: json['phoneNumberProprietor'],
+      imagePathCar: json['imagePathCar'] ??
+          [
+            'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+          ],
+      imagePathDocument: json['imagePathDocument'] ??
+          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg',
+      phoneNumberProprietor: json['phoneNumberProprietor'] ?? '',
       price: (double.tryParse(json['price']?.toString() ?? '0')
               ?.toStringAsFixed(0) ??
           "0"),
@@ -68,6 +77,7 @@ class CarResponse {
       createdDate: json['createdDate'],
       reviewNumber: json['reviewNumber'] ?? 0,
       reservationNumber: json['reservationNumber'] ?? 0,
+      proprietorId: json['proprietorId'],
     );
   }
 
@@ -81,6 +91,7 @@ class CarResponse {
       'condition': (condition != null) ? condition : 5,
       'typeCarburant': typeCarburant,
       'description': description,
+      'status': status,
       'numberOfPlaces': numberOfPlaces,
       'imagePathCar': imagePathCar,
       'imagePathDocument': imagePathDocument,

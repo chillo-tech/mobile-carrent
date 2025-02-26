@@ -14,6 +14,7 @@ class Success extends StatelessWidget {
   final String description = Get.arguments['description'];
   final String buttonTitle = Get.arguments['buttonTitle'];
   final String route = Get.arguments['route'];
+  final String back = Get.arguments['back'] ?? '';
   final String? argument = Get.arguments['operation_type'];
 
   @override
@@ -65,7 +66,7 @@ class Success extends StatelessWidget {
                   ],
                 ),
               ),
-              const BackBottomButton()
+              if(back.isEmpty) const BackBottomButton(),
             ],
           ),
         ),

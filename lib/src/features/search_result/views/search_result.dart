@@ -264,8 +264,19 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                                         searchResultController
                                                             .filteredCars[index]
                                                             .make,
-                                                    image:
-                                                        "https://files.chillo.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
+                                                    image: searchResultController
+                                                                .filteredCars[
+                                                                    index]
+                                                                .imagePathCar!
+                                                                .contains(
+                                                                    'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                                            searchResultController
+                                                                    .filteredCars[
+                                                                        index]
+                                                                    .imagePathCar![0] ==
+                                                                'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                                        ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                                        : "https://files.chillo.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
                                                     rating: 4.95,
                                                     commands: 120,
                                                     price:
@@ -604,115 +615,120 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     searchResultController.carTypes.add(
       {'type': 'Tous types', 'isSelected': false},
     );
-    searchResultController
-        .carTypes(searchResultController.carTypes.reversed.toList());
+    searchResultController.carTypes(searchResultController
+        .removeDuplicatesByType(searchResultController.carTypes)
+        .reversed
+        .toSet()
+        .toList());
     print(searchResultController.carTypes.toJson());
     return StatefulBuilder(builder: (context, setStater) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Get.back();
-                  },
-                  child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(FontAwesomeIcons.close)),
-                ),
-                Text(
-                  'Type',
-                  style: GoogleFonts.lato(
-                    fontWeight: FontWeight.w700,
-                    color: ColorStyle.fontColorLight,
-                    fontSize: 20.0,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    setStater(() {
-                      // Réinitialise toutes les marques à non sélectionné
-                      searchResultController.carTypes.forEach((brand) {
-                        brand['isSelected'] = false;
-                      });
-
-                      // Active la première marque pour l'exemple
-                      // searchResultController.carTypes[0]['isSelected'] = true;
-
-                      // Met à jour l'interface
-                      searchResultController.update();
-                    });
-                    await searchResultController.searchCar();
-                  },
-                  child: Text('Réinitialiser',
-                      style: GoogleFonts.lato(
-                        color: ColorStyle.fontColorLight,
-                        fontSize: 16.0,
-                      )),
-                ),
-              ],
-            ),
-            Obx(() {
-              return Column(
-                children: searchResultController.carTypes.map((type) {
-                  print(searchResultController.carTypes.toJson());
-                  return GestureDetector(
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
                     onTap: () {
-                      if (type['type'] == "Tous types") {
-                        searchResultController.carTypes.forEach((type) {
-                          setStater(() {
-                            type['isSelected'] = true;
-                          });
-                        });
-                      } else {
-                        searchResultController.carTypes[
-                                searchResultController.carTypes.length - 1]
-                            ['isSelected'] = true;
-                        setStater(() {
-                          type['isSelected'] = !type['isSelected'];
-                          searchResultController.update();
-                        });
-                      }
+                      Get.back();
                     },
-                    child: Column(
-                      children: [
-                        brandOrTypeComponent(
-                            type['type'], type['isSelected'], setStater),
-                        gapH12,
-                      ],
+                    child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(FontAwesomeIcons.close)),
+                  ),
+                  Text(
+                    'Type',
+                    style: GoogleFonts.lato(
+                      fontWeight: FontWeight.w700,
+                      color: ColorStyle.fontColorLight,
+                      fontSize: 20.0,
                     ),
-                  );
-                }).toList(),
-              );
-            }),
-            gapH8,
-            PrimaryButton(
-                title: 'Filtrer',
-                onPressed: () async {
-                  searchResultController.carFilter.makes =
-                      searchResultController.carTypes
-                          .where((element) =>
-                              element['isSelected'] &&
-                              element['type'] != "Tous types")
-                          .toList()
-                          .map((toElement) => toElement['type'] as String)
-                          .toList();
-                  searchResultController.appliedFilters.value.addIf(
-                      !searchResultController.appliedFilters.value
-                          .contains('type'),
-                      'type');
-                  searchResultController.update();
-                  print(searchResultController.appliedFilters);
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      setStater(() {
+                        // Réinitialise toutes les marques à non sélectionné
+                        searchResultController.carTypes.forEach((brand) {
+                          brand['isSelected'] = false;
+                        });
 
-                  await searchResultController.searchCar();
-                  Get.back();
-                  // Get.offNamed('/success_post');
-                })
-          ],
+                        // Active la première marque pour l'exemple
+                        // searchResultController.carTypes[0]['isSelected'] = true;
+
+                        // Met à jour l'interface
+                        searchResultController.update();
+                      });
+                      await searchResultController.searchCar();
+                    },
+                    child: Text('Réinitialiser',
+                        style: GoogleFonts.lato(
+                          color: ColorStyle.fontColorLight,
+                          fontSize: 16.0,
+                        )),
+                  ),
+                ],
+              ),
+              Obx(() {
+                return Column(
+                  children: searchResultController.carTypes.map((type) {
+                    print(searchResultController.carTypes.toJson());
+                    return GestureDetector(
+                      onTap: () {
+                        if (type['type'] == "Tous types") {
+                          searchResultController.carTypes.forEach((type) {
+                            setStater(() {
+                              type['isSelected'] = true;
+                            });
+                          });
+                        } else {
+                          searchResultController.carTypes[
+                                  searchResultController.carTypes.length - 1]
+                              ['isSelected'] = true;
+                          setStater(() {
+                            type['isSelected'] = !type['isSelected'];
+                            searchResultController.update();
+                          });
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          brandOrTypeComponent(
+                              type['type'], type['isSelected'], setStater),
+                          gapH12,
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              }),
+              gapH8,
+              PrimaryButton(
+                  title: 'Filtrer',
+                  onPressed: () async {
+                    searchResultController.carFilter.makes =
+                        searchResultController.carTypes
+                            .where((element) =>
+                                element['isSelected'] &&
+                                element['type'] != "Tous types")
+                            .toList()
+                            .map((toElement) => toElement['type'] as String)
+                            .toList();
+                    searchResultController.appliedFilters.value.addIf(
+                        !searchResultController.appliedFilters.value
+                            .contains('type'),
+                        'type');
+                    searchResultController.update();
+                    print(searchResultController.appliedFilters);
+
+                    await searchResultController.searchCar();
+                    Get.back();
+                    // Get.offNamed('/success_post');
+                  })
+            ],
+          ),
         ),
       );
     });

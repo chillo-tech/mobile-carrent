@@ -90,6 +90,20 @@ class ApiProvider {
     return jsonEncode(responseJson);
   }
 
+  Future<dynamic> patch(String baseUrl, String url) async {
+    var responseJson;
+    log.info(baseUrl + url);
+    var callURL = Uri.parse(baseUrl + url);
+    final contentTypeHeader =
+        _headers?[contentTypeKey] ?? dioPkg.Headers.jsonContentType;
+    final response = await _dio.patchUri(
+      callURL,
+      options: dioPkg.Options(headers: headers, contentType: contentTypeHeader),
+    );
+    responseJson = _returnResponseDio(response);
+    return jsonEncode(responseJson);
+  }
+
   Future<dynamic> post(String baseUrl, String url,
       {Map<String, dynamic>? body, String? contentType}) async {
     var responseJson;

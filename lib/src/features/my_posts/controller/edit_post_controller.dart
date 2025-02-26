@@ -26,6 +26,7 @@ class EditPostController extends GetxController {
 
   final Rx<XFile?> imageFile = XFile('').obs;
   final Rx<XFile?> pickedFile = XFile('').obs;
+  final RxBool hasClick = false.obs;
   final TextEditingController makeController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
@@ -44,6 +45,7 @@ class EditPostController extends GetxController {
   final RxString endAvailableDate = ''.obs;
   RxList<XFile?> imageFiles = RxList();
   RxBool hasErrorOnDocument = false.obs;
+  RxBool hasErrorOnImages = false.obs;
   RxList<CarResponse> myCars = (List<CarResponse>.of([])).obs;
 
   RxList<PostResponse> posts = (List<PostResponse>.of([])).obs;
@@ -98,28 +100,54 @@ class EditPostController extends GetxController {
 
   Future<void> retreiveFiles() async {
     try {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
+      if (currentPost.imagePathCar?.length == 1 &&
+          currentPost.imagePathCar?[0] ==
+              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') {
+        currentPost.imagePathCar?.forEach((element) async {
+          imageFiles.add(XFile(await urlToFile(
+                  "https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg")
+              .then((file) {
+            print(file.path);
+            return file.path;
+          })));
+        });
+      } else {
+        currentPost.imagePathCar?.forEach((element) async {
+          imageFiles.add(XFile(
+              await urlToFile("https://files.chillo.fr/$element").then((file) {
+            print(file.path);
+            return file.path;
+          })));
+        });
+      }
 
-      currentPost.imagePathCar?.forEach((element) async {
-        imageFiles.add(XFile(
-            await urlToFile("https://files.chillo.fr/$element").then((file) {
+      if (currentPost.imagePathCar?.length == 1 &&
+          currentPost.imagePathCar?[0] ==
+              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') {
+        pickedFile(XFile(await urlToFile(
+                "https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg")
+            .then((file) {
           print(file.path);
           return file.path;
         })));
-      });
-
-      pickedFile(XFile(await urlToFile(
-              "https://files.chillo.fr/${currentPost.imagePathDocument}")
-          .then((file) {
-        print(file.path);
-        return file.path;
-      })));
+      } else {
+        pickedFile(XFile(await urlToFile(
+                "https://files.chillo.fr/${currentPost.imagePathDocument}")
+            .then((file) {
+          print(file.path);
+          return file.path;
+        })));
+      }
     } catch (e) {
-      errorController.showMessage('Échec du téléchargement des elements');
+      errorController.handleError(e);
+      // errorController.showMessage('Échec du téléchargement des elements');
     }
     Get.back();
   }
@@ -162,15 +190,23 @@ class EditPostController extends GetxController {
 
   void editPost() async {
     print(imageFiles[0]?.path);
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     PostService postService = PostService();
 
     try {
+      if (currentPost.imagePathCar != null &&
+          currentPost.imagePathCar!.contains(
+              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg')) {
+        currentPost.imagePathCar?.remove(
+            'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg');
+      }
       var request = http.MultipartRequest(
           'PUT',
           Uri.parse(

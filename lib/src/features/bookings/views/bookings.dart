@@ -58,8 +58,10 @@ class _BookingsState extends State<Bookings> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
-                          Get.toNamed('/booking_details',
-                              arguments: _bookingsController.myBookings[index]);
+                          Get.toNamed('/booking_details', arguments: {
+                            'booking': _bookingsController.myBookings[index],
+                            'isCarBooking': false,
+                          });
                         },
                         child: bookingComponent(
                           context: context,
@@ -70,8 +72,15 @@ class _BookingsState extends State<Bookings> {
                           // status: _bookingsController.myBookings[index]['status'],
                           title:
                               '${_bookingsController.myBookings[index].car?.make} ${_bookingsController.myBookings[index].car?.model}',
-                          image:
-                              "https://files.chillo.fr/${_bookingsController.myBookings[index].car?.imagePathCar![0]}",
+                          image: _bookingsController
+                                      .myBookings[index].car!.imagePathCar!
+                                      .contains(
+                                          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                  _bookingsController.myBookings[index].car
+                                          ?.imagePathCar![0] ==
+                                      'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                              ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                              : "https://files.chillo.fr/${_bookingsController.myBookings[index].car?.imagePathCar![0]}",
                           // description: _bookingsController.myBookings[index].description ??
                           price:
                               _bookingsController.myBookings[index].car?.price,
@@ -188,7 +197,8 @@ class _BookingsState extends State<Bookings> {
                               //         :
                               reservationStatus,
                               reservationStatus != 'En cours' &&
-                                  reservationStatus != 'Confirmé',
+                                  reservationStatus != 'Confirmé' &&
+                                  reservationStatus != 'A Valider',
                               reservationStatus == 'Validé'),
                           gapW8,
                           rowIconText(

@@ -81,11 +81,13 @@ class BookingsController extends GetxController {
 
   Future<void> getMyBookings({required bool launchLoader}) async {
     if (launchLoader) {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
     }
     BookingService bookingService = BookingService();
     String userId =
@@ -109,11 +111,13 @@ class BookingsController extends GetxController {
   }
 
   void cancelMyBooking({required BookingResponse booking}) async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     BookingService bookingService = BookingService();
     try {
       await bookingService
@@ -141,16 +145,20 @@ class BookingsController extends GetxController {
 
   void withdrawACar({required BookingResponse booking}) async {
     BookingWithdrawController _withdrawBookingController = Get.find();
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     BookingService bookingService = BookingService();
     try {
       var request = http.MultipartRequest(
-          'PUT', Uri.parse('${Env.getUserManagementApiBaseUrl()}reservation/remove/${booking.id}'));
+          'PUT',
+          Uri.parse(
+              '${Env.getUserManagementApiBaseUrl()}reservation/remove/${booking.id}'));
 
       _withdrawBookingController.carImageFiles.forEach(
         (element) async {
@@ -166,9 +174,7 @@ class BookingsController extends GetxController {
       String token = await GetStorage().read(StorageConstants.refreshToken);
       request.headers.putIfAbsent("Authorization", () => 'Bearer $token');
 
-      await bookingService
-          .withdrawBooking(request)
-          .then((response) async {
+      await bookingService.withdrawBooking(request).then((response) async {
         // myBookings.value = response;
         // print("---------------------");
         // print(response);
@@ -178,6 +184,66 @@ class BookingsController extends GetxController {
           'title': "La prise en charge s'est déroulée sans problème !",
           'description':
               "La voiture a été récupérée avec succès, appuyez sur continuer pour procéder",
+          'buttonTitle': 'Continuer',
+          'route': '/bottom_nav'
+        });
+      });
+    } catch (error) {
+      Get.back();
+      errorController.handleError(error);
+    }
+  }
+
+  Future<void> getMyCarBookings(
+      {required bool launchLoader, required String carId}) async {
+    if (launchLoader) {
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
+    }
+    BookingService bookingService = BookingService();
+
+    try {
+      await bookingService.getCarBookings(carId: carId).then((response) async {
+        myBookings.value = response;
+        print("---------------------");
+        print(response);
+        if (launchLoader) {
+          Get.back();
+        }
+      });
+    } catch (error) {
+      if (launchLoader) {
+        Get.back();
+      }
+      errorController.handleError(error);
+    }
+  }
+
+  Future<void> validateOrRejectBooking(
+      {required String bookingId, bool isValidate = true}) async {
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
+    BookingService bookingService = BookingService();
+    try {
+      await bookingService
+          .validateOrRejectBooking(bookingId: bookingId, isValidate: isValidate)
+          .then((response) async {
+        Get.back();
+        Get.offAllNamed('/success_post', arguments: {
+          'image': Assets.success_post,
+          'title': 'Réservation validée avec succès ✨',
+          'description':
+              "Vous venez de valider la reservation. Le éhicule peut désormais etre retiré par l'utilisateur ayant éffectué la réservation",
           'buttonTitle': 'Continuer',
           'route': '/bottom_nav'
         });

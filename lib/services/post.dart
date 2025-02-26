@@ -58,4 +58,19 @@ class PostService {
     print(response);
     return response;
   }
+
+  Future<String> validateOrRejectPost({required String carId, bool isValidate = true}) async {
+    log.info('HEADERS ${apiProvider.headers}');
+
+    String token = await GetStorage().read(StorageConstants.refreshToken);
+    apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
+    // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); //$token');
+    final response = await apiProvider.patch(
+      Env.getUserManagementApiBaseUrl(),
+      isValidate? 'cars/validate/$carId': 'cars/reject/$carId',
+    );
+    print(response);
+    return response;
+    // return bookingResponsefromJsonList(json.decode(response));
+  }
 }

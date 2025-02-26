@@ -15,7 +15,7 @@ class ForgotPassword extends StatelessWidget {
   ForgotPasswordController forgotPasswordController =
       Get.put(ForgotPasswordController());
 
-      final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,8 @@ class ForgotPassword extends StatelessWidget {
                                         .resetWithEmail.value = true;
                                     forgotPasswordController
                                         .resetWithPhone.value = false;
-                                    forgotPasswordController.emailInputController
+                                    forgotPasswordController
+                                        .emailInputController
                                         .clear();
                                   }),
                               Text("Email",
@@ -109,6 +110,18 @@ class ForgotPassword extends StatelessWidget {
                                 if (value == null || value.isEmpty) {
                                   return 'Veuillez entrer votre téléphone';
                                 }
+                                if (value.contains('+')) {
+                                  // return 'Veuillez entrer votre téléphone sans le "+"';
+                                  return 'Veuillez entrer votre téléphone sans indicatif';
+                                }
+                                if (value.contains(' ')) {
+                                  return 'Veuillez entrer votre téléphone sans les espaces';
+                                }
+                                if (value.substring(0, 1) == "00" ||
+                                    value.substring(0, 2) == "+00") {
+                                  // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                                  return 'Veuillez entrer votre téléphone sans indicatif';
+                                }
                                 return null;
                               },
                             )
@@ -152,7 +165,7 @@ class ForgotPassword extends StatelessWidget {
                             ? 'Envoyer le lien par email'
                             : 'Envoyer le lien par sms',
                         onPressed: () {
-                          if(!_formKey.currentState!.validate()){
+                          if (!_formKey.currentState!.validate()) {
                             return;
                           }
                           forgotPasswordController.sendEmailOrSms();

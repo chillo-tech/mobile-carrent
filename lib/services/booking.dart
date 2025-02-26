@@ -24,7 +24,7 @@ class BookingService {
     // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); //$token');
     final response = await apiProvider.get(
       Env.getUserManagementApiBaseUrl(),
-      'reservation/$userid',
+      'reservation',
     );
     print(response);
     return bookingResponsefromJsonList(json.decode(response));
@@ -51,9 +51,10 @@ class BookingService {
     String token = await GetStorage().read(StorageConstants.refreshToken);
     apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
     // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); //$token');
-    final response = await apiProvider.get(
+    final response = await apiProvider.put(
       Env.getUserManagementApiBaseUrl(),
-      'reservation/cancelreservation/${booking.sessionId}?idReservation=${booking.id}',
+      'reservation/cancel/${booking.id}',
+      {}
     );
     print(response);
     return json.decode(response);
@@ -71,5 +72,37 @@ class BookingService {
     print(response.runtimeType);
     log.info('RESPONSE ${response}');
     return json.decode(response);
+  }
+
+  Future<List<BookingResponse>> getCarBookings({required String carId}) async {
+    log.info('HEADERS ${apiProvider.headers}');
+
+    String token = await GetStorage().read(StorageConstants.refreshToken);
+    apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
+    // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); //$token');
+    final response = await apiProvider.get(
+      Env.getUserManagementApiBaseUrl(),
+      'reservation/car?carId=$carId',
+    );
+    print(response);
+    return bookingResponsefromJsonList(json.decode(response));
+  }
+
+  Future<String> validateOrRejectBooking(
+      {required String bookingId, bool isValidate = true}) async {
+    log.info('HEADERS ${apiProvider.headers}');
+
+    String token = await GetStorage().read(StorageConstants.refreshToken);
+    apiProvider.headers!.putIfAbsent("Authorization", () => 'Bearer $token');
+    // 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYWVsQGVtYWlsMnRlc3QuY29tIiwiZXhwIjoxNzU2MTk1MzU4LCJlbWFpbCI6ImdhZWxAZW1haWwydGVzdC5jb20ifQ.mE5mvtMCbwdciKbQ2QiXyadfofjcsnBUdodLpz4SDfzzUncUlY5BP27cQZMrSdtST1ekVg4O7xQ-QmeiJGaG6g'); //$token');
+    final response = await apiProvider.put(
+        Env.getUserManagementApiBaseUrl(),
+        isValidate
+            ? 'reservation/valid/$bookingId'
+            : 'reservation/cancel/$bookingId',
+        {});
+    print(response);
+    return response;
+    // return bookingResponsefromJsonList(json.decode(response));
   }
 }

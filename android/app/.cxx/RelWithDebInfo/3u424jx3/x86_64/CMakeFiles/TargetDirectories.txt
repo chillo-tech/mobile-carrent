@@ -1,0 +1,2 @@
+/home/maeltoukap/Dev/Freelance/Sukuna/carrent/android/app/.cxx/RelWithDebInfo/3u424jx3/x86_64/CMakeFiles/rebuild_cache.dir
+/home/maeltoukap/Dev/Freelance/Sukuna/carrent/android/app/.cxx/RelWithDebInfo/3u424jx3/x86_64/CMakeFiles/edit_cache.dir

@@ -7,6 +7,7 @@ class UserResponse {
   final String id;
   final String completeName;
   final String? email;
+  final String? role;
   final String? password;
   final String phoneNumber;
 
@@ -14,6 +15,7 @@ class UserResponse {
     required this.id,
     required this.completeName,
     this.email,
+    required this.role,
     this.password,
     required this.phoneNumber,
   });
@@ -23,7 +25,8 @@ class UserResponse {
       id: json['id'] as String,
       completeName: json['completeName'] as String,
       email: json['email'] as String?,
-      password: json['password'] as String,
+      role: json['role'] as String? ?? 'USER',
+      password: json['password'] as String?,
       phoneNumber: json['phoneNumber'] as String,
     );
   }

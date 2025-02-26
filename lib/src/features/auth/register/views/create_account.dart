@@ -73,6 +73,18 @@ class CreateAccount extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer votre téléphone';
                       }
+                      if (value.contains('+')) {
+                        // return 'Veuillez entrer votre téléphone sans le "+"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
+                      }
+                      if (value.contains(' ')) {
+                        return 'Veuillez entrer votre téléphone sans les espaces';
+                      }
+                      if (value.substring(0, 1) == "00" ||
+                          value.substring(0, 2) == "+00") {
+                        // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
+                      }
                       return null;
                     },
                   ),
@@ -106,8 +118,43 @@ class CreateAccount extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer un mot de passe';
                       }
+                      if (!passwordRegex().hasMatch(value)) {
+                        return "Le mot de passe doit etre d'au moins 6 caractères";
+                      }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: 25.0),
+                  FormInputField(
+                    labelText: 'Répétez le mot de passe',
+                    placeholder: 'Répétez le nouveau mot de passe',
+                    fillColor: ColorStyle.bgFieldGrey,
+                    filled: true,
+                    password: true,
+                    controller:
+                        registerController.passwordConfirmInputController,
+                    textInputType: TextInputType.text,
+                    fieldValidator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer un mot de passe';
+                      } else if (!passwordRegex().hasMatch(value)) {
+                        return "Le mot de passe doit etre d'au moins 6 caractères";
+                      } else if (registerController
+                              .passwordTextController.text !=
+                          value) {
+                        return 'Les mots de passe ne correspondent pas';
+                      }
+                      return null;
+                    },
+                    // onChanged: (value) {
+                    //   if (value.isNotEmpty && passwordRegex().hasMatch(value)) {
+                    //     setState(() {});
+                    //     _formKey.currentState!.validate();
+                    //   } else {
+                    //     setState(() {});
+                    //     // _formKey.currentState!.;
+                    //   }
+                    // },
                   ),
                   const SizedBox(height: 30.0),
                   PrimaryButton(

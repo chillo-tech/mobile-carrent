@@ -8,11 +8,14 @@ import '../src/features/auth/otp/views/confirm_otp.dart';
 import '../src/features/auth/register/views/create_account.dart';
 import '../src/features/booking/views/booking.dart';
 import '../src/features/bookings/views/booking_details.dart';
+import '../src/features/bookings/views/bookings.dart';
+import '../src/features/bookings/views/my_car_bookings.dart';
 import '../src/features/bottom_nav/views/bottom_nav.dart';
 import '../src/features/create_post/views/create_post.dart';
 import '../src/features/create_post/views/create_post_or_booking_success.dart';
 import '../src/features/home/views/car_details.dart';
 import '../src/features/home/views/home.dart';
+import '../src/features/home/views/image_view.dart';
 import '../src/features/my_posts/views/my_posts.dart';
 import '../src/features/my_posts/views/post_details.dart';
 import '../src/features/notifications/views/notifications_screen.dart';
@@ -21,7 +24,7 @@ import '../src/features/search_result/views/search_result.dart';
 import '../src/features/settings/views/update_profile.dart';
 import '../src/features/splash/splash.dart';
 import '../src/features/success/success.dart';
-import '../src/features/web_view/web_view.dart';
+// import '../src/features/web_view/web_view.dart';
 import '../src/features/welcome/welcome.dart';
 import '../src/features/withdraw_booking/views/withdraw_booking.dart';
 
@@ -31,9 +34,11 @@ class Router {
     GetPage(name: '/welcome', page: () => const Welcome()),
     GetPage(name: '/login', page: () => Login()),
     GetPage(name: '/home', page: () => Home()),
+    GetPage(name: '/image_view', page: () => ImageView(), transition: Transition.fadeIn),
     GetPage(name: '/car_details', page: () => CarDetails()),
     GetPage(name: '/booking_withdraw', page: () => BookingWithdraw()),
     GetPage(name: '/booking', page: () => Booking()),
+    GetPage(name: '/my_car_bookings', page: () => MyCarBookings()),
     GetPage(name: '/search', page: () => const SearchScreen()),
     GetPage(name: '/search_result', page: () => SearchResultScreen()),
     GetPage(name: '/bottom_nav', page: () => BottomNav()),
@@ -50,8 +55,7 @@ class Router {
     GetPage(name: '/edit_post', page: () => EditPost()),
     GetPage(name: '/update_profile', page: () => UpdateProfile()),
     GetPage(name: '/notification', page: () => NotificationsScreen()),
-    
-    GetPage(name: '/web_view', page: () => ReservationWebView()),
-    
+
+    // GetPage(name: '/web_view', page: () => ReservationWebView()),
   ];
 }

@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../../theme/theme.dart';
+import '../../../../controllers/error_controller.dart';
 import '../../../../models/car_response.dart';
 import '../../create_post/controllers/post_controller.dart';
 import '../../widgets/form_input_field.dart';
@@ -229,6 +230,9 @@ class EditPost extends StatelessWidget {
                               if (files.isNotEmpty) {
                                 _editPostController.imageFiles.value = files;
                               }
+                              if (_editPostController.imageFiles.isNotEmpty) {
+                                _editPostController.hasErrorOnImages(false);
+                              }
                             },
                             child: Container(
                               width: double.infinity,
@@ -257,6 +261,18 @@ class EditPost extends StatelessWidget {
                               ),
                             ),
                           );
+                  }),
+                  gapH8,
+                  Obx(() {
+                    return _editPostController.hasErrorOnImages.value
+                        ? Text(
+                            "Selectionner au moins un document",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall!
+                                .copyWith(color: ColorStyle.lightPrimaryColor),
+                          )
+                        : SizedBox();
                   }),
                   GestureDetector(
                     onTap: () async {
@@ -311,7 +327,7 @@ class EditPost extends StatelessWidget {
                   Obx(() {
                     return _editPostController.hasErrorOnDocument.value
                         ? Text(
-                            "Select a document",
+                            "Selectionner un document",
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall!
@@ -385,21 +401,43 @@ class EditPost extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  // initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _editPostController
-                                          .startAvailableDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _editPostController
+                              //             .startAvailableDate.value) {
+                              //   _editPostController.startAvailableDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _editPostController.startAvailableDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _editPostController
+                                        .startAvailableDate.value);
+                                DateTime endDate = parseDate(
+                                    _editPostController.endAvailableDate.value);
+
+                                // Vérifier que la date de début ne soit pas après la date de fin
+                                if (startDate.isAfter(endDate)) {
+                                  _editPostController.startAvailableDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de début ne peut pas être après la date de fin.');
+                                } else {
+                                  _editPostController.startAvailableDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -419,8 +457,7 @@ class EditPost extends StatelessWidget {
                                               .startAvailableDate.isNotEmpty
                                           ? _editPostController
                                               .startAvailableDate.value
-                                          : convertDateToDayMonthYear(
-                                              post.startDisponibilityDate!),
+                                          : 'JJ/MM/AAAA',
                                       style: GoogleFonts.lato(
                                         color: ColorStyle.hintColor,
                                         fontSize: 15.0,
@@ -434,21 +471,42 @@ class EditPost extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () async {
+                              // Add one day to the day
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
                                   fieldLabelText: "Date",
                                   context: context,
-                                  // initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _editPostController
-                                          .endAvailableDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _editPostController.endAvailableDate.value) {
+                              //   _editPostController.endAvailableDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _editPostController.endAvailableDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _editPostController
+                                        .startAvailableDate.value);
+                                DateTime endDate = parseDate(
+                                    _editPostController.endAvailableDate.value);
+
+                                // Vérifier que la date de fin ne soit pas avant la date de début
+                                if (endDate.isBefore(startDate)) {
+                                  _editPostController.endAvailableDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de fin ne peut pas être avant la date de début.');
+                                } else {
+                                  _editPostController.endAvailableDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -468,8 +526,7 @@ class EditPost extends StatelessWidget {
                                               .endAvailableDate.isNotEmpty
                                           ? (_editPostController
                                               .endAvailableDate.value)
-                                          : convertDateToDayMonthYear(
-                                              post.endDisponibilityDate!),
+                                          : 'JJ/MM/AAAA',
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.lato(
                                         color: ColorStyle.hintColor,
@@ -510,6 +567,22 @@ class EditPost extends StatelessWidget {
                       )
                     ],
                   ),
+                  Obx(() {
+                    return (_editPostController.startAvailableDate.isEmpty ||
+                            _editPostController.endAvailableDate.isEmpty)
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              "Veuillez entrer une plage de dates valide",
+                              style: GoogleFonts.lato(
+                                color: ColorStyle.lightPrimaryColor,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          )
+                        : SizedBox();
+                  }),
                   const SizedBox(height: 15.0),
                   FormInputField(
                     labelText: 'Nombre de places',
@@ -528,7 +601,7 @@ class EditPost extends StatelessWidget {
                   ),
                   const SizedBox(height: 15.0),
                   FormInputField(
-                    labelText: 'Prix par jour en GBP',
+                    labelText: 'Prix par jour en FCFA',
                     placeholder:
                         'Entrez le prix de location journalier du véhicule',
                     // initialValue: double.parse(post.price!).round().toString(),
@@ -557,6 +630,18 @@ class EditPost extends StatelessWidget {
                     fieldValidator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer le numéro de téléphone du propriétaire';
+                      }
+                      if (value.contains('+')) {
+                        // return 'Veuillez entrer votre téléphone sans le "+"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
+                      }
+                      if (value.contains(' ')) {
+                        return 'Veuillez entrer votre téléphone sans les espaces';
+                      }
+                      if (value.substring(0, 1) == "00" ||
+                          value.substring(0, 2) == "+00") {
+                        // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
                       }
                       return null;
                     },
@@ -676,6 +761,16 @@ class EditPost extends StatelessWidget {
                               _editPostController
                                   .pickedFile.value!.name.isNotEmpty)) {
                             _editPostController.hasErrorOnDocument(true);
+                            return;
+                          }
+                          if (_editPostController.imageFiles.isEmpty) {
+                            _editPostController.hasErrorOnImages(true);
+                            return;
+                          }
+                          if (_editPostController
+                                  .startAvailableDate.value.isEmpty ||
+                              _editPostController
+                                  .endAvailableDate.value.isEmpty) {
                             return;
                           }
                           _editPostController.editPost();

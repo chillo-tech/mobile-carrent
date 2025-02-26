@@ -9,14 +9,18 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../common/common_fonctions.dart';
+import '../../../../controllers/user_controller.dart';
 import '../../../../theme/theme.dart';
 import '../../../../utils/utility.dart';
 import '../../create_post/controllers/post_controller.dart';
+import '../../widgets/primary_button.dart';
 
 class PostDetails extends StatelessWidget {
   PostDetails({super.key});
   final CarResponse post = Get.arguments;
   PostController postController = Get.put(PostController());
+
+  final UserController _userController = Get.put(UserController());
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +43,7 @@ class PostDetails extends StatelessWidget {
             post.startDisponibilityDate!, post.endDisponibilityDate!),
       },
       {
-        'title': 'Prix par jour',
+        'title': 'Prix par jour en FCFA',
         'value': post.price!,
       },
       {
@@ -137,97 +141,137 @@ class PostDetails extends StatelessWidget {
                         ),
                         childrenDelegate: SliverChildBuilderDelegate(
                           childCount: post.imagePathCar?.length,
-                          (context, index) => ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              // child: Image.network(
-                              //   "https://files.chillo.fr/${post.imagePathCar![index]}",
-                              //   fit: BoxFit.cover,
-                              // ),
-                              child: Image.network(
-                                "https://files.chillo.fr/${post.imagePathCar![index]}",
-                                fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    // Retourne l'image une fois chargée
-                                    return child;
-                                  }
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      color: ColorStyle.lightPrimaryColor,
-                                      backgroundColor: ColorStyle.grey,
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  (loadingProgress
-                                                          .expectedTotalBytes ??
-                                                      1)
-                                              : null,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Retourne un placeholder ou un widget d'erreur si l'image échoue
-                                  return Center(
-                                    child: Icon(
-                                      Icons.error,
-                                      color: Colors.red,
-                                      size: 50.0,
-                                    ),
-                                  );
-                                },
-                              )),
+                          (context, index) => GestureDetector(
+                            onTap: () {
+                              Get.toNamed('/image_view', arguments: {
+                                'imageUrls': post.imagePathCar,
+                                'initialIndex': post.imagePathCar?.indexWhere(
+                                    (imageUrl) =>
+                                        imageUrl == post.imagePathCar![index]),
+                              });
+                            },
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                // child: Image.network(
+                                //   "https://files.chillo.fr/${post.imagePathCar![index]}",
+                                //   fit: BoxFit.cover,
+                                // ),
+                                child: Image.network(
+                                  "https://files.chillo.fr/${post.imagePathCar![index]}",
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      // Retourne l'image une fois chargée
+                                      return child;
+                                    }
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorStyle.lightPrimaryColor,
+                                        backgroundColor: ColorStyle.grey,
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                (loadingProgress
+                                                        .expectedTotalBytes ??
+                                                    1)
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                    return Center(
+                                      child: Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                        size: 50.0,
+                                      ),
+                                    );
+                                  },
+                                )),
+                          ),
                         ),
                       )
-                    : Container(
-                        width: double.infinity,
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        // padding: const EdgeInsets.symmetric(vertical: 20.0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          // child: Image.network(
-                          //   "https://files.chillo.fr/${post.imagePathCar![0]}",
-                          //   fit: BoxFit.cover,
-                          // ),
-                          child: Image.network(
-                            "https://files.chillo.fr/${post.imagePathCar![0]}",
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                // Retourne l'image une fois chargée
-                                return child;
-                              }
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: ColorStyle.lightPrimaryColor,
-                                  backgroundColor: ColorStyle.grey,
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          (loadingProgress.expectedTotalBytes ??
-                                              1)
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              // Retourne un placeholder ou un widget d'erreur si l'image échoue
-                              return Center(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                  size: 50.0,
-                                ),
-                              );
-                            },
+                    : GestureDetector(
+                        onTap: () {
+                          Get.toNamed('/image_view', arguments: {
+                            'imageUrls': post.imagePathCar,
+                            'initialIndex': post.imagePathCar?.indexWhere(
+                                (imageUrl) =>
+                                    imageUrl == post.imagePathCar![0]),
+                          });
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          // padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.0)),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            // child: Image.network(
+                            //   "https://files.chillo.fr/${post.imagePathCar![0]}",
+                            //   fit: BoxFit.cover,
+                            // ),
+                            child: Image.network(
+                              post.imagePathCar!.contains(
+                                          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                      post.imagePathCar![0] ==
+                                          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                  ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                  : "https://files.chillo.fr/${post.imagePathCar![0]}",
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) {
+                                  // Retourne l'image une fois chargée
+                                  return child;
+                                }
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: ColorStyle.lightPrimaryColor,
+                                    backgroundColor: ColorStyle.grey,
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            (loadingProgress
+                                                    .expectedTotalBytes ??
+                                                1)
+                                        : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                // Retourne un placeholder ou un widget d'erreur si l'image échoue
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                    size: 50.0,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                 gapH32,
+                (post.reservationNumber ?? 0) > 0
+                    ? PrimaryButton(
+                        title: 'Voir les réservations',
+                        color: ColorStyle.lightPrimaryColor,
+                        onPressed: () {
+                          Get.toNamed('/my_car_bookings', arguments: {
+                            'carId': post.id,
+                          });
+                        },
+                      )
+                    : SizedBox(),
+                gapH16,
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -372,6 +416,76 @@ class PostDetails extends StatelessWidget {
                     )
                   ],
                 ),
+                _userController.currentuser != null &&
+                        (_userController.currentuser!.role != null &&
+                            _userController.currentuser!.role!.isNotEmpty &&
+                            _userController.currentuser!.role! == 'ADMIN')
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          gapH16,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "Valider l'annonce",
+                                  style: GoogleFonts.lato(
+                                    color: ColorStyle.opacGrey,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Get.dialog(
+                                    Utility.simpleBinaryDialog(
+                                      title: "Valider l'annonce",
+                                      content:
+                                          "Voulez-vous vraiment valider cette annonce ?",
+                                      onBackPressed: () => Get.back(),
+                                      onContinuePressed: () async {
+                                        Get.back();
+                                        await postController
+                                            .validateOrRejectPost(
+                                                carId: post.id,
+                                                isValidate: true);
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 10.0),
+                                  decoration: BoxDecoration(
+                                    color: ColorStyle.lightGreyColor1,
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        FontAwesomeIcons.check,
+                                        size: 16.0,
+                                        color: ColorStyle.success,
+                                      ),
+                                      gapW6,
+                                      Text(
+                                        "Valider",
+                                        style: GoogleFonts.lato(
+                                          color: ColorStyle.success,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
                 gapH20,
               ],
             ),

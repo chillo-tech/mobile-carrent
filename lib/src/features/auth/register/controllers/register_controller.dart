@@ -20,6 +20,7 @@ class RegisterController extends GetxController {
   TextEditingController phoneTextController = TextEditingController();
   TextEditingController emailTextController = TextEditingController();
   TextEditingController passwordTextController = TextEditingController();
+  TextEditingController passwordConfirmInputController = TextEditingController();
   var biometricAvailable = false.obs;
   RxList<Map<String, dynamic>> biometricOptions = RxList();
   // FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage();
@@ -42,6 +43,13 @@ class RegisterController extends GetxController {
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
+
+  RxString? errorFullName = ''.obs;
+  RxString? errorPhone = ''.obs;
+  RxString? errorEmail = ''.obs;
+  RxString? errorPassword = ''.obs;
+  RxString? errorPasswordConfirm = ''.obs;
+
   @override
   void onInit() async {
     countriesController.fetchSaraAvailableCountries();
@@ -50,11 +58,13 @@ class RegisterController extends GetxController {
   }
 
   void createAccount() async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     AuthService authService = AuthService();
 
@@ -86,11 +96,13 @@ class RegisterController extends GetxController {
   }
 
   void activateUser(String otp) async {
-    Get.dialog(Center(
-      child: CircularProgressIndicator(
-        color: Get.theme.colorScheme.secondary,
-      ),
-    ));
+    Get.dialog(
+        barrierDismissible: false,
+        Center(
+          child: CircularProgressIndicator(
+            color: Get.theme.colorScheme.secondary,
+          ),
+        ));
     // Utility.showLoader("${'logging_in'.tr}", "${'we_check_your_login'.tr}...");
     AuthService authService = AuthService();
 

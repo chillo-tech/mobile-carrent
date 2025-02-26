@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:carrent/controllers/error_controller.dart';
+
 import '../../../../common/app_sizes.dart';
 import '../../../../common/common_fonctions.dart';
 import '../../home/controllers/home_controller.dart';
@@ -17,9 +19,16 @@ import '../../../../theme/theme.dart';
 import '../../widgets/form_input_field.dart';
 import '../../widgets/primary_button.dart';
 
-class CreatePost extends StatelessWidget {
+class CreatePost extends StatefulWidget {
   CreatePost({super.key});
+
+  @override
+  State<CreatePost> createState() => _CreatePostState();
+}
+
+class _CreatePostState extends State<CreatePost> {
   final PostController _postcontroller = Get.put(PostController());
+
   final _formKey = GlobalKey<FormState>();
 
   List<String> vehicleRate = [
@@ -34,11 +43,37 @@ class CreatePost extends StatelessWidget {
     '9',
     '10'
   ];
+
   List<String> fuelType = [
     'Super',
     'Gazoil',
     'Electrique',
   ];
+
+  @override
+  initState() {
+    _postcontroller.imageFile = XFile('').obs;
+    _postcontroller.pickedFile = XFile('').obs;
+    _postcontroller.makeController = TextEditingController();
+    _postcontroller.modelController = TextEditingController();
+    _postcontroller.yearController = TextEditingController();
+    _postcontroller.conditionController = TextEditingController();
+    _postcontroller.typeCarburantController = TextEditingController();
+    _postcontroller.numberOfPlacesController = TextEditingController();
+    _postcontroller.imagePathCarController = TextEditingController();
+    _postcontroller.imagePathDocumentController = TextEditingController();
+    _postcontroller.phoneNumberProprietorController = TextEditingController();
+    _postcontroller.priceController = TextEditingController();
+    _postcontroller.descriptionController = TextEditingController();
+    _postcontroller.startAvailableDate = ''.obs;
+    _postcontroller.endAvailableDate = ''.obs;
+    _postcontroller.imageFiles = RxList();
+    _postcontroller.hasErrorOnDocument = false.obs;
+    _postcontroller.hasErrorOnImages = false.obs;
+    _postcontroller.isOnPageOpening = true.obs;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,7 +114,7 @@ class CreatePost extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    "Créer une Annonce",
+                    "Créer une annonce",
                     style: GoogleFonts.lato(
                       color: ColorStyle.fontColorLight,
                       fontSize: 24.0,
@@ -93,6 +128,9 @@ class CreatePost extends StatelessWidget {
                       List<XFile> files = (await picker.pickMultiImage());
                       if (files.isNotEmpty) {
                         _postcontroller.imageFiles.value = files;
+                      }
+                      if (_postcontroller.imageFiles.isNotEmpty) {
+                        _postcontroller.hasErrorOnImages(false);
                       }
                     },
                     child: Obx(() {
@@ -137,6 +175,18 @@ class CreatePost extends StatelessWidget {
                             );
                     }),
                   ),
+                  gapH8,
+                  Obx(() {
+                    return _postcontroller.hasErrorOnImages.value
+                        ? Text(
+                            "Selectionner au moins un document",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall!
+                                .copyWith(color: ColorStyle.lightPrimaryColor),
+                          )
+                        : SizedBox();
+                  }),
                   GestureDetector(
                     onTap: () async {
                       final ImagePicker picker = ImagePicker();
@@ -189,7 +239,7 @@ class CreatePost extends StatelessWidget {
                   Obx(() {
                     return _postcontroller.hasErrorOnDocument.value
                         ? Text(
-                            "Select a document",
+                            "Selectionner un document",
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall!
@@ -246,10 +296,8 @@ class CreatePost extends StatelessWidget {
                           GestureDetector(
                             onTap: () async {
                               // Add one day to the day
-                              var initialDate = DateTime(
-                                  DateTime.now().year,
-                                  DateTime.now().month,
-                                  DateTime.now().day + 1);
+                              var initialDate = DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day + 1);
                               final DateTime? picked = await showDatePicker(
                                   fieldHintText: "Choisissez une date",
                                   locale: const Locale('fr'),
@@ -259,12 +307,31 @@ class CreatePost extends StatelessWidget {
                                   firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _postcontroller
-                                          .startAvailableDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _postcontroller
+                              //             .startAvailableDate.value) {
+                              //   _postcontroller.startAvailableDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _postcontroller.startAvailableDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _postcontroller.startAvailableDate.value);
+                                DateTime endDate = parseDate(
+                                    _postcontroller.endAvailableDate.value);
+
+                                // Vérifier que la date de début ne soit pas après la date de fin
+                                if (startDate.isAfter(endDate)) {
+                                  _postcontroller.isOnPageOpening(false);
+                                  _postcontroller.startAvailableDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de début ne peut pas être après la date de fin.');
+                                } else {
+                                  _postcontroller.startAvailableDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -310,11 +377,30 @@ class CreatePost extends StatelessWidget {
                                   firstDate: initialDate,
                                   lastDate: DateTime(2030));
                               print(picked);
-                              if (picked != null &&
-                                  picked.toString() !=
-                                      _postcontroller.endAvailableDate.value) {
+                              // if (picked != null &&
+                              //     picked.toString() !=
+                              //         _postcontroller.endAvailableDate.value) {
+                              //   _postcontroller.endAvailableDate(
+                              //       convertDate(picked.toString()));
+                              // }
+                              if (picked != null) {
                                 _postcontroller.endAvailableDate(
                                     convertDate(picked.toString()));
+                                DateTime startDate = parseDate(
+                                    _postcontroller.startAvailableDate.value);
+                                DateTime endDate = parseDate(
+                                    _postcontroller.endAvailableDate.value);
+
+                                // Vérifier que la date de fin ne soit pas avant la date de début
+                                if (endDate.isBefore(startDate)) {
+                                  _postcontroller.isOnPageOpening(false);
+                                  _postcontroller.endAvailableDate('');
+                                  // ErrorController().showMessage(
+                                  //     'La date de fin ne peut pas être avant la date de début.');
+                                } else {
+                                  _postcontroller.endAvailableDate(
+                                      convertDate(picked.toString()));
+                                }
                               }
                             },
                             child: Container(
@@ -375,6 +461,23 @@ class CreatePost extends StatelessWidget {
                       )
                     ],
                   ),
+                  Obx(() {
+                    return (_postcontroller.startAvailableDate.isEmpty ||
+                                _postcontroller.endAvailableDate.isEmpty) &&
+                            !_postcontroller.isOnPageOpening.value
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              "Veuillez entrer une plage de dates valide",
+                              style: GoogleFonts.lato(
+                                color: ColorStyle.lightPrimaryColor,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          )
+                        : SizedBox();
+                  }),
                   const SizedBox(height: 15.0),
                   FormInputField(
                     labelText: 'Année',
@@ -407,7 +510,7 @@ class CreatePost extends StatelessWidget {
                   ),
                   const SizedBox(height: 15.0),
                   FormInputField(
-                    labelText: 'Prix par jour en GBP',
+                    labelText: 'Prix par jour en FCFA',
                     placeholder:
                         'Entrez le prix de location journalier du véhicule',
                     fillColor: ColorStyle.bgFieldGrey,
@@ -433,6 +536,18 @@ class CreatePost extends StatelessWidget {
                     fieldValidator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer le numéro de téléphone du propriétaire';
+                      }
+                      if (value.contains('+')) {
+                        // return 'Veuillez entrer votre téléphone sans le "+"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
+                      }
+                      if (value.contains(' ')) {
+                        return 'Veuillez entrer votre téléphone sans les espaces';
+                      }
+                      if (value.substring(0, 1) == "00" ||
+                          value.substring(0, 2) == "+00") {
+                        // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                        return 'Veuillez entrer votre téléphone sans indicatif';
                       }
                       return null;
                     },
@@ -539,12 +654,22 @@ class CreatePost extends StatelessWidget {
                   PrimaryButton(
                       title: 'Créer',
                       onPressed: () {
+                        _postcontroller.isOnPageOpening(false);
                         if (_formKey.currentState!.validate()) {
                           if (!(_postcontroller.pickedFile.value != null &&
                               _postcontroller.pickedFile.value?.name != null &&
                               _postcontroller
                                   .pickedFile.value!.name.isNotEmpty)) {
                             _postcontroller.hasErrorOnDocument(true);
+                            return;
+                          }
+                          if (_postcontroller.imageFiles.isEmpty) {
+                            _postcontroller.hasErrorOnImages(true);
+                            return;
+                          }
+                          if (_postcontroller
+                                  .startAvailableDate.value.isEmpty ||
+                              _postcontroller.endAvailableDate.value.isEmpty) {
                             return;
                           }
                           _postcontroller.createPost();

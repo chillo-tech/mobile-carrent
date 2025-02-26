@@ -21,6 +21,10 @@ RegExp emailRegex() {
       r'^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 }
 
+RegExp passwordRegex() {
+  return RegExp(r'^.{6,}$');
+}
+
 String convertDate(String inputDate) {
   DateTime dateTime = DateTime.parse(inputDate);
   String day = dateTime.day.toString().padLeft(2, '0');
@@ -41,7 +45,8 @@ String convertDateToPlainString(String inputDate) {
   DateTime parsedDate = DateFormat("dd/MM/yyyy").parse(inputDate);
 
   // Formatte la date au format souhaité
-  String formattedDate = DateFormat("EEE d MMM", 'fr_FR').format(parsedDate);
+  String formattedDate =
+      DateFormat("EEE d MMM yyyy", 'fr_FR').format(parsedDate);
 
   return formattedDate; // Résultat : Sam 10 Nov
 }
@@ -71,7 +76,7 @@ String formatDateRangewithYearFromStrings(
   final inputFormat = DateFormat('dd/MM/yyyy');
 
   // Format de sortie pour afficher les dates
-  final outputFormat = DateFormat('d MMM yy');
+  final outputFormat = DateFormat('d MMM yy', 'fr_FR');
 
   // Convertir les chaînes en objets DateTime
   DateTime startDate = inputFormat.parse(startDateStr);
@@ -541,11 +546,11 @@ Widget conflictSheet(
 
 Color getPostColorByStatus(String status) {
   switch (status) {
-    case 'In review':
+    case 'In review' || 'En révision':
       return ColorStyle.hintColor;
-    case 'Approved':
+    case 'Approved' || 'Validé':
       return ColorStyle.success;
-    case 'Not Approved':
+    case 'Not Approved' || 'Rejeté':
       return ColorStyle.lightPrimaryColor;
     default:
       return ColorStyle.success;
@@ -554,11 +559,11 @@ Color getPostColorByStatus(String status) {
 
 Color getPostBorderColorByStatus(String status) {
   switch (status) {
-    case 'In review':
+    case 'In review' || 'En révision':
       return ColorStyle.white;
-    case 'Approved':
+    case 'Approved' || 'Validé':
       return ColorStyle.success;
-    case 'Not Approved':
+    case 'Not Approved' || 'Rejeté':
       return ColorStyle.lightPrimaryColor;
     default:
       return ColorStyle.success;
@@ -567,11 +572,11 @@ Color getPostBorderColorByStatus(String status) {
 
 IconData getPostIconByStatus(String status) {
   switch (status) {
-    case 'In review':
+    case 'In review' || 'En révision':
       return FontAwesomeIcons.clock;
-    case 'Approved':
+    case 'Approved' || 'Validé':
       return FontAwesomeIcons.checkCircle;
-    case 'Not Approved':
+    case 'Not Approved' || 'Rejeté':
       return FontAwesomeIcons.close;
     default:
       return FontAwesomeIcons.checkCircle;
@@ -580,7 +585,7 @@ IconData getPostIconByStatus(String status) {
 
 Color getBookingColorByStatus(String status) {
   switch (status.toLowerCase()) {
-    case 'en cours' || 'ouvert' || 'confirmé':
+    case 'en cours' || 'ouvert' || 'confirmé' || 'a valider':
       return ColorStyle.hintColor;
     case 'not approved' || 'en attente':
       return Color(0xFFBF1C30);
@@ -595,7 +600,12 @@ Color getBookingColorByStatus(String status) {
 
 Color getBookingBackgroundColorByStatus(String status) {
   switch (status.toLowerCase()) {
-    case 'en cours' || 'ouvert' || 'retiré' || 'récupéré' || 'confirmé':
+    case 'en cours' ||
+          'ouvert' ||
+          'retiré' ||
+          'récupéré' ||
+          'confirmé' ||
+          'a valider':
       return ColorStyle.bgFieldGrey;
     case 'approved':
       return ColorStyle.success;
@@ -610,7 +620,7 @@ Color getBookingBackgroundColorByStatus(String status) {
 
 Color getBookingBorderColorByStatus(String status) {
   switch (status.toLowerCase()) {
-    case 'en cours' || 'ouvert' || 'confirmé':
+    case 'en cours' || 'ouvert' || 'confirmé' || 'a valider':
       return ColorStyle.white;
     case 'Approved':
       return ColorStyle.success;
@@ -632,7 +642,8 @@ String getBookingIconByStatus(String status) {
   }
 }
 
-Widget headStarsFromRating(List<Review> reviews, {Color enableColor = Colors.yellow}) {
+Widget headStarsFromRating(List<Review> reviews,
+    {Color enableColor = Colors.yellow}) {
   return Row(
     children: List.generate(5, (index) {
       final averageRating =
@@ -664,4 +675,78 @@ Widget headStarsFromRating(List<Review> reviews, {Color enableColor = Colors.yel
       }
     }),
   );
+}
+
+DateTime parseDate(String dateStr) {
+  if (dateStr.isEmpty) {
+    print("La chaîne de date est vide.");
+    return DateTime((DateTime.now().year + 20), 1,
+        26); // Retourne la date actuelle si la chaîne est vide
+  }
+  print('Chaîne de date reçue : $dateStr');
+
+  try {
+    // Parse la date au format "dd/MM/yyyy" puis la reconvertit en objet DateTime
+    final parsedDate = DateFormat("dd/MM/yyyy").parse(dateStr);
+    return DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+  } catch (e) {
+    print("Erreur lors de la conversion de la date : $e");
+    return DateTime.now(); // Retourne la date actuelle en cas d'erreur
+  }
+}
+
+enum FieldType {
+  email,
+  phone,
+  password,
+  confirmPassword,
+  text,
+}
+
+String? validateField({
+  required FieldType fieldType,
+  required String emptyError,
+  required String? value,
+  String? valueSecondary,
+}) {
+  if (value == null || value.isEmpty) {
+    return emptyError;
+  }
+
+  switch (fieldType) {
+    case FieldType.email:
+      final emailRegex =
+          RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+      if (!emailRegex.hasMatch(value)) {
+        return 'Veuillez entrer une adresse e-mail valide';
+      }
+      break;
+
+   case FieldType.phone:
+      final phoneRegex = RegExp(r'^(?!00|\+00)(?!.*\s)(?!.*\+)[0-9]{7,15}$');
+      if (!phoneRegex.hasMatch(value)) {
+        return 'Veuillez entrer un numéro de téléphone valide sans indicatif ni espace';
+      }
+      break;
+
+    case FieldType.password:
+      if (value.length < 6) {
+        return 'Le mot de passe doit contenir au moins 6 caractères';
+      }
+      break;
+
+    case FieldType.confirmPassword:
+      if (valueSecondary == null || value != valueSecondary) {
+        return 'Les mots de passe ne correspondent pas';
+      }
+      break;
+
+    case FieldType.text:
+      if (value.length < 2) {
+        return 'Veuillez entrer au moins 2 caractères';
+      }
+      break;
+  }
+
+  return null;
 }

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../common/common_fonctions.dart';
+import '../../../../controllers/countries_controller.dart';
 import '../../../../controllers/user_controller.dart';
 import '../../../../theme/theme.dart';
 import '../../widgets/form_input_field.dart';
@@ -20,12 +21,16 @@ class UpdateProfile extends StatelessWidget {
       Get.put(UpdateProfileController());
   final UserController _userController = Get.put(UserController());
 
+  CountriesController countriesController = Get.find();
+
   @override
   Widget build(BuildContext context) {
     _updateProfileController.fullNameTextController.text =
         "${_userController.currentuser?.completeName}";
-    _updateProfileController.phoneTextController.text =
-        _userController.currentuser?.phoneNumber ?? '';
+    _updateProfileController.phoneTextController
+        .text = _userController.currentuser?.phoneNumber.replaceFirst(
+            "+${countriesController.selectedCountry.value.phonecode}", "") ??
+        '';
     _updateProfileController.emailTextController.text =
         _userController.currentuser?.email ?? '';
     // _updateProfileController.passwordTextController.text = "************";
@@ -107,6 +112,18 @@ class UpdateProfile extends StatelessWidget {
                         fieldValidator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer votre téléphone';
+                          }
+                          if (value.contains('+')) {
+                            // return 'Veuillez entrer votre téléphone sans le "+"';
+                            return 'Veuillez entrer votre téléphone sans indicatif';
+                          }
+                          if (value.contains(' ')) {
+                            return 'Veuillez entrer votre téléphone sans les espaces';
+                          }
+                          if (value.substring(0, 1) == "00" ||
+                              value.substring(0, 2) == "+00") {
+                            // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                            return 'Veuillez entrer votre téléphone sans indicatif';
                           }
                           return null;
                         },

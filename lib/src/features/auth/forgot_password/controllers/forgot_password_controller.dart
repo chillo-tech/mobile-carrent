@@ -27,14 +27,23 @@ class ForgotPasswordController extends GetxController {
 
   CountriesController countriesController = Get.put(CountriesController());
 
+  void clear() {
+    emailInputController.clear();
+    phoneInputController.clear();
+    newPasswordInputController.clear();
+    newPasswordConfirmInputController.clear();
+  }
+
   void sendEmailOrSms() async {
     AuthService authService = AuthService();
     try {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
       final String recipientChannel = resetWithEmail.value
           ? emailInputController.text
           : "+${countriesController.selectedCountry.value.phonecode}${phoneInputController.text}";
@@ -68,11 +77,13 @@ class ForgotPasswordController extends GetxController {
   void validatePasscode(String otp) async {
     AuthService authService = AuthService();
     try {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
       final String recipientChannel = resetWithEmail.value
           ? emailInputController.text
           : "+${countriesController.selectedCountry.value.phonecode}${phoneInputController.text}";
@@ -94,11 +105,13 @@ class ForgotPasswordController extends GetxController {
   void setUpNewPassword() async {
     AuthService authService = AuthService();
     try {
-      Get.dialog(Center(
-        child: CircularProgressIndicator(
-          color: Get.theme.colorScheme.secondary,
-        ),
-      ));
+      Get.dialog(
+          barrierDismissible: false,
+          Center(
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.secondary,
+            ),
+          ));
       final String recipientChannel = resetWithEmail.value
           ? emailInputController.text
           : "+${countriesController.selectedCountry.value.phonecode}${phoneInputController.text}";
@@ -114,8 +127,10 @@ class ForgotPasswordController extends GetxController {
           'title': 'Réinitialisation du mot de passe',
           'description': 'Votre mot de passe a été réinitialisé avec succès',
           'buttonTitle': 'Se connecter maintenant',
-          'route': '/login'
+          'route': '/login',
+          'back': '/login'
         });
+        clear();
       });
     } catch (error) {
       Get.back();

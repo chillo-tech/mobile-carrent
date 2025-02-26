@@ -91,9 +91,10 @@ class _FormInputFieldState extends State<FormInputField> {
         children: [
           widget.labelText != null
               ? Text(
-                  widget.isUppercase
-                      ? widget.labelText!.toUpperCase()
-                      : widget.labelText!.toLowerCase().capitalizeEachWord,
+                  widget.labelText!,
+                  // widget.isUppercase
+                  //     ? widget.labelText!.toUpperCase()
+                  //     : widget.labelText!.toLowerCase().capitalizeEachWord,
                   style: GoogleFonts.lato(
                     color: ColorStyle.fontColorLight,
                     fontSize: 16.0,
