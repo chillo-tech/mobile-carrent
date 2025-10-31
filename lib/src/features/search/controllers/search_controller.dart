@@ -22,37 +22,41 @@ class SearchBarController extends GetxController {
     return [
       SearchEntity(
         title: 'Marques',
-        sections: homeController.cars.map((car) {
+        sections: homeController.cars
+            .map((car) => car.make)
+            .toSet()
+            .map((make) {
           return Section(
-              icon: Assets.building,
-              title: car.make,
-              action: () async {
-                searchResultController.carFilter = CarFilter();
-                searchResultController.appliedFilters.value.clear();
-                searchResultController.carFilter.makes = [];
-                searchResultController.carFilter.makes?.assign(car.make);
-                searchResultController.appliedFilters.value.addIf(
-                    !searchResultController.appliedFilters.value
-                        .contains('brand'),
-                    'brand');
-                searchResultController.update();
-                print(searchResultController.carFilter.makes);
-                await searchResultController.searchCar(navigate: true);
-              });
+            icon: Assets.car,
+            title: make,
+            action: () async {
+              searchResultController.carFilter = CarFilter();
+              searchResultController.appliedFilters.value.clear();
+              searchResultController.carFilter.makes = [];
+              searchResultController.carFilter.makes?.assign(make);
+              searchResultController.appliedFilters.value.addIf(
+                  !searchResultController.appliedFilters.value
+                      .contains('brand'),
+                  'brand');
+              searchResultController.update();
+              print(searchResultController.carFilter.makes);
+              await searchResultController.searchCar(navigate: true);
+            },
+          );
         }).toList(),
       ),
       SearchEntity(
-        title: 'Types',
+        title: 'Carburant',
         sections: [
           Section(
               icon: Assets.car,
-              title: 'Super',
+              title: 'Essence',
               action: () async {
                 searchResultController.carFilter = CarFilter();
                 searchResultController.appliedFilters.value.clear();
                 searchResultController.carFilter.typesCarburant = [];
                 searchResultController.carFilter.typesCarburant
-                    ?.assign('Super');
+                    ?.assign('Essence');
                 searchResultController.appliedFilters.value.addIf(
                     !searchResultController.appliedFilters.value
                         .contains('type'),
@@ -89,6 +93,24 @@ class SearchBarController extends GetxController {
                 searchResultController.carFilter.typesCarburant = [];
                 searchResultController.carFilter.typesCarburant
                     ?.assign('Electrique');
+                searchResultController.appliedFilters.value.addIf(
+                    !searchResultController.appliedFilters.value
+                        .contains('type'),
+                    'type');
+                searchResultController.update();
+                print(searchResultController.appliedFilters);
+
+                await searchResultController.searchCar(navigate: true);
+              }),
+          Section(
+              icon: Assets.car,
+              title: 'Hybride',
+              action: () async {
+                searchResultController.carFilter = CarFilter();
+                searchResultController.appliedFilters.value.clear();
+                searchResultController.carFilter.typesCarburant = [];
+                searchResultController.carFilter.typesCarburant
+                    ?.assign('Hybride');
                 searchResultController.appliedFilters.value.addIf(
                     !searchResultController.appliedFilters.value
                         .contains('type'),

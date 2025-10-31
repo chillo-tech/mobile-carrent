@@ -27,11 +27,13 @@ class ImageView extends StatelessWidget {
               // boundaryMargin: const EdgeInsets.all(100),
               minScale: 0.5,
               maxScale: 4.0,
-              child: SizedBox.expand( // Permet de remplir tout l'écran
-                  child: FittedBox( // Permet de garder l'image en plein écran en zoomant
-                    fit: BoxFit.contain,
+              child: SizedBox.expand(
+                // Permet de remplir tout l'écran
+                child: FittedBox(
+                  // Permet de garder l'image en plein écran en zoomant
+                  fit: BoxFit.contain,
                   child: Image.network(
-                    "https://files.chillo.fr/${imageUrls[index]}",
+                    "https://files.mky-corp.fr/${imageUrls[index]}",
                     fit: BoxFit.contain,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) {
@@ -45,6 +47,8 @@ class ImageView extends StatelessWidget {
                               ? loadingProgress.cumulativeBytesLoaded /
                                   (loadingProgress.expectedTotalBytes ?? 1)
                               : null,
+                          strokeWidth: 2.0,
+                          // padding: EdgeInsets.symmetric(horizontal: 40.0),
                         ),
                       );
                     },

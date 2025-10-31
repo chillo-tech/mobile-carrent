@@ -77,7 +77,7 @@ class _MyPostsState extends State<MyPosts> {
                                           .myCars[index].imagePathCar![0] ==
                                       'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                               ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                              : "https://files.chillo.fr/${_postController.myCars[index].imagePathCar![0]}",
+                              : "https://files.mky-corp.fr/${_postController.myCars[index].imagePathCar![0]}",
                           // description: _postController.myCars[index].description ??
                           description: _postController
                                           .myCars[index].description !=

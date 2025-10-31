@@ -41,345 +41,316 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorStyle.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 16.0),
-                child: Stack(
+      body: WillPopScope(
+        onWillPop: () async {
+          _searchBarController.isPlaceSearchActivated(false);
+          return true;
+        },
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Form(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Form(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
+                    Obx(() {
+                      return _searchBarController.isPlaceSearchActivated.value
+                          ? topSheet(context, navigate: true)
+                          : const SizedBox();
+                    }),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: ColorStyle.bgFieldGrey,
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: Row(
                         children: [
                           GestureDetector(
-                            onTap: () => _searchBarController
-                                .isPlaceSearchActivated(true),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 8.0),
-                              decoration: BoxDecoration(
-                                color: ColorStyle.bgFieldGrey,
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              child: Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.back();
-                                    },
-                                    child: const Icon(
-                                      FontAwesomeIcons.arrowLeft,
-                                      color: ColorStyle.textBlackColor,
-                                      size: 20.0,
-                                    ),
-                                  ),
-                                  // SvgPicture.asset(Assets.search),
-                                  const SizedBox(width: 10.0),
-                                  Text(
-                                    _searchBarController
-                                            .searchPlace.value.text.isNotEmpty
-                                        ? _searchBarController
-                                            .searchPlace.value.text
-                                        : "N’importe ou",
-                                    style: GoogleFonts.lato(
-                                      color: ColorStyle.greyColor,
-                                      fontSize: 16.0,
-                                    ),
-                                  )
-                                ],
-                              ),
+                            onTap: () {
+                              Get.back();
+                            },
+                            child: const Icon(
+                              FontAwesomeIcons.arrowLeft,
+                              color: ColorStyle.textBlackColor,
+                              size: 20.0,
                             ),
                           ),
-                          gapH10,
-                          Obx(() {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6.0),
-                                  decoration: BoxDecoration(
-                                      color: searchResultController
-                                              .appliedFilters.value.isEmpty
-                                          ? ColorStyle.containerBg
-                                          : ColorStyle.blackBackground,
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  child: searchResultController
-                                          .appliedFilters.value.isEmpty
-                                      ? SvgPicture.asset(Assets.filter)
-                                      : InkWell(
-                                          onTap: (() async {
-                                            searchResultController
-                                                .appliedFilters.value
-                                                .clear();
-
-                                            searchResultController.carFilter =
-                                                CarFilter();
-                                            await searchResultController
-                                                .searchCar();
-
-                                            setState(() {});
-                                            searchResultController.update();
-                                          }),
-                                          child: Row(
-                                            children: [
-                                              SvgPicture.asset(
-                                                Assets.filter,
-                                                color: ColorStyle.lightWhite,
-                                              ),
-                                              Text(
-                                                "(${searchResultController.appliedFilters.value.length})",
-                                                style: GoogleFonts.lato(
-                                                  color: ColorStyle.lightWhite,
-                                                  fontSize: 12.0,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                ),
-                                filterButton("prix",
-                                    isFilterApplied: searchResultController
-                                        .appliedFilters.value
-                                        .contains('price'), action: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return priceFilter();
-                                    },
-                                  ).then((_) {
-                                    setState(
-                                        () {}); // Forcer la mise à jour de l'interface
-                                  });
-                                },
-                                    isEnable: searchResultController
-                                            .getMinPrice(searchResultController
-                                                .filteredCars)! <
-                                        searchResultController.getMaxPrice(
-                                            searchResultController
-                                                .filteredCars)!),
-                                filterButton("Type de vehicule",
-                                    isFilterApplied: searchResultController
-                                        .appliedFilters.value
-                                        .contains('type'), action: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: typeFilter(),
-                                      );
-                                    },
-                                  ).then((_) {
-                                    setState(
-                                        () {}); // Forcer la mise à jour de l'interface
-                                  });
-                                },
-                                    isEnable: searchResultController
-                                            .filteredCars.length >
-                                        1),
-                                filterButton("Marque",
-                                    isFilterApplied: searchResultController
-                                        .appliedFilters.value
-                                        .contains('brand'), action: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: brandFilter(),
-                                      );
-                                    },
-                                  ).then((_) {
-                                    setState(
-                                        () {}); // Forcer la mise à jour de l'interface
-                                  });
-                                },
-                                    isEnable: searchResultController
-                                            .filteredCars.length >
-                                        1),
-                                filterButton("Année",
-                                    isFilterApplied: searchResultController
-                                        .appliedFilters.value
-                                        .contains('year'), action: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (context) {
-                                      return yearFilter();
-                                    },
-                                  ).then((_) {
-                                    setState(
-                                        () {}); // Forcer la mise à jour de l'interface
-                                  });
-                                },
-                                    isEnable: searchResultController.getMinYear(
-                                            searchResultController
-                                                .filteredCars)! <
-                                        searchResultController.getMaxYear(
-                                            searchResultController
-                                                .filteredCars)!),
-                              ],
-                            );
-                          }),
-                          Obx(() {
-                            return searchResultController
-                                    .filteredCars.isNotEmpty
-                                ? Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      sectionTitle(
-                                          '${searchResultController.filteredCars.length} cars available'),
-                                      ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: searchResultController
-                                              .filteredCars.length,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemBuilder:
-                                              (BuildContext context, index) {
-                                            print(searchResultController
-                                                .filteredCars);
-                                            return Column(
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    Get.toNamed('/car_details',
-                                                        arguments:
-                                                            searchResultController
-                                                                    .filteredCars[
-                                                                index]);
-                                                  },
-                                                  child: carComponent(
-                                                    title:
-                                                        searchResultController
-                                                            .filteredCars[index]
-                                                            .make,
-                                                    image: searchResultController
-                                                                .filteredCars[
-                                                                    index]
-                                                                .imagePathCar!
-                                                                .contains(
-                                                                    'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
-                                                            searchResultController
-                                                                    .filteredCars[
-                                                                        index]
-                                                                    .imagePathCar![0] ==
-                                                                'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                                        ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                                        : "https://files.chillo.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
-                                                    rating: 4.95,
-                                                    commands: 120,
-                                                    price:
-                                                        searchResultController
-                                                            .filteredCars[index]
-                                                            .price,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16.0),
-                                              ],
-                                            );
-                                          }),
-                                    ],
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.only(top: 20.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          height: 350,
-                                          child: Stack(
-                                            children: [
-                                              ClipRRect(
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(12.0),
-                                                    bottomRight:
-                                                        Radius.circular(12.0),
-                                                  ),
-                                                  child:
-                                                      Image.asset(Assets.car3)),
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: ClipRRect(
-                                                    borderRadius:
-                                                        const BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(12.0),
-                                                      bottomRight:
-                                                          Radius.circular(12.0),
-                                                    ),
-                                                    child: Image.asset(
-                                                        Assets.car4)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              1.5,
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                "Louez, Roulez, Retournez – Aussi simple que ça!",
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.lato(
-                                                  color:
-                                                      ColorStyle.fontColorLight,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 20.0,
-                                                ),
-                                              ),
-                                              Text(
-                                                "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.lato(
-                                                  color: ColorStyle.greyColor,
-                                                  fontSize: 16.0,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16.0),
-                                        PrimaryButton(
-                                          title: 'Parcourir les voitures',
-                                          onPressed: () {
-                                            Get.offAllNamed('/bottom_nav');
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                  );
-                          }),
+                          // SvgPicture.asset(Assets.search),
+                          const SizedBox(width: 10.0),
+                          Text(
+                            _searchBarController
+                                    .searchPlace.value.text.isNotEmpty
+                                ? _searchBarController.searchPlace.value.text
+                                : "N’importe ou",
+                            style: GoogleFonts.lato(
+                              color: ColorStyle.greyColor,
+                              fontSize: 16.0,
+                            ),
+                          )
                         ],
                       ),
                     ),
+                    gapH10,
+                    Obx(() {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6.0),
+                            decoration: BoxDecoration(
+                                color: searchResultController
+                                        .appliedFilters.value.isEmpty
+                                    ? ColorStyle.containerBg
+                                    : ColorStyle.blackBackground,
+                                borderRadius: BorderRadius.circular(8.0)),
+                            child: searchResultController
+                                    .appliedFilters.value.isEmpty
+                                ? SvgPicture.asset(Assets.filter)
+                                : InkWell(
+                                    onTap: (() async {
+                                      searchResultController
+                                          .appliedFilters.value
+                                          .clear();
+
+                                      searchResultController.carFilter =
+                                          CarFilter();
+                                      await searchResultController.searchCar();
+
+                                      setState(() {});
+                                      searchResultController.update();
+                                    }),
+                                    child: Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                          Assets.filter,
+                                          color: ColorStyle.lightWhite,
+                                        ),
+                                        Text(
+                                          "(${searchResultController.appliedFilters.value.length})",
+                                          style: GoogleFonts.lato(
+                                            color: ColorStyle.lightWhite,
+                                            fontSize: 12.0,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                          ),
+                          filterButton("prix",
+                              isFilterApplied: searchResultController
+                                  .appliedFilters.value
+                                  .contains('price'), action: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return priceFilter();
+                              },
+                            ).then((_) {
+                              setState(
+                                  () {}); // Forcer la mise à jour de l'interface
+                            });
+                          },
+                              isEnable: searchResultController.getMinPrice(
+                                      searchResultController.filteredCars)! <
+                                  searchResultController.getMaxPrice(
+                                      searchResultController.filteredCars)!),
+                          filterButton("Type de vehicule",
+                              isFilterApplied: searchResultController
+                                  .appliedFilters.value
+                                  .contains('type'), action: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  child: typeFilter(),
+                                );
+                              },
+                            ).then((_) {
+                              setState(
+                                  () {}); // Forcer la mise à jour de l'interface
+                            });
+                          },
+                              isEnable:
+                                  searchResultController.filteredCars.length >
+                                      1),
+                          filterButton("Marque",
+                              isFilterApplied: searchResultController
+                                  .appliedFilters.value
+                                  .contains('brand'), action: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  child: brandFilter(),
+                                );
+                              },
+                            ).then((_) {
+                              setState(
+                                  () {}); // Forcer la mise à jour de l'interface
+                            });
+                          },
+                              isEnable:
+                                  searchResultController.filteredCars.length >
+                                      1),
+                          filterButton("Année",
+                              isFilterApplied: searchResultController
+                                  .appliedFilters.value
+                                  .contains('year'), action: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return yearFilter();
+                              },
+                            ).then((_) {
+                              setState(
+                                  () {}); // Forcer la mise à jour de l'interface
+                            });
+                          },
+                              isEnable: searchResultController.getMinYear(
+                                      searchResultController.filteredCars)! <
+                                  searchResultController.getMaxYear(
+                                      searchResultController.filteredCars)!),
+                        ],
+                      );
+                    }),
+                    Obx(() {
+                      return searchResultController.filteredCars.isNotEmpty
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                sectionTitle(
+                                    '${searchResultController.filteredCars.length} cars available'),
+                                ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: searchResultController
+                                        .filteredCars.length,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemBuilder: (BuildContext context, index) {
+                                      print(
+                                          searchResultController.filteredCars);
+                                      return Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              Get.toNamed('/car_details',
+                                                  arguments:
+                                                      searchResultController
+                                                          .filteredCars[index]);
+                                            },
+                                            child: carComponent(
+                                              title:
+                                                  "${searchResultController.filteredCars[index].make} ${searchResultController.filteredCars[index].model}",
+                                              image: searchResultController
+                                                          .filteredCars[index]
+                                                          .imagePathCar!
+                                                          .contains(
+                                                              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                                      searchResultController
+                                                                  .filteredCars[
+                                                                      index]
+                                                                  .imagePathCar![
+                                                              0] ==
+                                                          'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                                  ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                                  : "https://files.mky-corp.fr/${searchResultController.filteredCars[index].imagePathCar![0]}",
+                                              rating: searchResultController
+                                                  .filteredCars[index]
+                                                  .reviewNumber,
+                                              commands: searchResultController
+                                                  .filteredCars[index]
+                                                  .reservationNumber,
+                                              price: searchResultController
+                                                  .filteredCars[index].price,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16.0),
+                                        ],
+                                      );
+                                    }),
+                              ],
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 20.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    height: 350,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                              topRight: Radius.circular(12.0),
+                                              bottomRight:
+                                                  Radius.circular(12.0),
+                                            ),
+                                            child: Image.asset(Assets.car3)),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: ClipRRect(
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                topRight: Radius.circular(12.0),
+                                                bottomRight:
+                                                    Radius.circular(12.0),
+                                              ),
+                                              child: Image.asset(Assets.car4)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.5,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Louez, Roulez, Retournez – Aussi simple que ça!",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.lato(
+                                            color: ColorStyle.fontColorLight,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 20.0,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Location de voiture simplifiée à portée de main, pour tout voyage, grand ou petit.",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.lato(
+                                            color: ColorStyle.greyColor,
+                                            fontSize: 16.0,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  PrimaryButton(
+                                    title: 'Parcourir les voitures',
+                                    onPressed: () {
+                                      Get.offAllNamed('/bottom_nav');
+                                    },
+                                  )
+                                ],
+                              ),
+                            );
+                    }),
                   ],
                 ),
               ),
             ),
-            Obx(() {
-              return _searchBarController.isPlaceSearchActivated.value
-                  ? topSheet(context, navigate: true)
-                  : const SizedBox();
-            }),
-          ],
+          ),
         ),
       ),
     );

@@ -36,6 +36,9 @@ class CarDetailsController extends GetxController {
 
   final ErrorController errorController = ErrorController();
   List<Map<String, dynamic>> carDetailsItems = [];
+  List<Map<String, dynamic>> bookerDetailsItems = [];
+  List<Map<String, dynamic>> bookingDates = [];
+  List<Map<String, dynamic>> proprietorDetailsItems = [];
   List<Map<String, dynamic>> actions = [];
   TextEditingController reviewController = TextEditingController();
   RxInt rating = 0.obs;
@@ -46,8 +49,23 @@ class CarDetailsController extends GetxController {
   RxList<Review> reviews = (List<Review>.of([])).obs;
 
   TextEditingController conflictDescription = TextEditingController();
+// 680756cf732f6376afdc4b03
+  RxBool isCarAlreadyBooked = false.obs;
+  RxBool isCarBookiedCarValidated = false.obs;
   @override
   void onInit() {
+    bookerDetailsItems = [];
+    bookingDates = [];
+    isCarAlreadyBooked.value =
+        homeController.bookingsController.myBookings.any((booking) {
+      return booking.car!.id == carResponse.id;
+    });
+
+    isCarBookiedCarValidated.value =
+        homeController.bookingsController.myBookings.any((booking) {
+      return booking.reservationStatus == 'Validé';
+    });
+
     carDetailsItems = [
       {
         'title': convertDateToPlainString(carResponse.startDisponibilityDate!),
@@ -57,21 +75,31 @@ class CarDetailsController extends GetxController {
       },
       {
         'title': carResponse.year!,
-        'description': carResponse.typeCarburant ?? "Super",
+        'description': carResponse.typeCarburant ?? "Essence",
         'icon': Assets.about_grey,
       },
       {
         'title': '${carResponse.price} FCFA par jour',
         'icon': Assets.cash,
       },
+      if (carResponse.city != null && carResponse.city!.isNotEmpty)
+        {
+          'title': carResponse.city,
+          'icon': Assets.building,
+        },
+    ];
+
+    // Add details about the proprietor
+    proprietorDetailsItems.addAll([
       if (carResponse.phoneNumberProprietor != null &&
           carResponse.phoneNumberProprietor!.isNotEmpty)
         {
-          'title': carResponse.phoneNumberProprietor!,
-          // 'description': carResponse.typeCarburant ?? "Super",
+          'title':
+              "${carResponse.proprietorName?.split(' ')[0].capitalize} ${carResponse.proprietorName!.split(' ').length >= 2 ? carResponse.proprietorName!.split(' ')[1][0].toUpperCase() + '.' : ''}",
+          'description': carResponse.phoneNumberProprietor,
           'icon': FontAwesomeIcons.user,
         },
-    ];
+    ]);
 
     actions = [
       {
@@ -185,6 +213,11 @@ class CarDetailsController extends GetxController {
     DateTime parsedDate = inputFormat.parse(notificationDate);
     DateTime now = DateTime.now();
     Duration difference = now.difference(parsedDate);
+    print("initial date : $notificationDate");
+    print("difference in days : ${difference.inDays}");
+    print("difference in hours : ${difference.inHours}");
+    print("difference in minutes : ${difference.inMinutes}");
+    print("difference in seconds : ${difference.inSeconds}");
 
     if (difference.inSeconds < 60) {
       return "il y a ${difference.inSeconds} seconde${difference.inSeconds > 1 ? 's' : ''}";

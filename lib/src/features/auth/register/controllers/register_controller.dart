@@ -20,7 +20,8 @@ class RegisterController extends GetxController {
   TextEditingController phoneTextController = TextEditingController();
   TextEditingController emailTextController = TextEditingController();
   TextEditingController passwordTextController = TextEditingController();
-  TextEditingController passwordConfirmInputController = TextEditingController();
+  TextEditingController passwordConfirmInputController =
+      TextEditingController();
   var biometricAvailable = false.obs;
   RxList<Map<String, dynamic>> biometricOptions = RxList();
   // FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage();
@@ -43,7 +44,6 @@ class RegisterController extends GetxController {
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
-
   RxString? errorFullName = ''.obs;
   RxString? errorPhone = ''.obs;
   RxString? errorEmail = ''.obs;
@@ -52,7 +52,7 @@ class RegisterController extends GetxController {
 
   @override
   void onInit() async {
-    countriesController.fetchSaraAvailableCountries();
+    countriesController.fetchCarrentAvailableCountries();
 
     super.onInit();
   }

@@ -4,7 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
-// import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../common/app_sizes.dart';
 import '../../../../common/common_fonctions.dart';
 import '../../../../common/storage_constants.dart';
@@ -20,6 +20,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../helpers/assets.dart';
 import '../../../../theme/theme.dart';
 import '../../../../utils/utility.dart';
+import '../../bookings/controllers/bookings_controller.dart';
+import '../../bookings/views/widgets/details_block.dart';
 import '../../widgets/form_input_field.dart';
 import '../../widgets/primary_button.dart';
 import '../controllers/car_details_controller.dart';
@@ -38,6 +40,8 @@ class _CarDetailsState extends State<CarDetails> {
   CarDetailsController carDetailsController =
       Get.put(CarDetailsController(carResponse: Get.arguments));
   final UserController _userController = Get.put(UserController());
+  final BookingsController bookingsController =
+      Get.put(BookingsController(launchInitState: false));
   int _currentIndex = 0;
 
   List<Review> reviews = [
@@ -57,6 +61,18 @@ class _CarDetailsState extends State<CarDetails> {
     ),
   ];
 
+  @override
+  initState() {
+    super.initState();
+    if (carDetailsController.isCarBookiedCarValidated.value) {
+      carDetailsController.carDetailsItems.addAll([
+        {
+          'title': '${carResponse!.immatriculation}',
+          'icon': Assets.car,
+        }
+      ]);
+    }
+  }
   // @override
   // void initState() {
   //   print(Get.arguments.id);
@@ -143,7 +159,7 @@ class _CarDetailsState extends State<CarDetails> {
                                                 carResponse.imagePathCar![0] ==
                                                     'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                                             ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                            : "https://files.chillo.fr/$url",
+                                            : "https://files.mky-corp.fr/$url",
                                         fit: BoxFit.cover,
                                         loadingBuilder:
                                             (context, child, loadingProgress) {
@@ -184,7 +200,7 @@ class _CarDetailsState extends State<CarDetails> {
                                   ),
                                 ),
                                 // Image.network(
-                                //   "https://files.chillo.fr/$url",
+                                //   "https://files.mky-corp.fr/$url",
                                 //   fit: BoxFit.cover,
                                 // ),
                                 Padding(
@@ -304,7 +320,7 @@ class _CarDetailsState extends State<CarDetails> {
                       }),
                       gapH8,
                       SizedBox(
-                        height: 30.0,
+                        height: 35.0,
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
@@ -368,100 +384,18 @@ class _CarDetailsState extends State<CarDetails> {
                           ],
                         ),
                       gapH16,
-                      Column(
-                        children: List.generate(
-                          carDetailsController.carDetailsItems.length,
-                          (index) {
-                            return Column(
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    // if (carDetailsController
-                                    //         .carDetailsItems[index]['icon']
-                                    //         .runtimeType !=
-                                    //     String) {
-                                    //   await launchUrl(carDetailsController
-                                    //         .carDetailsItems[index]['title']);
-                                    // }
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(15.0),
-                                        decoration: BoxDecoration(
-                                          color: ColorStyle.lightGreyColor1,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        child: carDetailsController
-                                                    .carDetailsItems[index]
-                                                        ['icon']
-                                                    .runtimeType ==
-                                                String
-                                            ? SvgPicture.asset(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['icon']!)
-                                            : Icon(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['icon'],
-                                                size: 14.0,
-                                              ),
-                                      ),
-                                      gapW8,
-                                      carDetailsController
-                                                      .carDetailsItems[index]
-                                                  ['description'] !=
-                                              null
-                                          ? Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  carDetailsController
-                                                          .carDetailsItems[
-                                                      index]['title']!,
-                                                  style: GoogleFonts.lato(
-                                                    color: ColorStyle
-                                                        .fontColorLight,
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  carDetailsController
-                                                          .carDetailsItems[
-                                                      index]['description']!,
-                                                  style: GoogleFonts.lato(
-                                                    color: ColorStyle
-                                                        .fontColorLight,
-                                                    fontSize: 12.0,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                          : Text(
-                                              carDetailsController
-                                                      .carDetailsItems[index]
-                                                  ['title']!,
-                                              style: GoogleFonts.lato(
-                                                color:
-                                                    ColorStyle.fontColorLight,
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            )
-                                    ],
-                                  ),
-                                ),
-                                gapH8,
-                              ],
-                            );
-                          },
-                        ),
-                      ),
+                      DetailsBlock(
+                          blockDetails:
+                              carDetailsController.proprietorDetailsItems,
+                          title: 'Propriétaire',
+                          carMake: carResponse.make,
+                          carModel: carResponse.model,),
+                      gapH16,
+                      DetailsBlock(
+                          blockDetails: carDetailsController.carDetailsItems,
+                          title: 'Details du véhicule',),
+
+                      gapH16,
                       if (carResponse.description != null &&
                           carResponse.description!.isNotEmpty)
                         Column(
@@ -758,7 +692,7 @@ class _CarDetailsState extends State<CarDetails> {
                       //                     title: carDetailsController
                       //                         .cars[index].make,
                       //                     image:
-                      //                         "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
+                      //                         "https://files.mky-corp.fr/${carDetailsController.cars[index].imagePathCar![0]}",
                       //                     rating: 4.95,
                       //                     commands: 120,
                       //                     price: carDetailsController
@@ -805,7 +739,7 @@ class _CarDetailsState extends State<CarDetails> {
                                 carResponse.endDisponibilityDate!),
                             style: GoogleFonts.lato(
                               color: ColorStyle.fontColorLight,
-                              fontSize: 14.0,
+                              fontSize: 13.0,
                             ),
                           ),
                           gapH4,
@@ -825,7 +759,7 @@ class _CarDetailsState extends State<CarDetails> {
                                     '${carResponse.price} FCFA / jour',
                                     style: GoogleFonts.lato(
                                       color: ColorStyle.fontColorLight,
-                                      fontSize: 16.0,
+                                      fontSize: 15.0,
                                       fontWeight: FontWeight.w400,
                                     ),
                                   )
@@ -838,6 +772,9 @@ class _CarDetailsState extends State<CarDetails> {
                       gapW4,
                       PrimaryButton(
                         isHalfWidth: true,
+                        color: carDetailsController.isCarAlreadyBooked.value
+                            ? ColorStyle.opacGrey
+                            : ColorStyle.lightPrimaryColor,
                         title: 'Réserver la voiture',
                         onPressed: () {
                           // Get.bottomSheet(
@@ -860,7 +797,9 @@ class _CarDetailsState extends State<CarDetails> {
                             );
                           } else {
                             if (carResponse.proprietorId ==
-                                _userController.currentuser!.id) {
+                                    _userController.currentuser!.id &&
+                                !carDetailsController
+                                    .isCarAlreadyBooked.value) {
                               Get.dialog(
                                 Utility.simpleBinaryDialog(
                                   title: "Vous avez besoin de votre véhicule?",
@@ -878,7 +817,10 @@ class _CarDetailsState extends State<CarDetails> {
                               );
                               return;
                             }
-                            Get.toNamed('/booking', arguments: carResponse);
+                            if (!carDetailsController
+                                .isCarAlreadyBooked.value) {
+                              Get.toNamed('/booking', arguments: carResponse);
+                            }
                           }
                         },
                       )

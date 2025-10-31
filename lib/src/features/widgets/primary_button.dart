@@ -30,7 +30,7 @@ class PrimaryButton extends StatelessWidget {
       },
       child: Container(
         width: isHalfWidth
-            ? MediaQuery.of(context).size.width / 2
+            ? MediaQuery.of(context).size.width / 2.3
             : double.infinity,
         decoration: BoxDecoration(
           color: color,
@@ -57,7 +57,7 @@ class PrimaryButton extends StatelessWidget {
               title,
               style: GoogleFonts.lato(
                 color: textColor,
-                fontSize: 18.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.bold,
               ),
             ),

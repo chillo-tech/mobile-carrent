@@ -120,9 +120,10 @@ class UpdateProfile extends StatelessWidget {
                           if (value.contains(' ')) {
                             return 'Veuillez entrer votre téléphone sans les espaces';
                           }
-                          if (value.substring(0, 1) == "00" ||
-                              value.substring(0, 2) == "+00") {
-                            // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
+                          // Vérifie les préfixes invalides
+                          if (value.startsWith("+") ||
+                              value.startsWith("00") ||
+                              value.startsWith("+00")) {
                             return 'Veuillez entrer votre téléphone sans indicatif';
                           }
                           return null;

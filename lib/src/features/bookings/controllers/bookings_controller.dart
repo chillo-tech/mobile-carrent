@@ -25,6 +25,7 @@ class BookingsController extends GetxController {
   ErrorController errorController = ErrorController();
 
   TextEditingController descriptionController = TextEditingController();
+  RxBool isCarOwner = false.obs;
 
   List<Map<String, dynamic>> actions = [
     {

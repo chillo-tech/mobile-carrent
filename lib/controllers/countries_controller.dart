@@ -25,7 +25,7 @@ class CountriesController extends GetxController {
 
   @override
   void onInit() {
-    fetchSaraAvailableCountries();
+    fetchCarrentAvailableCountries();
     super.onInit();
   }
 
@@ -39,7 +39,7 @@ class CountriesController extends GetxController {
   //   }
   // }
 
-  void fetchSaraAvailableCountries() async {
+  void fetchCarrentAvailableCountries() async {
     try {
       isFetchingCountry(true);
 
@@ -51,19 +51,19 @@ class CountriesController extends GetxController {
       if (cachedCountriesCodePhoneList.isEmpty ||
           cachedCountriesCodePhoneList.length <= 0) {
         // final countriesService = CountriesService();
-        // final response = await countriesService.getSaraCountriesAvailable();
-        final countries = await saraCountriesFromJson();
+        // final response = await countriesService.getCarrentCountriesAvailable();
+        final countries = await carrentCountriesFromJson();
         GetStorage().write(StorageConstants.countriesCodePhoneList, countries);
 
         countriesResponse.assignAll(countries);
       } else {
         countriesResponse.clear();
-        for (var saraCountry in cachedCountriesCodePhoneList) {
-          if (saraCountry is Map) {
+        for (var carrentCountry in cachedCountriesCodePhoneList) {
+          if (carrentCountry is Map) {
             countriesResponse
-                .add(CarrentCountry.fromJson(saraCountry as Map<String, dynamic>));
+                .add(CarrentCountry.fromJson(carrentCountry as Map<String, dynamic>));
           } else {
-            countriesResponse.add(saraCountry);
+            countriesResponse.add(carrentCountry);
           }
         }
       }
@@ -109,7 +109,7 @@ class CountriesController extends GetxController {
     filteredCountries.assignAll(results);
   }
 
-  Future<List<CarrentCountry>> saraCountriesFromJson() async {
+  Future<List<CarrentCountry>> carrentCountriesFromJson() async {
     var str = await rootBundle.loadString('assets/data/new_countries.json');
     var decoded = json.decode(str);
 

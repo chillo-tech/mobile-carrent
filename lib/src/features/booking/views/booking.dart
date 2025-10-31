@@ -102,7 +102,7 @@ class _BookingState extends State<Booking> {
                                           carResponse.imagePathCar![0] ==
                                               'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                                       ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                      : "https://files.chillo.fr/${carResponse.imagePathCar![0]}",
+                                      : "https://files.mky-corp.fr/${carResponse.imagePathCar![0]}",
                                   fit: BoxFit.cover,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {

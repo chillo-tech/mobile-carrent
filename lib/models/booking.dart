@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:carrent/models/car_response.dart';
+import 'package:carrent/models/user_response.dart';
 
 BookingResponse bookingResponseFromJson(String str) =>
     BookingResponse.fromJson(json.decode(str));
@@ -23,6 +24,7 @@ class BookingResponse {
   // final String? sessionId;
   final String? withdrawStatus;
   final String? reservationStatus;
+  final UserResponse? user;
 
   BookingResponse({
     this.id,
@@ -38,6 +40,7 @@ class BookingResponse {
     // this.sessionId,
     this.withdrawStatus,
     this.reservationStatus,
+    this.user,
   });
 
   factory BookingResponse.fromJson(Map<String, dynamic> json) {
@@ -55,6 +58,7 @@ class BookingResponse {
       // sessionId: json['sessionId'] as String,
       withdrawStatus: json['withdrawStatus'].toString().trim(),
       reservationStatus: json['reservationStatus'].toString().trim(),
+      user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
     );
   }
 

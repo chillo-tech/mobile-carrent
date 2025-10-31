@@ -33,6 +33,8 @@ class PostController extends GetxController {
   Rx<XFile?> pickedFile = XFile('').obs;
   TextEditingController makeController = TextEditingController();
   TextEditingController modelController = TextEditingController();
+  TextEditingController immatriculationController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
   TextEditingController yearController = TextEditingController();
   TextEditingController conditionController = TextEditingController();
   TextEditingController typeCarburantController = TextEditingController();
@@ -49,6 +51,8 @@ class PostController extends GetxController {
   RxBool hasErrorOnDocument = false.obs;
   RxBool hasErrorOnImages = false.obs;
   RxBool isOnPageOpening = true.obs;
+  RxBool isMakeBottomModalOpened = false.obs;
+  RxBool isModelBottomModalOpened = false.obs;
   RxList<CarResponse> myCars = (List<CarResponse>.of([])).obs;
 
   RxList<PostResponse> posts = (List<PostResponse>.of([])).obs;
@@ -124,6 +128,8 @@ class PostController extends GetxController {
 
       request.fields['make'] = makeController.text;
       request.fields['model'] = modelController.text;
+      request.fields['immatriculation'] = immatriculationController.text;
+      request.fields['city'] = cityController.text;
       request.fields['year'] = yearController.text;
       request.fields['condition'] = conditionController.text;
       request.fields['typeCarburant'] = typeCarburantController.text;
@@ -138,8 +144,13 @@ class PostController extends GetxController {
       // request.fields['price'] = priceController.text;
       // request.fields['price'] = priceController.text;
       request.fields['price'] = priceController.text;
-      request.fields['price'] = priceController.text;
 
+      print("Document File: ${pickedFile.value!.path}");
+      imageFiles.forEach(
+        (element) async {
+          print("Images File: ${element!.path}");
+        },
+      );
       imageFiles.forEach(
         (element) async {
           request.files.add(
@@ -196,6 +207,7 @@ class PostController extends GetxController {
         });
       });
     } catch (error) {
+      print(error);
       Get.back();
       errorController.handleError(error);
     }
@@ -218,6 +230,8 @@ class PostController extends GetxController {
 
       request.fields['make'] = makeController.text;
       request.fields['model'] = modelController.text;
+      request.fields['immatriculation'] = immatriculationController.text;
+      request.fields['city'] = cityController.text;
       request.fields['year'] = yearController.text;
       request.fields['condition'] = conditionController.text;
       request.fields['typeCarburant'] = typeCarburantController.text;
@@ -340,7 +354,7 @@ class PostController extends GetxController {
       final String fileUrl = currentPost.imagePathDocument ==
               'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
           ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-          : "https://files.chillo.fr/${currentPost.imagePathDocument}";
+          : "https://files.mky-corp.fr/${currentPost.imagePathDocument}";
 
       final status = await Permission.storage.request();
       if (!status.isGranted) {

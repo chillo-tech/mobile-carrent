@@ -103,7 +103,7 @@ class _MyCarBookingsState extends State<MyCarBookings> {
                                               ?.imagePathCar![0] ==
                                           'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                                   ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                  : "https://files.chillo.fr/${_bookingsController.myBookings[index].car?.imagePathCar![0]}",
+                                  : "https://files.mky-corp.fr/${_bookingsController.myBookings[index].car?.imagePathCar![0]}",
                               // description: _bookingsController.myBookings[index].description ??
                               price: _bookingsController
                                   .myBookings[index].car?.price,
@@ -275,7 +275,7 @@ class _MyCarBookingsState extends State<MyCarBookings> {
                           ),
                           const SizedBox(height: 7.0),
                           Text(
-                            price + " par jour",
+                            price + " FCFA par jour",
                             style: GoogleFonts.lato(
                               color: ColorStyle.fontColorLight,
                               fontSize: 14.0,

@@ -1,6 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carrent/models/booking.dart';
+import 'package:carrent/src/features/bookings/views/widgets/details_block.dart';
+import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../common/app_sizes.dart';
 import '../../../../common/common_fonctions.dart';
 import '../../../../controllers/toast_controller.dart';
@@ -61,10 +65,48 @@ class _BookingDetailsState extends State<BookingDetails> {
   initState() {
     super.initState();
     carResponse = bookingResponse.car;
+    bookingsController.isCarOwner(
+        carResponse!.proprietorId == _userController.currentuser?.id);
+    if (bookingResponse.reservationStatus == 'Validé') {
+      carDetailsController.carDetailsItems.addAll([
+        {
+          'title': '${carResponse!.immatriculation}',
+          'icon': Assets.car,
+        },
+      ]);
+
+      // Add details about who booked the car
+      carDetailsController.bookerDetailsItems.addAll([
+        if ((carResponse!.proprietorId != null &&
+                carResponse!.proprietorId == _userController.currentuser?.id) ||
+            _userController.currentuser?.role == 'ADMIN')
+          {
+            'title': '${bookingResponse.user!.completeName}',
+            'description': bookingResponse.user != null &&
+                    (bookingResponse.user!.phoneNumber != null &&
+                        bookingResponse.user!.phoneNumber.isNotEmpty)
+                ? bookingResponse.user!.phoneNumber
+                : bookingResponse.user!.email,
+            'icon': FontAwesomeIcons.user,
+          }
+      ]);
+
+      // Add booking dates
+      carDetailsController.bookingDates.addAll([
+        {
+          'icon': Assets.calendar_details,
+          'title': formatDatewithYearFromStrings(
+              bookingResponse.startDate!.toString()),
+          'description': formatDatewithYearFromStrings(
+              bookingResponse.endDate!.toString()),
+        },
+      ]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    print(_userController.currentuser?.role);
     actions = [
       if (!isCarBooking)
         {
@@ -89,6 +131,9 @@ class _BookingDetailsState extends State<BookingDetails> {
         'action': 'cancel_booking',
       },
     ];
+    if (bookingResponse.user!.id != _userController.currentuser?.id) {
+      actions.removeWhere((action) => action['title'] == 'Retrait');
+    }
 
     List<Map<String, dynamic>> badges = [
       {
@@ -153,7 +198,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                           carResponse!.imagePathCar![0] ==
                                               'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                                       ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                      : "https://files.chillo.fr/$url",
+                                      : "https://files.mky-corp.fr/$url",
                                   fit: BoxFit.cover,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
@@ -305,7 +350,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                       }),
                       gapH8,
                       SizedBox(
-                        height: 30.0,
+                        height: 35.0,
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
@@ -338,122 +383,101 @@ class _BookingDetailsState extends State<BookingDetails> {
                           ),
                           gapH10,
                           SizedBox(
-                            height: 35.0,
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: actions.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 10.0),
-                                    child: containerWithOrWithoutcon(
-                                        text: actions[index]['title'] as String,
-                                        icon: actions[index]['icon'] as String,
-                                        color: ((bookingResponse.reservationStatus == 'Ouvert' || bookingResponse.reservationStatus == 'A Valider') && actions[index]['title'] != 'Retrait') ||
-                                                (bookingResponse.reservationStatus == 'Validé' &&
-                                                    bookingResponse.withdrawStatus ==
-                                                        'En attente')
-                                            ? actions[index]['color'] as Color?
-                                            : ColorStyle.opacGrey,
-                                        textColor: ((bookingResponse.reservationStatus == 'Ouvert' || bookingResponse.reservationStatus == 'A Valider') && actions[index]['title'] != 'Retrait') ||
-                                                (bookingResponse.reservationStatus == 'Validé' &&
-                                                    bookingResponse.withdrawStatus ==
-                                                        'En attente')
-                                            ? actions[index]['textColor']
-                                                as Color?
-                                            : ColorStyle.lightWhite,
-                                        action: ((bookingResponse.reservationStatus == 'Ouvert' || bookingResponse.reservationStatus == 'A Valider') && actions[index]['title'] != 'Retrait') ||
-                                                (bookingResponse.reservationStatus == 'Validé' &&
-                                                    bookingResponse.withdrawStatus == 'En attente')
-                                            ? actions[index]['action'] as String
-                                            : null,
-                                        booking: bookingResponse),
-                                  );
-                                }),
-                          ),
+                              // height: 35.0,
+                              child: Wrap(
+                            children: List.generate(actions.length,
+                                // shrinkWrap: true,
+                                // scrollDirection: Axis.horizontal,
+                                // itemCount: actions.length,
+                                // itemBuilder:
+                                (index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                    right: 10.0, bottom: 10.0),
+                                child: containerWithOrWithoutcon(
+                                    text: actions[index]['title'] as String,
+                                    icon: actions[index]['icon'] as String,
+                                    color: ((bookingResponse.reservationStatus == 'Ouvert' || bookingResponse.reservationStatus == 'A Valider') && actions[index]['title'] != 'Retrait') ||
+                                            (bookingResponse.reservationStatus == 'Validé' &&
+                                                bookingResponse.withdrawStatus ==
+                                                    'En attente')
+                                        ? actions[index]['color'] as Color?
+                                        : ColorStyle.opacGrey,
+                                    textColor: ((bookingResponse.reservationStatus == 'Ouvert' || bookingResponse.reservationStatus == 'A Valider') && actions[index]['title'] != 'Retrait') ||
+                                            (bookingResponse.reservationStatus == 'Validé' &&
+                                                bookingResponse.withdrawStatus ==
+                                                    'En attente')
+                                        ? actions[index]['textColor'] as Color?
+                                        : ColorStyle.lightWhite,
+                                    action: ((bookingResponse.reservationStatus == 'Ouvert' ||
+                                                    bookingResponse.reservationStatus == 'A Valider') &&
+                                                actions[index]['title'] != 'Retrait') ||
+                                            (bookingResponse.reservationStatus == 'Validé' && bookingResponse.withdrawStatus == 'En attente')
+                                        ? actions[index]['action'] as String
+                                        : null,
+                                    booking: bookingResponse),
+                              );
+                            }),
+                          )),
                         ],
                       ),
                       gapH16,
-                      Column(
-                        children: List.generate(
-                          carDetailsController.carDetailsItems.length,
-                          (index) {
+                      DetailsBlock(
+                          blockDetails:
+                              carDetailsController.proprietorDetailsItems,
+                          title: 'Propriétaire',
+                          carMake: carResponse!.make,
+                          carModel: carResponse!.model),
+                      gapH16,
+                      DetailsBlock(
+                          blockDetails: carDetailsController.carDetailsItems,
+                          title: 'Details du véhicule'),
+
+                      gapH16,
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          if (constraints.maxWidth < 350) {
+                            // Écran étroit : afficher en colonne
                             return Column(
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(15.0),
-                                      decoration: BoxDecoration(
-                                        color: ColorStyle.lightGreyColor1,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      child: carDetailsController
-                                                  .carDetailsItems[index]
-                                                      ['icon']
-                                                  .runtimeType ==
-                                              String
-                                          ? SvgPicture.asset(
-                                              carDetailsController
-                                                      .carDetailsItems[index]
-                                                  ['icon']!)
-                                          : Icon(
-                                              carDetailsController
-                                                      .carDetailsItems[index]
-                                                  ['icon'],
-                                              size: 14.0,
-                                            ),
-                                    ),
-                                    gapW8,
-                                    carDetailsController.carDetailsItems[index]
-                                                ['description'] !=
-                                            null
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['title']!,
-                                                style: GoogleFonts.lato(
-                                                  color:
-                                                      ColorStyle.fontColorLight,
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              Text(
-                                                carDetailsController
-                                                        .carDetailsItems[index]
-                                                    ['description']!,
-                                                style: GoogleFonts.lato(
-                                                  color:
-                                                      ColorStyle.fontColorLight,
-                                                  fontSize: 12.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        : Text(
-                                            carDetailsController
-                                                    .carDetailsItems[index]
-                                                ['title']!,
-                                            style: GoogleFonts.lato(
-                                              color: ColorStyle.fontColorLight,
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          )
-                                  ],
+                                DetailsBlock(
+                                  blockDetails:
+                                      carDetailsController.bookerDetailsItems,
+                                  title: 'Reservée par',
+                                  carMake: carResponse!.make,
+                                  carModel: carResponse!.model,
                                 ),
-                                gapH8,
+                                gapH16,
+                                DetailsBlock(
+                                  blockDetails:
+                                      carDetailsController.bookingDates,
+                                  title: 'Reservation',
+                                ),
                               ],
                             );
-                          },
-                        ),
+                          } else {
+                            // Écran large : afficher en ligne
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                DetailsBlock(
+                                  blockDetails:
+                                      carDetailsController.bookerDetailsItems,
+                                  title: 'Reservée par',
+                                  carMake: carResponse!.make,
+                                  carModel: carResponse!.model,
+                                ),
+                                gapW16,
+                                DetailsBlock(
+                                  blockDetails:
+                                      carDetailsController.bookingDates,
+                                  title: 'Reservation',
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                       if (carResponse!.description != null &&
                           carResponse!.description!.isNotEmpty)
@@ -637,13 +661,13 @@ class _BookingDetailsState extends State<BookingDetails> {
                                   //             textColor: ColorStyle.fontColorLight,
                                   //             title: 'Voir plus',
                                   //             onPressed: () {}),
+                                  !isCarBooking ? gapH16 : gapH64,
+                                  if (isCarBooking) gapH64,
                                 ],
                               )
                             : SizedBox();
                       }),
-                      !isCarBooking ? gapH16 : gapH64,
-                      if (isCarBooking) gapH64,
-
+                      gapH16,
                       !isCarBooking
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -752,7 +776,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                       //                     title: carDetailsController
                       //                         .cars[index].make,
                       //                     image:
-                      //                         "https://files.chillo.fr/${carDetailsController.cars[index].imagePathCar![0]}",
+                      //                         "https://files.mky-corp.fr/${carDetailsController.cars[index].imagePathCar![0]}",
                       //                     rating: 4.95,
                       //                     commands: 120,
                       //                     price: carDetailsController
@@ -793,14 +817,17 @@ class _BookingDetailsState extends State<BookingDetails> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Réservé ${formatDateRangewithYearFromStrings(bookingResponse.startDate!, bookingResponse.endDate!)}",
-                            style: GoogleFonts.lato(
-                              color: ColorStyle.fontColorLight,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          gapH4,
+                          // SizedBox(
+                          //   width: MediaQuery.of(context).size.width / 3.5,
+                          //   child: Text(
+                          //     "Réservé ${formatDateRangewithYearFromStrings(bookingResponse.startDate!, bookingResponse.endDate!)}",
+                          //     style: GoogleFonts.lato(
+                          //       color: ColorStyle.fontColorLight,
+                          //       fontSize: 13.0,
+                          //     ),
+                          //   ),
+                          // ),
+                          // gapH4,
                           IntrinsicWidth(
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 4.0),
@@ -817,7 +844,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                     '${carResponse!.price} FCFA / jour',
                                     style: GoogleFonts.lato(
                                       color: ColorStyle.fontColorLight,
-                                      fontSize: 16.0,
+                                      fontSize: 15.0,
                                       fontWeight: FontWeight.w400,
                                     ),
                                   )
@@ -844,8 +871,10 @@ class _BookingDetailsState extends State<BookingDetails> {
                                           'En attente'
                                   ? ColorStyle.lightPrimaryColor
                                   : ColorStyle.opacGrey,
-                              onPressed: bookingResponse.reservationStatus ==
-                                          'Validé' &&
+                              onPressed: (bookingResponse.reservationStatus ==
+                                              'Ouvert' ||
+                                          bookingResponse.reservationStatus ==
+                                              'A Valider') &&
                                       bookingResponse.withdrawStatus ==
                                           'En attente'
                                   ? () async {
@@ -867,13 +896,17 @@ class _BookingDetailsState extends State<BookingDetails> {
                               color: bookingResponse.reservationStatus ==
                                           'Validé' &&
                                       bookingResponse.withdrawStatus ==
-                                          'En attente'
+                                          'En attente' &&
+                                      bookingResponse.user!.id ==
+                                          _userController.currentuser?.id
                                   ? ColorStyle.lightPrimaryColor
                                   : ColorStyle.opacGrey,
                               onPressed: bookingResponse.reservationStatus !=
                                           'Validé' &&
                                       bookingResponse.withdrawStatus !=
-                                          'En attente'
+                                          'En attente' &&
+                                      bookingResponse.user!.id ==
+                                          _userController.currentuser?.id
                                   ? () {
                                       // Get.bottomSheet(
                                       //   conflictSheet(carResponse: carResponse),
@@ -910,7 +943,7 @@ class _BookingDetailsState extends State<BookingDetails> {
             bookingsController.executeActionOnTap(action!, booking);
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(8.0),

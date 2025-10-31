@@ -51,7 +51,7 @@ class LoginController extends GetxController {
 
   @override
   void onInit() async {
-    countriesController.fetchSaraAvailableCountries();
+    countriesController.fetchCarrentAvailableCountries();
 
     super.onInit();
   }

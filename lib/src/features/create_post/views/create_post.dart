@@ -1,27 +1,918 @@
-import 'dart:io';
+// import 'dart:io';
 
-import 'package:carrent/controllers/error_controller.dart';
+// import 'package:carrent/controllers/error_controller.dart';
 
-import '../../../../common/app_sizes.dart';
-import '../../../../common/common_fonctions.dart';
-import '../../home/controllers/home_controller.dart';
-import '../controllers/post_controller.dart';
-import '../../../../helpers/assets.dart';
+// import '../../../../common/app_sizes.dart';
+// import '../../../../common/common_fonctions.dart';
+// import '../../../../controllers/car_brand_controller.dart';
+// import '../../../../models/car_brand.dart';
+// import '../../home/controllers/home_controller.dart';
+// import '../../widgets/bottom_modal.dart';
+// import '../controllers/post_controller.dart';
+// import '../../../../helpers/assets.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/widgets.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:get/get.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import 'package:image_picker/image_picker.dart';
+
+// import '../../../../theme/theme.dart';
+// import '../../widgets/form_input_field.dart';
+// import '../../widgets/primary_button.dart';
+
+// class CreatePost extends StatefulWidget {
+//   CreatePost({super.key});
+
+//   @override
+//   State<CreatePost> createState() => _CreatePostState();
+// }
+
+// class _CreatePostState extends State<CreatePost> {
+//   final PostController _postcontroller = Get.put(PostController());
+//   final CarBrandController carBrandController = Get.put(CarBrandController());
+
+//   final _formKey = GlobalKey<FormState>();
+
+//   List<String> vehicleRate = [
+//     '1',
+//     '2',
+//     '3',
+//     '4',
+//     '5',
+//     '6',
+//     '7',
+//     '8',
+//     '9',
+//     '10'
+//   ];
+
+//   List<String> fuelType = [
+//     'Essence',
+//     'Gazoil',
+//     'Electrique',
+//     'Hybride',
+//   ];
+
+//   @override
+//   initState() {
+//     _postcontroller.imageFile = XFile('').obs;
+//     _postcontroller.pickedFile = XFile('').obs;
+//     _postcontroller.makeController = TextEditingController();
+//     _postcontroller.modelController = TextEditingController();
+//     _postcontroller.yearController = TextEditingController();
+//     _postcontroller.conditionController = TextEditingController();
+//     _postcontroller.typeCarburantController = TextEditingController();
+//     _postcontroller.numberOfPlacesController = TextEditingController();
+//     _postcontroller.imagePathCarController = TextEditingController();
+//     _postcontroller.imagePathDocumentController = TextEditingController();
+//     _postcontroller.phoneNumberProprietorController = TextEditingController();
+//     _postcontroller.priceController = TextEditingController();
+//     _postcontroller.descriptionController = TextEditingController();
+//     _postcontroller.startAvailableDate = ''.obs;
+//     _postcontroller.endAvailableDate = ''.obs;
+//     _postcontroller.imageFiles = RxList();
+//     _postcontroller.hasErrorOnDocument = false.obs;
+//     _postcontroller.hasErrorOnImages = false.obs;
+//     _postcontroller.isOnPageOpening = true.obs;
+//     _postcontroller.isMakeBottomModalOpened = false.obs;
+//     _postcontroller.isModelBottomModalOpened = false.obs;
+//     super.initState();
+//   }
+
+//   void _controlModal(List<String> elements,
+//       TextEditingController dropdownController, String label, bool isOpened) {
+//     if (label == 'Marque') {
+//       _postcontroller.isMakeBottomModalOpened(
+//           !_postcontroller.isMakeBottomModalOpened.value);
+//     } else {
+//       _postcontroller.isModelBottomModalOpened(
+//           !_postcontroller.isModelBottomModalOpened.value);
+//     }
+//     showModalBottomSheet(
+//       showDragHandle: true,
+//       context: context,
+//       builder: (BuildContext context) {
+//         return BottomModal(
+//           searchList: elements,
+//           dropdownController: dropdownController,
+//           label: label,
+//         );
+//       },
+//     ).whenComplete(() {
+//       if (label == 'Marque') {
+//         _postcontroller.isMakeBottomModalOpened(
+//             !_postcontroller.isMakeBottomModalOpened.value);
+//       } else {
+//         _postcontroller.isModelBottomModalOpened(
+//             !_postcontroller.isModelBottomModalOpened.value);
+//       }
+
+//       CarBrand? selectedCarBrand = null;
+//       if (label == 'Marque' && dropdownController.text.isNotEmpty) {
+//         carBrandController.loadCarModelsFromACar(dropdownController.text);
+//         selectedCarBrand = carBrandController.carBrands
+//             .firstWhere((element) => element.brand == dropdownController.text);
+//       }
+//       if (selectedCarBrand != null &&
+//           !selectedCarBrand.models
+//               .contains(_postcontroller.modelController.text)) {
+//         _postcontroller.modelController.text = '';
+//       }
+//       // widget.onChanged(dropdownController.text);
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: ColorStyle.white,
+//       appBar: AppBar(
+//         centerTitle: false,
+//         backgroundColor: Colors.transparent,
+//         elevation: 0.0,
+//         leading: GestureDetector(
+//           onTap: () {
+//             _postcontroller.imageFile.value = XFile('');
+//             _postcontroller.pickedFile.value = XFile('');
+//             Get.back();
+//           },
+//           child: const Icon(
+//             FontAwesomeIcons.arrowLeft,
+//             color: ColorStyle.textBlackColor,
+//             size: 20.0,
+//           ),
+//         ),
+//         title: Text(
+//           "Retour",
+//           style: GoogleFonts.lato(
+//             color: ColorStyle.textBlackColor,
+//             fontSize: 16.0,
+//             fontWeight: FontWeight.w600,
+//           ),
+//         ),
+//       ),
+//       body: SafeArea(
+//         child: Form(
+//           key: _formKey,
+//           child: Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//             child: SingleChildScrollView(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 mainAxisAlignment: MainAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     "Créer une annonce",
+//                     style: GoogleFonts.lato(
+//                       color: ColorStyle.fontColorLight,
+//                       fontSize: 24.0,
+//                       fontWeight: FontWeight.w700,
+//                     ),
+//                   ),
+//                   gapH16,
+//                   GestureDetector(
+//                     onTap: () async {
+//                       final ImagePicker picker = ImagePicker();
+//                       List<XFile> files = (await picker.pickMultiImage());
+//                       if (files.isNotEmpty) {
+//                         _postcontroller.imageFiles.value = files;
+//                       }
+//                       if (_postcontroller.imageFiles.isNotEmpty) {
+//                         _postcontroller.hasErrorOnImages(false);
+//                       }
+//                     },
+//                     child: Obx(() {
+//                       return _postcontroller.imageFiles.isNotEmpty &&
+//                               _postcontroller.imageFiles[0]!.path.isNotEmpty
+//                           ? Container(
+//                               width: double.infinity,
+//                               height: 150.0,
+//                               child: ClipRRect(
+//                                 borderRadius: BorderRadius.circular(8.0),
+//                                 child: Image.file(
+//                                   File(_postcontroller.imageFiles[0]!.path),
+//                                   fit: BoxFit.cover,
+//                                   width: double.infinity,
+//                                 ),
+//                               ),
+//                             )
+//                           : Container(
+//                               width: double.infinity,
+//                               padding:
+//                                   const EdgeInsets.symmetric(vertical: 20.0),
+//                               decoration: BoxDecoration(
+//                                   borderRadius: BorderRadius.circular(8.0),
+//                                   color: ColorStyle.containerBg),
+//                               child: Column(
+//                                 crossAxisAlignment: CrossAxisAlignment.center,
+//                                 mainAxisAlignment: MainAxisAlignment.center,
+//                                 children: [
+//                                   const Icon(FontAwesomeIcons.camera,
+//                                       color: ColorStyle.hintColor, size: 20.0),
+//                                   const SizedBox(height: 10.0),
+//                                   Text(
+//                                     "Ajouter des photos",
+//                                     style: GoogleFonts.lato(
+//                                       color: ColorStyle.hintColor,
+//                                       fontSize: 14.0,
+//                                       fontWeight: FontWeight.w600,
+//                                     ),
+//                                   )
+//                                 ],
+//                               ),
+//                             );
+//                     }),
+//                   ),
+//                   gapH8,
+//                   Obx(() {
+//                     return _postcontroller.hasErrorOnImages.value
+//                         ? Text(
+//                             "Selectionner au moins un document",
+//                             style: Theme.of(context)
+//                                 .textTheme
+//                                 .labelSmall!
+//                                 .copyWith(color: ColorStyle.lightPrimaryColor),
+//                           )
+//                         : SizedBox();
+//                   }),
+//                   GestureDetector(
+//                     onTap: () async {
+//                       final ImagePicker picker = ImagePicker();
+//                       XFile? file = (await picker.pickMedia());
+//                       if (file != null) {
+//                         _postcontroller.pickedFile.value = file;
+//                       }
+//                       if ((_postcontroller.pickedFile.value != null &&
+//                           _postcontroller.pickedFile.value?.name != null &&
+//                           _postcontroller.pickedFile.value!.name.isNotEmpty)) {
+//                         _postcontroller.hasErrorOnDocument(false);
+//                       }
+//                     },
+//                     child: Container(
+//                       margin: const EdgeInsets.only(top: 10.0),
+//                       padding: const EdgeInsets.symmetric(vertical: 15.0),
+//                       decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(8.0),
+//                         border: Border.all(color: ColorStyle.hintColor),
+//                       ),
+//                       child: Row(
+//                         mainAxisAlignment: MainAxisAlignment.center,
+//                         children: [
+//                           Obx(() {
+//                             return Text(
+//                               _postcontroller.pickedFile.value != null &&
+//                                       _postcontroller.pickedFile.value?.name !=
+//                                           null &&
+//                                       _postcontroller
+//                                           .pickedFile.value!.name.isNotEmpty
+//                                   ? _postcontroller.pickedFile.value!.name
+//                                   : 'Télécharger le document du véhicule',
+//                               style: GoogleFonts.lato(
+//                                 color: ColorStyle.blackBackground,
+//                                 fontSize: 15.0,
+//                                 fontWeight: FontWeight.w600,
+//                               ),
+//                             );
+//                           }),
+//                           const SizedBox(width: 10.0),
+//                           SvgPicture.asset(
+//                             Assets.upload,
+//                             width: 18.0,
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   gapH8,
+//                   Obx(() {
+//                     return _postcontroller.hasErrorOnDocument.value
+//                         ? Text(
+//                             "Selectionner un document",
+//                             style: Theme.of(context)
+//                                 .textTheme
+//                                 .labelSmall!
+//                                 .copyWith(color: ColorStyle.lightPrimaryColor),
+//                           )
+//                         : SizedBox();
+//                   }),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     onTap: () {
+//                       _controlModal(
+//                           carBrandController.carBrands
+//                               .map((e) => e.brand)
+//                               .toList(),
+//                           _postcontroller.makeController,
+//                           'Marque',
+//                           _postcontroller.isMakeBottomModalOpened.value);
+//                     },
+//                     readOnly: true,
+//                     labelText: 'Marque',
+//                     placeholder: 'Entrez la marque du véhicule',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.text,
+//                     controller: _postcontroller.makeController,
+//                     suffixIcon: Obx(() {
+//                       return Icon(
+//                           _postcontroller.isMakeBottomModalOpened.value
+//                               ? Icons.keyboard_arrow_up_sharp
+//                               : Icons.keyboard_arrow_down_sharp,
+//                           color: const Color(0xFF858381));
+//                     }),
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez entrer le modèle du véhicule';
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     onTap: () {
+//                       _controlModal(
+//                           carBrandController.carModels
+//                               .map((model) => model)
+//                               .toList(),
+//                           _postcontroller.modelController,
+//                           'Modèle',
+//                           _postcontroller.isModelBottomModalOpened.value);
+//                     },
+//                     readOnly: true,
+//                     labelText: 'Modèle',
+//                     placeholder: 'Entrez le modèle du véhicule',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.text,
+//                     controller: _postcontroller.modelController,
+//                     suffixIcon: Obx(() {
+//                       return Icon(
+//                           _postcontroller.isModelBottomModalOpened.value
+//                               ? Icons.keyboard_arrow_up_sharp
+//                               : Icons.keyboard_arrow_down_sharp,
+//                           color: const Color(0xFF858381));
+//                     }),
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez entrer le modèle du véhicule';
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Immatriculation',
+//                     placeholder: "Entrez l'immatriculation du véhicule",
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.text,
+//                     controller: _postcontroller.immatriculationController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return "Veuillez entrer l'immatriculation du véhicule";
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Ville',
+//                     placeholder: "Ville ou se trouve le vehicule",
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.text,
+//                     controller: _postcontroller.cityController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return "Veuillez entrer la ville du véhicule";
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     mainAxisAlignment: MainAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         'Plage de dates de disponibilité',
+//                         style: GoogleFonts.lato(
+//                           color: ColorStyle.fontColorLight,
+//                           fontSize: 16.0,
+//                           fontWeight: FontWeight.w400,
+//                         ),
+//                       ),
+//                       gapH4,
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           GestureDetector(
+//                             onTap: () async {
+//                               // Add one day to the day
+//                               var initialDate = DateTime(DateTime.now().year,
+//                                   DateTime.now().month, DateTime.now().day + 1);
+//                               final DateTime? picked = await showDatePicker(
+//                                   fieldHintText: "Choisissez une date",
+//                                   locale: const Locale('fr'),
+//                                   fieldLabelText: "Date",
+//                                   context: context,
+//                                   initialDate: initialDate,
+//                                   firstDate: initialDate,
+//                                   lastDate: DateTime(2030));
+//                               print(picked);
+//                               // if (picked != null &&
+//                               //     picked.toString() !=
+//                               //         _postcontroller
+//                               //             .startAvailableDate.value) {
+//                               //   _postcontroller.startAvailableDate(
+//                               //       convertDate(picked.toString()));
+//                               // }
+//                               if (picked != null) {
+//                                 _postcontroller.startAvailableDate(
+//                                     convertDate(picked.toString()));
+//                                 DateTime startDate = parseDate(
+//                                     _postcontroller.startAvailableDate.value);
+//                                 DateTime endDate = parseDate(
+//                                     _postcontroller.endAvailableDate.value);
+
+//                                 // Vérifier que la date de début ne soit pas après la date de fin
+//                                 if (startDate.isAfter(endDate)) {
+//                                   _postcontroller.isOnPageOpening(false);
+//                                   _postcontroller.startAvailableDate('');
+//                                   // ErrorController().showMessage(
+//                                   //     'La date de début ne peut pas être après la date de fin.');
+//                                 } else {
+//                                   _postcontroller.startAvailableDate(
+//                                       convertDate(picked.toString()));
+//                                 }
+//                               }
+//                             },
+//                             child: Container(
+//                               height: 50.0,
+//                               width: MediaQuery.of(context).size.width / 3.1,
+//                               decoration: BoxDecoration(
+//                                 borderRadius: BorderRadius.circular(8.0),
+//                                 color: ColorStyle.containerBg,
+//                               ),
+//                               child: Column(
+//                                 mainAxisAlignment: MainAxisAlignment.center,
+//                                 crossAxisAlignment: CrossAxisAlignment.center,
+//                                 children: [
+//                                   Obx(() {
+//                                     return Text(
+//                                       _postcontroller
+//                                               .startAvailableDate.isNotEmpty
+//                                           ? _postcontroller
+//                                               .startAvailableDate.value
+//                                           : 'JJ/MM/AAAA',
+//                                       style: GoogleFonts.lato(
+//                                         color: ColorStyle.hintColor,
+//                                         fontSize: 15.0,
+//                                         fontWeight: FontWeight.w300,
+//                                       ),
+//                                     );
+//                                   }),
+//                                 ],
+//                               ),
+//                             ),
+//                           ),
+//                           GestureDetector(
+//                             onTap: () async {
+//                               // Add one day to the day
+//                               var initialDate = DateTime(DateTime.now().year,
+//                                   DateTime.now().month, DateTime.now().day + 1);
+//                               final DateTime? picked = await showDatePicker(
+//                                   fieldHintText: "Choisissez une date",
+//                                   locale: const Locale('fr'),
+//                                   fieldLabelText: "Date",
+//                                   context: context,
+//                                   initialDate: initialDate,
+//                                   firstDate: initialDate,
+//                                   lastDate: DateTime(2030));
+//                               print(picked);
+//                               // if (picked != null &&
+//                               //     picked.toString() !=
+//                               //         _postcontroller.endAvailableDate.value) {
+//                               //   _postcontroller.endAvailableDate(
+//                               //       convertDate(picked.toString()));
+//                               // }
+//                               if (picked != null) {
+//                                 _postcontroller.endAvailableDate(
+//                                     convertDate(picked.toString()));
+//                                 DateTime startDate = parseDate(
+//                                     _postcontroller.startAvailableDate.value);
+//                                 DateTime endDate = parseDate(
+//                                     _postcontroller.endAvailableDate.value);
+
+//                                 // Vérifier que la date de fin ne soit pas avant la date de début
+//                                 if (endDate.isBefore(startDate)) {
+//                                   _postcontroller.isOnPageOpening(false);
+//                                   _postcontroller.endAvailableDate('');
+//                                   // ErrorController().showMessage(
+//                                   //     'La date de fin ne peut pas être avant la date de début.');
+//                                 } else {
+//                                   _postcontroller.endAvailableDate(
+//                                       convertDate(picked.toString()));
+//                                 }
+//                               }
+//                             },
+//                             child: Container(
+//                               height: 50.0,
+//                               width: MediaQuery.of(context).size.width / 3.1,
+//                               decoration: BoxDecoration(
+//                                 borderRadius: BorderRadius.circular(8.0),
+//                                 color: ColorStyle.containerBg,
+//                               ),
+//                               child: Column(
+//                                 mainAxisAlignment: MainAxisAlignment.center,
+//                                 crossAxisAlignment: CrossAxisAlignment.center,
+//                                 children: [
+//                                   Obx(() {
+//                                     return Text(
+//                                       _postcontroller
+//                                               .endAvailableDate.isNotEmpty
+//                                           ? (_postcontroller
+//                                               .endAvailableDate.value)
+//                                           : 'JJ/MM/AAAA',
+//                                       textAlign: TextAlign.center,
+//                                       style: GoogleFonts.lato(
+//                                         color: ColorStyle.hintColor,
+//                                         fontSize: 15.0,
+//                                         fontWeight: FontWeight.w300,
+//                                       ),
+//                                     );
+//                                   }),
+//                                 ],
+//                               ),
+//                             ),
+//                           ),
+//                           Container(
+//                             height: 50.0,
+//                             width: MediaQuery.of(context).size.width / 4.5,
+//                             decoration: BoxDecoration(
+//                               borderRadius: BorderRadius.circular(8.0),
+//                               color: ColorStyle.containerBg,
+//                             ),
+//                             child: Row(
+//                               mainAxisAlignment: MainAxisAlignment.center,
+//                               children: [
+//                                 SvgPicture.asset(
+//                                   Assets.calendar,
+//                                   height: 14.0,
+//                                 ),
+//                                 const SizedBox(
+//                                   width: 10.0,
+//                                 ),
+//                                 const Icon(
+//                                   FontAwesomeIcons.chevronDown,
+//                                   size: 12.0,
+//                                 ),
+//                               ],
+//                             ),
+//                           )
+//                         ],
+//                       )
+//                     ],
+//                   ),
+//                   Obx(() {
+//                     return (_postcontroller.startAvailableDate.isEmpty ||
+//                                 _postcontroller.endAvailableDate.isEmpty) &&
+//                             !_postcontroller.isOnPageOpening.value
+//                         ? Padding(
+//                             padding: const EdgeInsets.only(top: 8.0),
+//                             child: Text(
+//                               "Veuillez entrer une plage de dates valide",
+//                               style: GoogleFonts.lato(
+//                                 color: ColorStyle.lightPrimaryColor,
+//                                 fontSize: 12.0,
+//                                 fontWeight: FontWeight.w300,
+//                               ),
+//                             ),
+//                           )
+//                         : SizedBox();
+//                   }),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Année',
+//                     placeholder: "Entrez l'année d'achat du véhicule",
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.number,
+//                     controller: _postcontroller.yearController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return "Veuillez entrer l'année d'achat du véhicule";
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Nombre de places',
+//                     placeholder: 'Entrez le nombre de places du véhicule',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.number,
+//                     controller: _postcontroller.numberOfPlacesController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez entrer le nombre de places du véhicule';
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Prix par jour en FCFA',
+//                     placeholder:
+//                         'Entrez le prix de location journalier du véhicule',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.number,
+//                     controller: _postcontroller.priceController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez entrer le prix de location journalier du véhicule';
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Numéro de téléphone du propriétaire',
+//                     hasCountry: true,
+//                     placeholder: 'Entrez le numéro du propriétaire',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     textInputType: TextInputType.phone,
+//                     controller: _postcontroller.phoneNumberProprietorController,
+//                     fieldValidator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez entrer le numéro de téléphone du propriétaire';
+//                       }
+//                       if (value.contains('+')) {
+//                         // return 'Veuillez entrer votre téléphone sans le "+"';
+//                         return 'Veuillez entrer votre téléphone sans indicatif';
+//                       }
+//                       if (value.contains(' ')) {
+//                         return 'Veuillez entrer votre téléphone sans les espaces';
+//                       }
+//                       // Vérifie les préfixes invalides
+//                       if (value.startsWith("+") ||
+//                           value.startsWith("00") ||
+//                           value.startsWith("+00")) {
+//                         return 'Veuillez entrer votre téléphone sans indicatif';
+//                       }
+//                       return null;
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   Text(
+//                     'Évaluez l\'état du véhicule de 1 à 10',
+//                     style: GoogleFonts.lato(
+//                       color: ColorStyle.fontColorLight,
+//                       fontSize: 16.0,
+//                       fontWeight: FontWeight.w400,
+//                     ),
+//                   ),
+//                   gapH4,
+//                   DropdownButtonFormField(
+//                     validator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez sélectionner une note';
+//                       }
+//                       return null;
+//                     },
+//                     decoration: InputDecoration(
+//                       filled: true,
+//                       fillColor: ColorStyle.bgFieldGrey,
+//                       labelText: 'Sélectionnez une note',
+//                       labelStyle: GoogleFonts.lato(
+//                         color: ColorStyle.hintColor,
+//                         fontSize: 15.0,
+//                         fontWeight: FontWeight.w300,
+//                       ),
+//                       border: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(8.0),
+//                         borderSide: BorderSide.none,
+//                       ),
+//                     ),
+//                     items: vehicleRate
+//                         .map((e) => DropdownMenuItem(
+//                               value: e,
+//                               child: Text(e),
+//                             ))
+//                         .toList(),
+//                     onChanged: (value) {
+//                       _postcontroller.conditionController.text =
+//                           value.toString();
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   Text(
+//                     'Type de carburant',
+//                     style: GoogleFonts.lato(
+//                       color: ColorStyle.fontColorLight,
+//                       fontSize: 16.0,
+//                       fontWeight: FontWeight.w400,
+//                     ),
+//                   ),
+//                   gapH4,
+//                   DropdownButtonFormField(
+//                     validator: (value) {
+//                       if (value == null || value.isEmpty) {
+//                         return 'Veuillez sélectionner le type de carburant';
+//                       }
+//                       return null;
+//                     },
+//                     decoration: InputDecoration(
+//                       filled: true,
+//                       fillColor: ColorStyle.bgFieldGrey,
+//                       labelText: 'Sélectionnez le type de carburant',
+//                       labelStyle: GoogleFonts.lato(
+//                         color: ColorStyle.hintColor,
+//                         fontSize: 15.0,
+//                         fontWeight: FontWeight.w300,
+//                       ),
+//                       border: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(8.0),
+//                         borderSide: BorderSide.none,
+//                       ),
+//                     ),
+//                     items: fuelType
+//                         .map((e) => DropdownMenuItem(
+//                               value: e,
+//                               child: Text(e),
+//                             ))
+//                         .toList(),
+//                     onChanged: (value) {
+//                       _postcontroller.typeCarburantController.text =
+//                           value.toString();
+//                     },
+//                   ),
+//                   const SizedBox(height: 15.0),
+//                   FormInputField(
+//                     labelText: 'Description (optionnel)',
+//                     placeholder: 'Entrez une brève description du véhicule',
+//                     fillColor: ColorStyle.bgFieldGrey,
+//                     filled: true,
+//                     maxLines: 3,
+//                     textInputType: TextInputType.text,
+//                     controller: _postcontroller.descriptionController,
+//                     // fieldValidator: (value) {
+//                     //   if (value == null || value.isEmpty) {
+//                     //     return 'Please enter the daily rental price of the vehicle';
+//                     //   }
+//                     //   return null;
+//                     // },
+//                   ),
+//                   const SizedBox(height: 70.0),
+//                   PrimaryButton(
+//                       title: 'Créer',
+//                       onPressed: () {
+//                         _postcontroller.isOnPageOpening(false);
+//                         if (_formKey.currentState!.validate()) {
+//                           if (!(_postcontroller.pickedFile.value != null &&
+//                               _postcontroller.pickedFile.value?.name != null &&
+//                               _postcontroller
+//                                   .pickedFile.value!.name.isNotEmpty)) {
+//                             _postcontroller.hasErrorOnDocument(true);
+//                             return;
+//                           }
+//                           if (_postcontroller.imageFiles.isEmpty) {
+//                             _postcontroller.hasErrorOnImages(true);
+//                             return;
+//                           }
+//                           if (_postcontroller
+//                                   .startAvailableDate.value.isEmpty ||
+//                               _postcontroller.endAvailableDate.value.isEmpty) {
+//                             return;
+//                           }
+//                           _postcontroller.createPost();
+//                         }
+//                         // Get.offNamed('/success_post');
+//                       }),
+//                   const SizedBox(height: 16.0),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget sectionTitle(String title) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8.0),
+//       child: Text(
+//         title,
+//         style: GoogleFonts.lato(
+//           color: ColorStyle.textBlackColor,
+//           fontSize: 16.0,
+//           fontWeight: FontWeight.w600,
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget carComponent({required String title, image, rating, commands, price}) {
+//     return Container(
+//       padding: const EdgeInsets.only(bottom: 16.0),
+//       decoration: const BoxDecoration(
+//         color: ColorStyle.carComponentBg,
+//         borderRadius: BorderRadius.only(
+//           topLeft: Radius.circular(12.0),
+//           topRight: Radius.circular(12.0),
+//         ),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           ClipRRect(
+//             borderRadius: const BorderRadius.only(
+//               topLeft: Radius.circular(12.0),
+//               topRight: Radius.circular(12.0),
+//             ),
+//             child: Image.asset(
+//               image,
+//               fit: BoxFit.cover,
+//               width: double.infinity,
+//             ),
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 12.0),
+//             child: Text(
+//               title,
+//               style: GoogleFonts.lato(
+//                 color: ColorStyle.fontColorLight,
+//                 fontSize: 20.0,
+//                 fontWeight: FontWeight.w700,
+//               ),
+//             ),
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 12.0),
+//             child: Row(
+//               children: [
+//                 Text(
+//                   "$rating",
+//                   style: GoogleFonts.lato(
+//                     color: ColorStyle.fontColorLight,
+//                     fontSize: 14.0,
+//                   ),
+//                 ),
+//                 SvgPicture.asset(Assets.star),
+//                 Text(
+//                   "($commands commandes)",
+//                   style: GoogleFonts.lato(
+//                     color: ColorStyle.fontColorLight,
+//                     fontSize: 14.0,
+//                   ),
+//                 )
+//               ],
+//             ),
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 12.0),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.end,
+//               children: [
+//                 Text(
+//                   "$price FCFA /jour",
+//                   style: GoogleFonts.lato(
+//                     color: ColorStyle.fontColorLight,
+//                     fontWeight: FontWeight.w700,
+//                     fontSize: 20.0,
+//                   ),
+//                 )
+//               ],
+//             ),
+//           )
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../theme/theme.dart';
-import '../../widgets/form_input_field.dart';
-import '../../widgets/primary_button.dart';
+import '../../../../controllers/car_brand_controller.dart';
+import '../../widgets/post_form.dart';
+import '../controllers/post_controller.dart';
 
 class CreatePost extends StatefulWidget {
-  CreatePost({super.key});
-
   @override
   State<CreatePost> createState() => _CreatePostState();
 }
@@ -29,26 +920,9 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   final PostController _postcontroller = Get.put(PostController());
 
+  final CarBrandController carBrandController = Get.put(CarBrandController());
+
   final _formKey = GlobalKey<FormState>();
-
-  List<String> vehicleRate = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10'
-  ];
-
-  List<String> fuelType = [
-    'Super',
-    'Gazoil',
-    'Electrique',
-  ];
 
   @override
   initState() {
@@ -56,6 +930,8 @@ class _CreatePostState extends State<CreatePost> {
     _postcontroller.pickedFile = XFile('').obs;
     _postcontroller.makeController = TextEditingController();
     _postcontroller.modelController = TextEditingController();
+    _postcontroller.immatriculationController = TextEditingController();
+    _postcontroller.cityController = TextEditingController();
     _postcontroller.yearController = TextEditingController();
     _postcontroller.conditionController = TextEditingController();
     _postcontroller.typeCarburantController = TextEditingController();
@@ -71,710 +947,68 @@ class _CreatePostState extends State<CreatePost> {
     _postcontroller.hasErrorOnDocument = false.obs;
     _postcontroller.hasErrorOnImages = false.obs;
     _postcontroller.isOnPageOpening = true.obs;
+    _postcontroller.isMakeBottomModalOpened = false.obs;
+    _postcontroller.isModelBottomModalOpened = false.obs;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorStyle.white,
-      appBar: AppBar(
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        leading: GestureDetector(
-          onTap: () {
-            _postcontroller.imageFile.value = XFile('');
-            _postcontroller.pickedFile.value = XFile('');
-            Get.back();
-          },
-          child: const Icon(
-            FontAwesomeIcons.arrowLeft,
-            color: ColorStyle.textBlackColor,
-            size: 20.0,
-          ),
-        ),
-        title: Text(
-          "Retour",
-          style: GoogleFonts.lato(
-            color: ColorStyle.textBlackColor,
-            fontSize: 16.0,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "Créer une annonce",
-                    style: GoogleFonts.lato(
-                      color: ColorStyle.fontColorLight,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  gapH16,
-                  GestureDetector(
-                    onTap: () async {
-                      final ImagePicker picker = ImagePicker();
-                      List<XFile> files = (await picker.pickMultiImage());
-                      if (files.isNotEmpty) {
-                        _postcontroller.imageFiles.value = files;
-                      }
-                      if (_postcontroller.imageFiles.isNotEmpty) {
-                        _postcontroller.hasErrorOnImages(false);
-                      }
-                    },
-                    child: Obx(() {
-                      return _postcontroller.imageFiles.isNotEmpty &&
-                              _postcontroller.imageFiles[0]!.path.isNotEmpty
-                          ? Container(
-                              width: double.infinity,
-                              height: 150.0,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.file(
-                                  File(_postcontroller.imageFiles[0]!.path),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              width: double.infinity,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 20.0),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  color: ColorStyle.containerBg),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(FontAwesomeIcons.camera,
-                                      color: ColorStyle.hintColor, size: 20.0),
-                                  const SizedBox(height: 10.0),
-                                  Text(
-                                    "Ajouter des photos",
-                                    style: GoogleFonts.lato(
-                                      color: ColorStyle.hintColor,
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            );
-                    }),
-                  ),
-                  gapH8,
-                  Obx(() {
-                    return _postcontroller.hasErrorOnImages.value
-                        ? Text(
-                            "Selectionner au moins un document",
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall!
-                                .copyWith(color: ColorStyle.lightPrimaryColor),
-                          )
-                        : SizedBox();
-                  }),
-                  GestureDetector(
-                    onTap: () async {
-                      final ImagePicker picker = ImagePicker();
-                      XFile? file = (await picker.pickMedia());
-                      if (file != null) {
-                        _postcontroller.pickedFile.value = file;
-                      }
-                      if ((_postcontroller.pickedFile.value != null &&
-                          _postcontroller.pickedFile.value?.name != null &&
-                          _postcontroller.pickedFile.value!.name.isNotEmpty)) {
-                        _postcontroller.hasErrorOnDocument(false);
-                      }
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 10.0),
-                      padding: const EdgeInsets.symmetric(vertical: 15.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(color: ColorStyle.hintColor),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Obx(() {
-                            return Text(
-                              _postcontroller.pickedFile.value != null &&
-                                      _postcontroller.pickedFile.value?.name !=
-                                          null &&
-                                      _postcontroller
-                                          .pickedFile.value!.name.isNotEmpty
-                                  ? _postcontroller.pickedFile.value!.name
-                                  : 'Télécharger le document du véhicule',
-                              style: GoogleFonts.lato(
-                                color: ColorStyle.blackBackground,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            );
-                          }),
-                          const SizedBox(width: 10.0),
-                          SvgPicture.asset(
-                            Assets.upload,
-                            width: 18.0,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  gapH8,
-                  Obx(() {
-                    return _postcontroller.hasErrorOnDocument.value
-                        ? Text(
-                            "Selectionner un document",
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall!
-                                .copyWith(color: ColorStyle.lightPrimaryColor),
-                          )
-                        : SizedBox();
-                  }),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Marque',
-                    placeholder: 'Entrez la marque du véhicule',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.text,
-                    controller: _postcontroller.makeController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer la marque du véhicule';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Modèle',
-                    placeholder: 'Entrez le modèle du véhicule',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.text,
-                    controller: _postcontroller.modelController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer le modèle du véhicule';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Plage de dates de disponibilité',
-                        style: GoogleFonts.lato(
-                          color: ColorStyle.fontColorLight,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              // Add one day to the day
-                              var initialDate = DateTime(DateTime.now().year,
-                                  DateTime.now().month, DateTime.now().day + 1);
-                              final DateTime? picked = await showDatePicker(
-                                  fieldHintText: "Choisissez une date",
-                                  locale: const Locale('fr'),
-                                  fieldLabelText: "Date",
-                                  context: context,
-                                  initialDate: initialDate,
-                                  firstDate: initialDate,
-                                  lastDate: DateTime(2030));
-                              print(picked);
-                              // if (picked != null &&
-                              //     picked.toString() !=
-                              //         _postcontroller
-                              //             .startAvailableDate.value) {
-                              //   _postcontroller.startAvailableDate(
-                              //       convertDate(picked.toString()));
-                              // }
-                              if (picked != null) {
-                                _postcontroller.startAvailableDate(
-                                    convertDate(picked.toString()));
-                                DateTime startDate = parseDate(
-                                    _postcontroller.startAvailableDate.value);
-                                DateTime endDate = parseDate(
-                                    _postcontroller.endAvailableDate.value);
-
-                                // Vérifier que la date de début ne soit pas après la date de fin
-                                if (startDate.isAfter(endDate)) {
-                                  _postcontroller.isOnPageOpening(false);
-                                  _postcontroller.startAvailableDate('');
-                                  // ErrorController().showMessage(
-                                  //     'La date de début ne peut pas être après la date de fin.');
-                                } else {
-                                  _postcontroller.startAvailableDate(
-                                      convertDate(picked.toString()));
-                                }
-                              }
-                            },
-                            child: Container(
-                              height: 50.0,
-                              width: MediaQuery.of(context).size.width / 3.1,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8.0),
-                                color: ColorStyle.containerBg,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Obx(() {
-                                    return Text(
-                                      _postcontroller
-                                              .startAvailableDate.isNotEmpty
-                                          ? _postcontroller
-                                              .startAvailableDate.value
-                                          : 'JJ/MM/AAAA',
-                                      style: GoogleFonts.lato(
-                                        color: ColorStyle.hintColor,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              // Add one day to the day
-                              var initialDate = DateTime(DateTime.now().year,
-                                  DateTime.now().month, DateTime.now().day + 1);
-                              final DateTime? picked = await showDatePicker(
-                                  fieldHintText: "Choisissez une date",
-                                  locale: const Locale('fr'),
-                                  fieldLabelText: "Date",
-                                  context: context,
-                                  initialDate: initialDate,
-                                  firstDate: initialDate,
-                                  lastDate: DateTime(2030));
-                              print(picked);
-                              // if (picked != null &&
-                              //     picked.toString() !=
-                              //         _postcontroller.endAvailableDate.value) {
-                              //   _postcontroller.endAvailableDate(
-                              //       convertDate(picked.toString()));
-                              // }
-                              if (picked != null) {
-                                _postcontroller.endAvailableDate(
-                                    convertDate(picked.toString()));
-                                DateTime startDate = parseDate(
-                                    _postcontroller.startAvailableDate.value);
-                                DateTime endDate = parseDate(
-                                    _postcontroller.endAvailableDate.value);
-
-                                // Vérifier que la date de fin ne soit pas avant la date de début
-                                if (endDate.isBefore(startDate)) {
-                                  _postcontroller.isOnPageOpening(false);
-                                  _postcontroller.endAvailableDate('');
-                                  // ErrorController().showMessage(
-                                  //     'La date de fin ne peut pas être avant la date de début.');
-                                } else {
-                                  _postcontroller.endAvailableDate(
-                                      convertDate(picked.toString()));
-                                }
-                              }
-                            },
-                            child: Container(
-                              height: 50.0,
-                              width: MediaQuery.of(context).size.width / 3.1,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8.0),
-                                color: ColorStyle.containerBg,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Obx(() {
-                                    return Text(
-                                      _postcontroller
-                                              .endAvailableDate.isNotEmpty
-                                          ? (_postcontroller
-                                              .endAvailableDate.value)
-                                          : 'JJ/MM/AAAA',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.lato(
-                                        color: ColorStyle.hintColor,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 50.0,
-                            width: MediaQuery.of(context).size.width / 4.5,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: ColorStyle.containerBg,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  Assets.calendar,
-                                  height: 14.0,
-                                ),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                const Icon(
-                                  FontAwesomeIcons.chevronDown,
-                                  size: 12.0,
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                  Obx(() {
-                    return (_postcontroller.startAvailableDate.isEmpty ||
-                                _postcontroller.endAvailableDate.isEmpty) &&
-                            !_postcontroller.isOnPageOpening.value
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              "Veuillez entrer une plage de dates valide",
-                              style: GoogleFonts.lato(
-                                color: ColorStyle.lightPrimaryColor,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          )
-                        : SizedBox();
-                  }),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Année',
-                    placeholder: "Entrez l'année d'achat du véhicule",
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.number,
-                    controller: _postcontroller.yearController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Veuillez entrer l'année d'achat du véhicule";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Nombre de places',
-                    placeholder: 'Entrez le nombre de places du véhicule',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.number,
-                    controller: _postcontroller.numberOfPlacesController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer le nombre de places du véhicule';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Prix par jour en FCFA',
-                    placeholder:
-                        'Entrez le prix de location journalier du véhicule',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.number,
-                    controller: _postcontroller.priceController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer le prix de location journalier du véhicule';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Numéro de téléphone du propriétaire',
-                    hasCountry: true,
-                    placeholder: 'Entrez le numéro du propriétaire',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    textInputType: TextInputType.phone,
-                    controller: _postcontroller.phoneNumberProprietorController,
-                    fieldValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer le numéro de téléphone du propriétaire';
-                      }
-                      if (value.contains('+')) {
-                        // return 'Veuillez entrer votre téléphone sans le "+"';
-                        return 'Veuillez entrer votre téléphone sans indicatif';
-                      }
-                      if (value.contains(' ')) {
-                        return 'Veuillez entrer votre téléphone sans les espaces';
-                      }
-                      if (value.substring(0, 1) == "00" ||
-                          value.substring(0, 2) == "+00") {
-                        // return 'Veuillez entrer votre téléphone sans le "+" ou le "00"';
-                        return 'Veuillez entrer votre téléphone sans indicatif';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  Text(
-                    'Évaluez l\'état du véhicule de 1 à 10',
-                    style: GoogleFonts.lato(
-                      color: ColorStyle.fontColorLight,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  DropdownButtonFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez sélectionner une note';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: ColorStyle.bgFieldGrey,
-                      labelText: 'Sélectionnez une note',
-                      labelStyle: GoogleFonts.lato(
-                        color: ColorStyle.hintColor,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w300,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    items: vehicleRate
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      _postcontroller.conditionController.text =
-                          value.toString();
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  Text(
-                    'Type de carburant',
-                    style: GoogleFonts.lato(
-                      color: ColorStyle.fontColorLight,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  DropdownButtonFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez sélectionner le type de carburant';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: ColorStyle.bgFieldGrey,
-                      labelText: 'Sélectionnez le type de carburant',
-                      labelStyle: GoogleFonts.lato(
-                        color: ColorStyle.hintColor,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w300,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    items: fuelType
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      _postcontroller.typeCarburantController.text =
-                          value.toString();
-                    },
-                  ),
-                  const SizedBox(height: 15.0),
-                  FormInputField(
-                    labelText: 'Description (optionnel)',
-                    placeholder: 'Entrez une brève description du véhicule',
-                    fillColor: ColorStyle.bgFieldGrey,
-                    filled: true,
-                    maxLines: 3,
-                    textInputType: TextInputType.text,
-                    controller: _postcontroller.descriptionController,
-                    // fieldValidator: (value) {
-                    //   if (value == null || value.isEmpty) {
-                    //     return 'Please enter the daily rental price of the vehicle';
-                    //   }
-                    //   return null;
-                    // },
-                  ),
-                  const SizedBox(height: 70.0),
-                  PrimaryButton(
-                      title: 'Créer',
-                      onPressed: () {
-                        _postcontroller.isOnPageOpening(false);
-                        if (_formKey.currentState!.validate()) {
-                          if (!(_postcontroller.pickedFile.value != null &&
-                              _postcontroller.pickedFile.value?.name != null &&
-                              _postcontroller
-                                  .pickedFile.value!.name.isNotEmpty)) {
-                            _postcontroller.hasErrorOnDocument(true);
-                            return;
-                          }
-                          if (_postcontroller.imageFiles.isEmpty) {
-                            _postcontroller.hasErrorOnImages(true);
-                            return;
-                          }
-                          if (_postcontroller
-                                  .startAvailableDate.value.isEmpty ||
-                              _postcontroller.endAvailableDate.value.isEmpty) {
-                            return;
-                          }
-                          _postcontroller.createPost();
-                        }
-                        // Get.offNamed('/success_post');
-                      }),
-                  const SizedBox(height: 16.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: GoogleFonts.lato(
-          color: ColorStyle.textBlackColor,
-          fontSize: 16.0,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget carComponent({required String title, image, rating, commands, price}) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      decoration: const BoxDecoration(
-        color: ColorStyle.carComponentBg,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12.0),
-          topRight: Radius.circular(12.0),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12.0),
-              topRight: Radius.circular(12.0),
-            ),
-            child: Image.asset(
-              image,
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(
-              title,
-              style: GoogleFonts.lato(
-                color: ColorStyle.fontColorLight,
-                fontSize: 20.0,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              children: [
-                Text(
-                  "$rating",
-                  style: GoogleFonts.lato(
-                    color: ColorStyle.fontColorLight,
-                    fontSize: 14.0,
-                  ),
-                ),
-                SvgPicture.asset(Assets.star),
-                Text(
-                  "($commands commandes)",
-                  style: GoogleFonts.lato(
-                    color: ColorStyle.fontColorLight,
-                    fontSize: 14.0,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  "$price FCFA /jour",
-                  style: GoogleFonts.lato(
-                    color: ColorStyle.fontColorLight,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20.0,
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+    return PostForm(
+      formKey: _formKey,
+      makeController: _postcontroller.makeController,
+      modelController: _postcontroller.modelController,
+      yearController: _postcontroller.yearController,
+      conditionController: _postcontroller.conditionController,
+      typeCarburantController: _postcontroller.typeCarburantController,
+      numberOfPlacesController: _postcontroller.numberOfPlacesController,
+      priceController: _postcontroller.priceController,
+      phoneNumberProprietorController:
+          _postcontroller.phoneNumberProprietorController,
+      descriptionController: _postcontroller.descriptionController,
+      startAvailableDate: _postcontroller.startAvailableDate,
+      endAvailableDate: _postcontroller.endAvailableDate,
+      imageFiles: _postcontroller.imageFiles,
+      pickedFile: _postcontroller.pickedFile,
+      hasErrorOnDocument: _postcontroller.hasErrorOnDocument,
+      hasErrorOnImages: _postcontroller.hasErrorOnImages,
+      isMakeBottomModalOpened: _postcontroller.isMakeBottomModalOpened,
+      isModelBottomModalOpened: _postcontroller.isModelBottomModalOpened,
+      loadCarModelsFromACar: (carBrand) =>
+          carBrandController.loadCarModelsFromACar(carBrand),
+      carBrands: carBrandController.carBrands,
+      carModels: carBrandController.carModels,
+      carTypeCarbutant: carBrandController.carTypeCarbutant,
+      carCondition: carBrandController.carCondition,
+      isOnPageOpening: _postcontroller.isOnPageOpening,
+      onSave: () {
+        _postcontroller.isOnPageOpening(false);
+        if (_formKey.currentState!.validate()) {
+          if (!(_postcontroller.pickedFile.value != null &&
+              _postcontroller.pickedFile.value?.name != null &&
+              _postcontroller.pickedFile.value!.name.isNotEmpty)) {
+            _postcontroller.hasErrorOnDocument(true);
+            return;
+          }
+          if (_postcontroller.imageFiles.isEmpty) {
+            _postcontroller.hasErrorOnImages(true);
+            return;
+          }
+          if (_postcontroller.startAvailableDate.value.isEmpty ||
+              _postcontroller.endAvailableDate.value.isEmpty) {
+            return;
+          }
+          _postcontroller.createPost();
+        }
+        // Get.offNamed('/success_post');
+      },
+      onCancel: () {
+        _postcontroller.imageFile.value = XFile('');
+        _postcontroller.pickedFile.value = XFile('');
+        Get.back();
+      },
+      immatriculationController: _postcontroller.immatriculationController,
+      cityController: _postcontroller.cityController,
     );
   }
 }

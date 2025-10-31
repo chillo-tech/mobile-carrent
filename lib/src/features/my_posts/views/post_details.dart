@@ -15,12 +15,28 @@ import '../../../../utils/utility.dart';
 import '../../create_post/controllers/post_controller.dart';
 import '../../widgets/primary_button.dart';
 
-class PostDetails extends StatelessWidget {
+class PostDetails extends StatefulWidget {
   PostDetails({super.key});
+
+  @override
+  State<PostDetails> createState() => _PostDetailsState();
+}
+
+class _PostDetailsState extends State<PostDetails> {
   final CarResponse post = Get.arguments;
+
   PostController postController = Get.put(PostController());
 
   final UserController _userController = Get.put(UserController());
+
+  @override
+  void initState() {
+    Future.delayed(Duration.zero, () async {
+      await _userController.retreiveUserData();
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +64,15 @@ class PostDetails extends StatelessWidget {
       },
       {
         'title': "Taux de l'état du véhicule",
-        'value': post.condition!,
+        'value': double.parse(post.condition!).toInt().toString(),
       },
       {
         'title': 'Type de carburant',
         'value': post.typeCarburant!,
+      },
+      {
+        'title': 'Imm`atriculation',
+        'value': post.immatriculation,
       },
       {
         'title': 'Description',
@@ -153,11 +173,11 @@ class PostDetails extends StatelessWidget {
                             child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 // child: Image.network(
-                                //   "https://files.chillo.fr/${post.imagePathCar![index]}",
+                                //   "https://files.mky-corp.fr/${post.imagePathCar![index]}",
                                 //   fit: BoxFit.cover,
                                 // ),
                                 child: Image.network(
-                                  "https://files.chillo.fr/${post.imagePathCar![index]}",
+                                  "https://files.mky-corp.fr/${post.imagePathCar![index]}",
                                   fit: BoxFit.cover,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
@@ -213,7 +233,7 @@ class PostDetails extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             // child: Image.network(
-                            //   "https://files.chillo.fr/${post.imagePathCar![0]}",
+                            //   "https://files.mky-corp.fr/${post.imagePathCar![0]}",
                             //   fit: BoxFit.cover,
                             // ),
                             child: Image.network(
@@ -222,7 +242,7 @@ class PostDetails extends StatelessWidget {
                                       post.imagePathCar![0] ==
                                           'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
                                   ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                  : "https://files.chillo.fr/${post.imagePathCar![0]}",
+                                  : "https://files.mky-corp.fr/${post.imagePathCar![0]}",
                               fit: BoxFit.cover,
                               loadingBuilder:
                                   (context, child, loadingProgress) {
@@ -360,66 +380,11 @@ class PostDetails extends StatelessWidget {
                     )
                   ],
                 ),
-                gapH16,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Supprimer l'annonce",
-                        style: GoogleFonts.lato(
-                          color: ColorStyle.opacGrey,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Get.dialog(
-                          Utility.simpleBinaryDialog(
-                            title: "Supprimer l'annonce",
-                            content:
-                                "Voulez-vous vraiment supprimer cette annonce ?",
-                            onBackPressed: () => Get.back(),
-                            onContinuePressed: () async {
-                              Get.back();
-                              await postController.deleteMyPost(post.id);
-                            },
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 10.0),
-                        decoration: BoxDecoration(
-                          color: ColorStyle.lightGreyColor1,
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              Assets.trash,
-                              width: 15.0,
-                            ),
-                            gapW6,
-                            Text(
-                              "Supprimer",
-                              style: GoogleFonts.lato(
-                                color: ColorStyle.lightAccentColor,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
                 _userController.currentuser != null &&
                         (_userController.currentuser!.role != null &&
                             _userController.currentuser!.role!.isNotEmpty &&
-                            _userController.currentuser!.role! == 'ADMIN')
+                            _userController.currentuser!.role! == 'ADMIN') &&
+                        post.status?.toLowerCase() != 'validé'
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -480,12 +445,68 @@ class PostDetails extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ],
                       )
                     : SizedBox(),
+                gapH16,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Supprimer l'annonce",
+                        style: GoogleFonts.lato(
+                          color: ColorStyle.opacGrey,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.dialog(
+                          Utility.simpleBinaryDialog(
+                            title: "Supprimer l'annonce",
+                            content:
+                                "Voulez-vous vraiment supprimer cette annonce ?",
+                            onBackPressed: () => Get.back(),
+                            onContinuePressed: () async {
+                              Get.back();
+                              await postController.deleteMyPost(post.id);
+                            },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 10.0),
+                        decoration: BoxDecoration(
+                          color: ColorStyle.lightGreyColor1,
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              Assets.trash,
+                              width: 15.0,
+                            ),
+                            gapW6,
+                            Text(
+                              "Supprimer",
+                              style: GoogleFonts.lato(
+                                color: ColorStyle.lightAccentColor,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
                 gapH20,
               ],
             ),

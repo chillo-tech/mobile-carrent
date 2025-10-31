@@ -3,8 +3,9 @@ import 'helpers/urls.dart';
 class Env {
   static String getEnv([String defaultValue = ""]) {
     switch (URLS.BASE_URL) {
-      case "https://api.carrent.chillo.fr/api/v1":
-        return 'TEST INTERNE V.1.0.0';
+      case "https://api.carrent.mky-corp.fr/api/v1":
+        // return 'TEST INTERNE V.1.0.0';
+        return defaultValue;
       default:
         return defaultValue;
     }

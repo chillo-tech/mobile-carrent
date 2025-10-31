@@ -85,44 +85,48 @@ class _HomeState extends State<Home> {
               ),
               Obx(() {
                 return homeController.cars.isNotEmpty
-                    ? ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: homeController.cars.length,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (BuildContext context, index) {
-                          print(homeController.cars);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              gapH6,
-                              sectionTitle('Vu récemment'),
-                              GestureDetector(
-                                onTap: () {
-                                  Get.toNamed('/car_details',
-                                      arguments: homeController.cars[index]);
-                                },
-                                child: carComponent(
-                                  title: homeController.cars[index].make,
-                                  image: homeController
-                                              .cars[index].imagePathCar!
-                                              .contains(
-                                                  'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
-                                          homeController.cars[index]
-                                                  .imagePathCar![0] ==
-                                              'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                      ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
-                                      : "https://files.chillo.fr/${homeController.cars[index].imagePathCar![0]}",
-                                  rating:
-                                      homeController.cars[index].reviewNumber,
-                                  commands: homeController
-                                      .cars[index].reservationNumber,
-                                  price: homeController.cars[index].price,
-                                ),
-                              ),
-                              const SizedBox(height: 16.0),
-                            ],
-                          );
-                        })
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          gapH6,
+                          sectionTitle('Vu récemment'),
+                          ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: homeController.cars.length,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (BuildContext context, index) {
+                                print(homeController.cars);
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 16.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.toNamed('/car_details',
+                                          arguments:
+                                              homeController.cars[index]);
+                                    },
+                                    child: carComponent(
+                                      title:
+                                          '${homeController.cars[index].make} ${homeController.cars[index].model}',
+                                      image: homeController
+                                                  .cars[index].imagePathCar!
+                                                  .contains(
+                                                      'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg') ||
+                                              homeController.cars[index]
+                                                      .imagePathCar![0] ==
+                                                  'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                          ? 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg'
+                                          : "https://files.mky-corp.fr/${homeController.cars[index].imagePathCar![0]}",
+                                      rating: homeController
+                                          .cars[index].reviewNumber,
+                                      commands: homeController
+                                          .cars[index].reservationNumber,
+                                      price: homeController.cars[index].price,
+                                    ),
+                                  ),
+                                );
+                              }),
+                        ],
+                      )
                     : Padding(
                         padding: const EdgeInsets.only(top: 16.0),
                         child: Column(

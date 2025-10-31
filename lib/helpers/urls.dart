@@ -6,11 +6,11 @@ class URLS {
   static String _getBaseUrl() {
     switch (F.appFlavor) {
       case Flavor.internaltest:
-        return 'https://api.carrent.chillo.fr/api/v1';
+        return 'https://api.carrent.mky-corp.fr/api/v1';
       case Flavor.production:
-        return 'https://api.carrent.chillo.fr/api/v1';
+        return 'https://api.carrent.mky-corp.fr/api/v1';
       default:
-        return 'https://api.carrent.chillo.fr/api/v1';
+        return 'https://api.carrent.mky-corp.fr/api/v1';
     }
   }
 

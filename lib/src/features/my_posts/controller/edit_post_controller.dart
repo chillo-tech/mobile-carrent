@@ -24,28 +24,31 @@ import '../../../../controllers/countries_controller.dart';
 class EditPostController extends GetxController {
   ErrorController errorController = ErrorController();
 
-  final Rx<XFile?> imageFile = XFile('').obs;
-  final Rx<XFile?> pickedFile = XFile('').obs;
-  final RxBool hasClick = false.obs;
-  final TextEditingController makeController = TextEditingController();
-  final TextEditingController modelController = TextEditingController();
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController conditionController = TextEditingController();
-  final TextEditingController typeCarburantController = TextEditingController();
-  final TextEditingController numberOfPlacesController =
+  Rx<XFile?> imageFile = XFile('').obs;
+  Rx<XFile?> pickedFile = XFile('').obs;
+  RxBool hasClick = false.obs;
+  TextEditingController makeController = TextEditingController();
+  TextEditingController modelController = TextEditingController();
+  TextEditingController immatriculationController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+  TextEditingController yearController = TextEditingController();
+  TextEditingController conditionController = TextEditingController();
+  TextEditingController typeCarburantController = TextEditingController();
+  TextEditingController numberOfPlacesController = TextEditingController();
+  TextEditingController imagePathCarController = TextEditingController();
+  TextEditingController imagePathDocumentController = TextEditingController();
+  TextEditingController phoneNumberProprietorController =
       TextEditingController();
-  final TextEditingController imagePathCarController = TextEditingController();
-  final TextEditingController imagePathDocumentController =
-      TextEditingController();
-  final TextEditingController phoneNumberProprietorController =
-      TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final RxString startAvailableDate = ''.obs;
-  final RxString endAvailableDate = ''.obs;
+  TextEditingController priceController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  RxString startAvailableDate = ''.obs;
+  RxString endAvailableDate = ''.obs;
   RxList<XFile?> imageFiles = RxList();
   RxBool hasErrorOnDocument = false.obs;
   RxBool hasErrorOnImages = false.obs;
+  RxBool isOnPageOpening = true.obs;
+  RxBool isMakeBottomModalOpened = false.obs;
+  RxBool isModelBottomModalOpened = false.obs;
   RxList<CarResponse> myCars = (List<CarResponse>.of([])).obs;
 
   RxList<PostResponse> posts = (List<PostResponse>.of([])).obs;
@@ -68,8 +71,10 @@ class EditPostController extends GetxController {
   void assignValues() async {
     makeController.text = currentPost.make;
     modelController.text = currentPost.model;
+    immatriculationController.text = currentPost.immatriculation!;
+    cityController.text = currentPost.city!;
     yearController.text = currentPost.year!;
-    conditionController.text = currentPost.condition!;
+    conditionController.text =  double.parse(currentPost.condition!).toInt().toString();
     typeCarburantController.text = currentPost.typeCarburant!;
     numberOfPlacesController.text = currentPost.numberOfPlaces.toString();
     // imagePathCarController.text = currentPost.imagePathCar!;
@@ -86,12 +91,18 @@ class EditPostController extends GetxController {
             int.parse(propriorPhoneNumber?.dialCode ??
                 CountryHelper.PHONE_CODE.toString()));
 
-    priceController.text = currentPost.price!;
+    priceController.text = currentPost.unformattedPrice!;
     descriptionController.text = currentPost.description ?? '';
     startAvailableDate.value =
         convertDateToDayMonthYear(currentPost.startDisponibilityDate!);
     endAvailableDate.value =
         convertDateToDayMonthYear(currentPost.endDisponibilityDate!);
+
+    hasErrorOnDocument = false.obs;
+    hasErrorOnImages = false.obs;
+    isOnPageOpening = true.obs;
+    isMakeBottomModalOpened = false.obs;
+    isModelBottomModalOpened = false.obs;
 
     Future.delayed(Duration(seconds: 0), () {
       retreiveFiles();
@@ -121,7 +132,8 @@ class EditPostController extends GetxController {
       } else {
         currentPost.imagePathCar?.forEach((element) async {
           imageFiles.add(XFile(
-              await urlToFile("https://files.chillo.fr/$element").then((file) {
+              await urlToFile("https://files.mky-corp.fr/$element")
+                  .then((file) {
             print(file.path);
             return file.path;
           })));
@@ -139,7 +151,7 @@ class EditPostController extends GetxController {
         })));
       } else {
         pickedFile(XFile(await urlToFile(
-                "https://files.chillo.fr/${currentPost.imagePathDocument}")
+                "https://files.mky-corp.fr/${currentPost.imagePathDocument}")
             .then((file) {
           print(file.path);
           return file.path;
@@ -214,6 +226,8 @@ class EditPostController extends GetxController {
 
       request.fields['make'] = makeController.text;
       request.fields['model'] = modelController.text;
+      request.fields['immatriculation'] = immatriculationController.text;
+      request.fields['city'] = cityController.text;
       request.fields['year'] = yearController.text;
       request.fields['condition'] = conditionController.text;
       request.fields['typeCarburant'] = typeCarburantController.text;

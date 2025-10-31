@@ -104,11 +104,6 @@ class BottomNav extends StatelessWidget {
                       }),
                     ),
                   ),
-                  Obx(() {
-                    return _searchBarController.isPlaceSearchActivated.value
-                        ? topSheet(context)
-                        : const SizedBox();
-                  }),
                 ],
               ),
             ),

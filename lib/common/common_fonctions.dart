@@ -51,24 +51,23 @@ String convertDateToPlainString(String inputDate) {
   return formattedDate; // Résultat : Sam 10 Nov
 }
 
-String formatDateRangeFromStrings(String startDateStr, String endDateStr) {
+String formatDatewithYearFromStrings(String dateStr) {
   // Format pour analyser les chaînes de date
   final inputFormat = DateFormat('dd/MM/yyyy');
 
   // Format de sortie pour afficher les dates
-  final outputFormat = DateFormat('d MMM');
+  final outputFormat = DateFormat('EEE d MMM yyyy', 'fr_FR');
 
   // Convertir les chaînes en objets DateTime
-  DateTime startDate = inputFormat.parse(startDateStr);
-  DateTime endDate = inputFormat.parse(endDateStr);
+  DateTime inputDate = inputFormat.parse(dateStr);
 
   // Formater les dates
-  final start = outputFormat.format(startDate);
-  final end = outputFormat.format(endDate);
+  final start = outputFormat.format(inputDate);
 
-  // Retourner la plage de dates
-  return '$start - $end';
+  // Retourner la date
+  return start;
 }
+
 
 String formatDateRangewithYearFromStrings(
     String startDateStr, String endDateStr) {
@@ -90,6 +89,22 @@ String formatDateRangewithYearFromStrings(
   return '$start - $end';
 }
 
+String formatAmount(
+  num amount, {
+  String locale = 'fr_FR',
+  String? currencySymbol,
+  int decimalDigits = 0,
+}) {
+  final format = NumberFormat.currency(
+    locale: locale,
+    symbol: currencySymbol ?? '',
+    decimalDigits: decimalDigits,
+  );
+
+  return format.format(amount).trim();
+}
+
+
 Widget topSheet(BuildContext context, {bool navigate = true}) {
   final FocusNode locationFocusNode = FocusNode();
   final formKey = GlobalKey<FormState>();
@@ -104,16 +119,21 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
     child: IntrinsicHeight(
       child: Container(
         padding: const EdgeInsets.only(
-            bottom: 20.0, left: 16.0, right: 16.0, top: 16.0),
+            bottom: 20.0, top: 16.0),
         decoration: const BoxDecoration(color: Colors.white),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            InkWell(
-                onTap: () {
-                  searchBarController.isPlaceSearchActivated.value = false;
-                },
-                child: const Icon(FontAwesomeIcons.arrowLeft)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                    onTap: () {
+                      searchBarController.isPlaceSearchActivated.value = false;
+                    },
+                    child: const Icon(FontAwesomeIcons.xmark)),
+              ],
+            ),
             // Padding(
             //   padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
             //   child: Text(
@@ -143,7 +163,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
             Padding(
               padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
               child: Text(
-                "Date de disponibilite",
+                "Date de disponibilité",
                 style: GoogleFonts.lato(
                   color: ColorStyle.textBlackColor,
                   fontSize: 16.0,
@@ -157,7 +177,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                 GestureDetector(
                   onTap: () async {
                     final DateTime? picked = await showDatePicker(
-                        fieldHintText: "Choissez une date",
+                        fieldHintText: "Choisissez une date",
                         locale: const Locale('fr'),
                         fieldLabelText: "Date",
                         context: context,
@@ -174,7 +194,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                   },
                   child: Container(
                     height: 50.0,
-                    width: MediaQuery.of(context).size.width / 3.1,
+                    width: MediaQuery.of(context).size.width / 3.5,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       color: ColorStyle.containerBg,
@@ -202,7 +222,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                 GestureDetector(
                   onTap: () async {
                     final DateTime? picked = await showDatePicker(
-                        fieldHintText: "Choissez une date",
+                        fieldHintText: "Choisissez une date",
                         locale: const Locale('fr'),
                         fieldLabelText: "Date",
                         context: context,
@@ -219,7 +239,7 @@ Widget topSheet(BuildContext context, {bool navigate = true}) {
                   },
                   child: Container(
                     height: 50.0,
-                    width: MediaQuery.of(context).size.width / 3.1,
+                    width: MediaQuery.of(context).size.width / 3.5,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       color: ColorStyle.containerBg,
@@ -302,10 +322,7 @@ Widget carComponent(
     padding: const EdgeInsets.only(bottom: 16.0),
     decoration: const BoxDecoration(
       color: ColorStyle.carComponentBg,
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(12.0),
-        topRight: Radius.circular(12.0),
-      ),
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,6 +406,10 @@ Widget carComponent(
               )
             ],
           ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+          child: Divider(),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
